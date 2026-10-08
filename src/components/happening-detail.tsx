@@ -84,13 +84,16 @@ export default function HappeningDetailView({
             </span>
             <span>
               <small>Contributors</small>
-              <strong>{detail.contributorCount} distinct people</strong>
+              <strong>{detail.contributorCount} distinct contributors</strong>
             </span>
           </div>
         </div>
         {detail.startsAt && (
           <p>
-            Scheduled: {dateLabel(detail.startsAt)} – {dateLabel(detail.endsAt)}
+            Scheduled: {dateLabel(detail.startsAt)} ·{" "}
+            {detail.endsAt
+              ? `Ends ${dateLabel(detail.endsAt)}`
+              : "End time unknown"}
             . The schedule does not establish that the activity occurred.
           </p>
         )}

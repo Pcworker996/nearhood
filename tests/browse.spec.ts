@@ -144,12 +144,13 @@ test("a source-based activity preserves unknown observation time and separates i
       /The schedule does not establish that the activity occurred/,
     ),
   ).toBeVisible();
+  await expect(page.getByText(/End time unknown/)).toBeVisible();
   await page
     .getByRole("button", { name: "Current account", exact: true })
     .click();
   await page
     .getByRole("button", {
-      name: "A stretch-and-picnic activity was announced for October 8, 4:30–5:30 pm.",
+      name: "A stretch-and-picnic activity was announced for October 8 at 4:30 pm.",
     })
     .click();
   await expect(
