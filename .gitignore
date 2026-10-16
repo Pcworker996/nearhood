@@ -1,8 +1,35 @@
+# Dependencies
 node_modules/
+
+# Build output and caches
 .next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Environment variables and local credentials
 .env*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local data and deployment state
 .local/
+.vercel/
+
+# Installed agent tools and local agent settings
+/.agents/skills/
+/.claude/
+/.codex/
+/skills-lock.json
+
+# Browser test artifacts
 playwright-report/
 test-results/
-*.tsbuildinfo
+blob-report/
+
+# Logs and operating system files
+*.log
+.DS_Store
