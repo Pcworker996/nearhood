@@ -1,9 +1,10 @@
 import { readFile, readdir } from "node:fs/promises";
 import { Pool } from "pg";
+import { poolConfig } from "../src/lib/postgres-config";
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error("Set DATABASE_URL before setting up the database.");
-const pool = new Pool({ connectionString: url });
+const pool = new Pool(poolConfig(url));
 const client = await pool.connect();
 try {
   await client.query("BEGIN");

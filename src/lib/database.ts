@@ -8,6 +8,7 @@ import type {
   Report,
   SharedAccount,
 } from "./happenings";
+import { poolConfig } from "./postgres-config";
 
 const globalDatabase = globalThis as typeof globalThis & {
   nearhoodPool?: Pool;
@@ -15,7 +16,7 @@ const globalDatabase = globalThis as typeof globalThis & {
 function database() {
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required.");
   globalDatabase.nearhoodPool ??= new Pool({
-    connectionString: process.env.DATABASE_URL,
+    ...poolConfig(process.env.DATABASE_URL),
     max: 5,
   });
   return globalDatabase.nearhoodPool;

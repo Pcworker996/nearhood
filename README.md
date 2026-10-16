@@ -2,7 +2,7 @@
 
 Nearhood turns local Reports into evolving, evidence-linked Happenings. This first implementation slice (#3) provides public browsing and claim-specific evidence inspection with a real HTTP API and persistent PostgreSQL/PostGIS data.
 
-The Northbank bridge, streetlamp and picnic are **fictional demo fixtures** over Detroit coordinates. Their stored accounts are authored fixtures, not live model output. Contribution, authentication, model processing, resolution/freshness automation, discovery, directions/calendar and private updates belong to later tickets; their controls are not represented as functioning actions here.
+The Northbank bridge, streetlamp, picnic, riverside path, crossing signal and garden cleanup are **fictional demo fixtures** over Detroit coordinates. The added path reports demonstrate location and time scope; the signal reports show differing observations at different times; the garden cleanup is a plan, not evidence that it occurred. Their stored accounts are authored fixtures, not live model output. Contribution, authentication, model processing, resolution/freshness automation, discovery, directions/calendar and private updates belong to later tickets; their controls are not represented as functioning actions here.
 
 ## Run locally
 
@@ -42,6 +42,8 @@ Open http://127.0.0.1:3000. Select the bridge, open full details, tap a claim, a
 `db/migrations` maintains distinct Reports, Observations, memberships, Happenings, versioned Shared accounts, claims and claim supports. Migration application is transactional and versioned; fixture seeding is idempotent and does not overwrite existing rows. Observation time is nullable and separate from submission time. Account provenance records whether it is a fixture or model-derived.
 
 The application connects to PostgreSQL on the server. Tables live in the `nearhood` schema, outside Supabase's default public Data API; RLS is enabled with no direct browser policies. Use a server-owned connection with access to this schema. Do not expose `DATABASE_URL` or its credentials to browser code. PostGIS must be installed in the `extensions` schema; the migration creates it there on a new database. Check existing extension placement before applying to an existing Supabase project.
+
+Remote connections use verified TLS through a shared configuration for the app and setup script. Download Supabase's root CA from **Database Settings → SSL Configuration → Download Certificate**. Set `DATABASE_SSL_CA_FILE` to its local path, or set `DATABASE_SSL_CA` to its PEM contents on Vercel (inline contents take precedence). Without a custom CA, Node uses its default trusted CAs. Remote URL SSL parameters cannot override this policy. The setup script requires these environment variables in the shell; it does not load `.env.local`. See the [503 troubleshooting note](docs/troubleshooting/supabase-tls.md).
 
 Public read-only application endpoints:
 

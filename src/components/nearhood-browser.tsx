@@ -122,6 +122,8 @@ export default function NearhoodBrowser({
   }
   function returnToDemo() {
     setSelectedId(null);
+    setReader(null);
+    setLocationMessage("");
     setDestination({
       coordinates: DEMO_CENTER,
       request: Date.now(),
@@ -210,13 +212,23 @@ export default function NearhoodBrowser({
             </h2>
             <p>What neighbors are noticing nearby</p>
           </div>
-          <button
-            className="round-button"
-            aria-label="Use my location"
-            onClick={locate}
-          >
-            <FigmaIcon name="locate" />
-          </button>
+          <div className="area-actions">
+            <button
+              className="return-demo-button"
+              aria-label="Return to Northbank demo"
+              onClick={returnToDemo}
+            >
+              Return to demo
+            </button>
+            <button
+              className="round-button"
+              aria-label="Use my location"
+              title="Use my location"
+              onClick={locate}
+            >
+              <FigmaIcon name="locate" />
+            </button>
+          </div>
         </section>
         {locationMessage && (
           <p className="location-message" role="status">
