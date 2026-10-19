@@ -53,13 +53,50 @@ export type Observation = {
   observedAt: string | null;
 };
 export type ReportProcessingState =
-  "saved" | "processing" | "pending" | "clarification" | "published";
+  | "saved"
+  | "processing"
+  | "pending"
+  | "match_review"
+  | "clarification"
+  | "published";
+export type MatchEvidence = {
+  observationId: string;
+  reportId: string;
+  originalText: string;
+  displayName: string;
+  observedAt: string | null;
+  submittedAt: string;
+  provenance: "firsthand" | "source_based";
+  sourceUrl: string | null;
+  reportLocationName: string | null;
+  lat: number;
+  lng: number;
+  subject: string;
+  describedState: string;
+  spatialScope: string | null;
+};
+export type MatchCandidate = Coordinates & {
+  id: string;
+  title: string;
+  category: "disruption" | "safety" | "activity";
+  locationName: string;
+  distanceMeters: number;
+  evidence: MatchEvidence[];
+};
+export type MatchRecommendation =
+  | { kind: "match"; candidateId: string; evidenceIds: string[] }
+  | { kind: "no_match" }
+  | { kind: "uncertain"; evidenceIds: string[]; question: string };
 export type SavedReport = Report & {
   state: ReportProcessingState;
   happeningId: string | null;
   locationName: string;
-  clearlyNew: boolean;
   candidateId: string | null;
+  candidateIds: string[];
+  candidates: MatchCandidate[];
+  recommendation: MatchRecommendation | null;
+  matchingOutcome: "matched" | "create_new" | null;
+  decisionCandidateIds: string[];
 };
 export type HappeningDetail = Happening & {
   reports: Report[];

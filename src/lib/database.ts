@@ -55,7 +55,7 @@ async function pendingReports(
     r.observed_at AS "observedAt", r.submitted_at AS "submittedAt", r.provenance, r.source_url AS "sourceUrl",
     p.location_name AS "locationName", extensions.ST_Y(r.location::extensions.geometry) AS lat, extensions.ST_X(r.location::extensions.geometry) AS lng
     FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id
-    WHERE p.clearly_new AND p.state IN ('saved','processing','pending')
+    WHERE p.matching_outcome='create_new' AND p.state='pending'
     AND ($1::text IS NULL OR r.id=$1) AND ($2::double precision IS NULL OR
     (extensions.ST_Y(r.location::extensions.geometry) BETWEEN $3 AND $5 AND
     CASE WHEN $2 <= $4 THEN extensions.ST_X(r.location::extensions.geometry) BETWEEN $2 AND $4

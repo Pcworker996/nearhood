@@ -4,7 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 
 const codes = new Map<string, { id: string; challenge: string }>();
 const tokens = new Map<string, string>();
-const scenarios = new Map<string, string>();
+const scenarios = new Map<string, { mode: string; candidateId?: string }>();
 let cancelNextSignIn = false;
 const user = (id: string) => ({
   id,
@@ -30,7 +30,10 @@ const server = createServer(async (req, res) => {
   if (url.pathname === "/health") return json({ ok: true });
   if (url.pathname === "/control") {
     if (body.cancelNextSignIn) cancelNextSignIn = true;
-    scenarios.set(body.text, body.mode);
+    scenarios.set(body.text, {
+      mode: body.mode,
+      candidateId: body.candidateId,
+    });
     return json({ ok: true });
   }
   if (url.pathname === "/auth/v1/authorize") {
@@ -87,8 +90,20 @@ const server = createServer(async (req, res) => {
   if (url.pathname === "/auth/v1/logout") return json({});
   if (url.pathname === "/v1/chat/completions") {
     const input = JSON.parse(body.messages[1].content);
-    const text = input.originalText as string;
-    const mode = scenarios.get(text) ?? "failure";
+    if (
+      typeof input.report.locationName !== "string" ||
+      !input.report.locationName.trim() ||
+      !Number.isFinite(input.report.lat) ||
+      input.report.lat < -90 ||
+      input.report.lat > 90 ||
+      !Number.isFinite(input.report.lng) ||
+      input.report.lng < -180 ||
+      input.report.lng > 180
+    )
+      return json({ error: "Missing submitted Report location" }, 400);
+    const text = input.report.originalText as string;
+    const scenario = scenarios.get(text) ?? { mode: "failure" };
+    const mode = scenario.mode;
     if (mode === "failure")
       return json({ error: "Controlled provider outage" }, 503);
     if (mode === "slow")
@@ -106,6 +121,35 @@ const server = createServer(async (req, res) => {
       spatialScope:
         passage.match(/(?:north|south|east) (?:path|entrance)/)?.[0] ?? null,
     }));
+    const candidate = input.candidates.find(
+      (item: { id: string }) => item.id === scenario.candidateId,
+    );
+    const evidenceIds =
+      candidate?.evidence.map(
+        (item: { observationId: string }) => item.observationId,
+      ) ?? [];
+    const matching =
+      mode === "match"
+        ? {
+            kind: "match",
+            candidateId: scenario.candidateId ?? candidate?.id,
+            evidenceIds: evidenceIds.slice(0, 1),
+            question: null,
+          }
+        : mode === "uncertain"
+          ? {
+              kind: "uncertain",
+              candidateId: null,
+              evidenceIds: evidenceIds.slice(0, 1),
+              question:
+                "Was this at the footbridge, or at a different nearby crossing?",
+            }
+          : {
+              kind: "no_match",
+              candidateId: null,
+              evidenceIds: [],
+              question: null,
+            };
     return json({
       choices: [
         {
@@ -126,6 +170,7 @@ const server = createServer(async (req, res) => {
                       : observations.map((o) => o.key),
                 },
               ],
+              matching,
             }),
           },
         },

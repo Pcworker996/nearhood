@@ -796,6 +796,73 @@ dialog > .muted {
   display: inline-block;
   margin: 12px 8px 12px 0;
 }
+.secondary-button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  background: #fffefa;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 12px;
+}
+.match-review {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #f7f6f0;
+}
+.match-review > .eyebrow {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.match-review > h2 {
+  margin-top: 0;
+}
+.match-candidate {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: white;
+}
+.match-candidate h2 {
+  margin: 0 0 6px;
+  font-family: "DM Sans Variable", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+.match-candidate .muted {
+  font-size: 11px;
+  line-height: 1.5;
+}
+.match-evidence {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e6e5dd;
+}
+.match-evidence .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.match-evidence blockquote {
+  margin: 8px 0;
+  color: #384b45;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.match-evidence a {
+  color: var(--green);
+  font-size: 11px;
+}
 .badge.pending,
 .pin.pending {
   background: #e5e8e2;

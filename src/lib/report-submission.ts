@@ -20,7 +20,6 @@ export type ReportInput = {
   observedAt: string | null;
   provenance: "firsthand" | "source_based";
   sourceUrl: string | null;
-  clearlyNew: boolean;
   candidateId: string | null;
 };
 export function parseReportInput(value: unknown): ReportInput {
@@ -61,13 +60,10 @@ export function parseReportInput(value: unknown): ReportInput {
     );
   if (b.provenance !== "firsthand" && b.provenance !== "source_based")
     throw new SubmissionError("Choose firsthand or source-based.");
-  if (
-    typeof b.clearlyNew !== "boolean" ||
-    !(
-      b.candidateId === null ||
-      (typeof b.candidateId === "string" && b.candidateId.length <= 200)
-    )
-  )
+  if (!(
+    b.candidateId === null ||
+    (typeof b.candidateId === "string" && b.candidateId.length <= 200)
+  ))
     throw new SubmissionError("Invalid situation context.");
   let sourceUrl: string | null = null;
   if (b.sourceUrl !== null && b.sourceUrl !== "") {
@@ -105,7 +101,6 @@ export function parseReportInput(value: unknown): ReportInput {
         : new Date(b.observedAt as string).toISOString(),
     provenance: b.provenance,
     sourceUrl,
-    clearlyNew: b.clearlyNew,
     candidateId: b.candidateId,
   };
 }
@@ -113,7 +108,10 @@ export function parseReportInput(value: unknown): ReportInput {
 const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.original_text AS "originalText", c.display_name AS "displayName",
   r.observed_at AS "observedAt", r.submitted_at AS "submittedAt", r.provenance, r.source_url AS "sourceUrl",
   extensions.ST_Y(r.location::extensions.geometry) AS lat, extensions.ST_X(r.location::extensions.geometry) AS lng,
-  p.location_name AS "locationName", p.clearly_new AS "clearlyNew", p.candidate_id AS "candidateId", p.happening_id AS "happeningId",
+  p.location_name AS "locationName", p.candidate_id AS "candidateId", p.happening_id AS "happeningId",
+  p.candidate_ids AS "candidateIds", p.candidate_packet AS candidates,
+  p.recommendation, p.matching_outcome AS "matchingOutcome",
+  p.decision_candidate_ids AS "decisionCandidateIds",
   CASE WHEN p.state='processing' AND p.lease_until < now() THEN 'pending' ELSE p.state END AS state
   FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id`;
 
@@ -138,7 +136,7 @@ export async function saveReport(input: ReportInput, contributorId: string) {
       [contributorId],
     );
     const existing = await client.query(
-      "SELECT report_id, request_body = $3::jsonb AS identical FROM nearhood.report_processing WHERE contributor_id=$1 AND request_key=$2",
+      "SELECT report_id, (request_body - 'clearlyNew') = $3::jsonb AS identical FROM nearhood.report_processing WHERE contributor_id=$1 AND request_key=$2",
       [contributorId, input.requestKey, JSON.stringify(input)],
     );
     if (existing.rows[0]) {
@@ -177,14 +175,13 @@ export async function saveReport(input: ReportInput, contributorId: string) {
         ],
       );
       await client.query(
-        `INSERT INTO nearhood.report_processing(report_id,request_key,request_body,contributor_id,clearly_new,candidate_id,location_name)
-        VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+        `INSERT INTO nearhood.report_processing(report_id,request_key,request_body,contributor_id,candidate_id,location_name)
+        VALUES ($1,$2,$3,$4,$5,$6)`,
         [
           id,
           input.requestKey,
           JSON.stringify(input),
           contributorId,
-          input.clearlyNew,
           input.candidateId,
           input.locationName,
         ],

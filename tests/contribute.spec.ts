@@ -20,7 +20,6 @@ function submission(text: string, overrides = {}) {
     observedAt: null,
     provenance: "firsthand",
     sourceUrl: null,
-    clearlyNew: true,
     candidateId: null,
     ...overrides,
   };
@@ -28,6 +27,214 @@ function submission(text: string, overrides = {}) {
 
 // Confirmed seam: real application HTTP API and PostgreSQL, with external
 // authentication/model services controlled by HTTP fixtures in later journeys.
+test("contributors are not asked to classify a Report as new", async ({
+  page,
+}) => {
+  await signIn(page);
+  await expect(page.getByLabel("This is a clearly new situation")).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByRole("button", { name: "Submit Report", exact: true }),
+  ).toBeVisible();
+});
+
+test("a semantic match is recommended with evidence but attached only after confirmation", async ({
+  page,
+}) => {
+  await signIn(page);
+  const text = "The stretch class is taking place near the west gate.";
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text, mode: "match", candidateId: "picnic" },
+  });
+  const before = await (
+    await page.request.get("/api/happenings/picnic")
+  ).json();
+  const report = await (
+    await page.request.post("/api/reports", {
+      data: submission(text, {
+        lat: 42.3352,
+        lng: -83.0513,
+        locationName: "Canal Green west gate",
+        observedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        candidateId: "picnic",
+      }),
+    })
+  ).json();
+  const reviewed = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  expect(reviewed.state).toBe("match_review");
+  expect(reviewed.candidateIds).toContain("picnic");
+  expect(reviewed.candidates).toHaveLength(5);
+  expect(reviewed.candidates[0].id).toBe("picnic");
+  expect(
+    reviewed.candidates.find(
+      (candidate: { id: string }) => candidate.id === "picnic",
+    ).category,
+  ).toBe("activity");
+  expect(reviewed.recommendation).toEqual({
+    kind: "match",
+    candidateId: "picnic",
+    evidenceIds: expect.any(Array),
+  });
+  const picnic = reviewed.candidates.find(
+    (candidate: { id: string }) => candidate.id === "picnic",
+  );
+  const citedEvidence = picnic.evidence.find(
+    (item: { observationId: string }) =>
+      reviewed.recommendation.evidenceIds.includes(item.observationId),
+  );
+  expect(citedEvidence?.originalText).toBeTruthy();
+  expect(
+    (
+      await page.request.post(`/api/reports/${report.id}/match`, {
+        data: {
+          choice: "match",
+          candidateId: "not-supplied",
+          candidateIdsShown: ["not-supplied"],
+        },
+      })
+    ).status(),
+  ).toBe(400);
+  const afterReview = await (
+    await page.request.get("/api/happenings/picnic")
+  ).json();
+  expect(afterReview.account).toEqual(before.account);
+  expect(afterReview.reports).toHaveLength(before.reports.length);
+
+  await page.goto(`/?contribute=1&report=${report.id}`);
+  await expect(
+    page.getByText("Suggested Happening", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Match review" })
+      .getByText(citedEvidence.originalText, { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Match review" })
+      .getByText(
+        citedEvidence.provenance === "source_based"
+          ? "Source-based · contributor-declared"
+          : "Firsthand · contributor-declared",
+      ),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Use this Happening", exact: true })
+    .click();
+  await expect(
+    page.getByText("Report saved · account published", { exact: true }),
+  ).toBeVisible();
+  const attached = await (
+    await page.request.get("/api/happenings/picnic")
+  ).json();
+  expect(attached.reports).toHaveLength(before.reports.length + 1);
+  expect(
+    attached.reports.map((item: { originalText: string }) => item.originalText),
+  ).toContain(text);
+  expect(attached.account.version).toBe(before.account.version + 1);
+  const repeated = await (
+    await page.request.post(`/api/reports/${report.id}/match`, {
+      data: {
+        choice: "match",
+        candidateId: "picnic",
+        candidateIdsShown: ["picnic"],
+      },
+    })
+  ).json();
+  expect(repeated.state).toBe("published");
+  expect(
+    (await (await page.request.get("/api/happenings/picnic")).json()).account
+      .version,
+  ).toBe(before.account.version + 1);
+});
+
+test("an uncertain match asks a focused question and records the contributor's answer", async ({
+  page,
+}) => {
+  await signIn(page);
+  const text = "A barrier is near the footbridge entrance.";
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text, mode: "uncertain", candidateId: "bridge" },
+  });
+  const report = await (
+    await page.request.post("/api/reports", {
+      data: submission(text, {
+        lat: 42.336,
+        lng: -83.0457,
+        locationName: "North footbridge approach",
+        observedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        candidateId: "bridge",
+      }),
+    })
+  ).json();
+  const clarification = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  expect(clarification.state).toBe("clarification");
+  expect(clarification.recommendation.kind).toBe("uncertain");
+  expect(
+    (await page.request.get(`/api/happenings/${report.id}`)).status(),
+  ).toBe(404);
+
+  await page.goto(`/?contribute=1&report=${report.id}`);
+  await expect(
+    page.getByText("Could you clarify?", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Was this at the footbridge, or at a different nearby crossing?",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "None of these describe what I reported" })
+    .click();
+  await expect(
+    page.getByText("Report saved · account published", { exact: true }),
+  ).toBeVisible();
+  const decided = await (
+    await page.request.get(`/api/reports/${report.id}`)
+  ).json();
+  expect(decided.matchingOutcome).toBe("create_new");
+  expect(decided.decisionCandidateIds).toEqual(decided.candidateIds);
+  expect(decided.happeningId).toBe(report.id);
+});
+
+test("a successful empty nearby search creates a Happening without a newness question", async ({
+  page,
+}) => {
+  await signIn(page);
+  const text = "A branch blocks the rural trail.";
+  const lat = -60 + Math.random() * 120;
+  const lng = -180 + Math.random() * 360;
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text, mode: "uncertain" },
+  });
+  const report = await (
+    await page.request.post("/api/reports", {
+      data: submission(text, {
+        lat,
+        lng,
+        locationName: `Remote test location ${lat.toFixed(2)}, ${lng.toFixed(2)}`,
+        observedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      }),
+    })
+  ).json();
+  const processed = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  expect(processed.state).toBe("published");
+  expect(processed.candidateIds).toEqual([]);
+  expect(processed.matchingOutcome).toBe("create_new");
+  expect(processed.happeningId).toBe(report.id);
+  expect(
+    (await page.request.get(`/api/happenings/${report.id}`)).status(),
+  ).toBe(200);
+});
+
 test("public readers can browse but cannot submit or process Reports", async ({
   request,
 }) => {
@@ -58,7 +265,6 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
     .fill("A fallen tree blocks the north path.");
   await page.getByLabel("Public display name").fill("River Neighbor");
   await page.getByLabel("Observation time").selectOption("unknown");
-  await page.getByLabel("This is a clearly new situation").check();
   await page.getByRole("button", { name: "Continue with Google" }).click();
   await expect(page.getByLabel("What did you observe?")).toHaveValue(
     "A fallen tree blocks the north path.",
@@ -171,7 +377,6 @@ test("processing begins after the original is saved and concurrent retries publi
   await page.getByLabel("What did you observe?").fill(text);
   await page.getByLabel("Public display name").fill("Path Walker");
   await page.getByLabel("Observation time").selectOption("now");
-  await page.getByLabel("This is a clearly new situation").check();
   const saveResponse = page.waitForResponse(
     (r) => r.url().endsWith("/api/reports") && r.request().method() === "POST",
   );
@@ -280,7 +485,6 @@ test("a source-based Report produces distinct claim evidence with unknown observ
     .fill("https://example.test/community-notice");
   await page.getByLabel("Latitude", { exact: true }).fill("44.25");
   await page.getByLabel("Longitude", { exact: true }).fill("-85.25");
-  await page.getByLabel("This is a clearly new situation").check();
   await page
     .getByRole("button", { name: "Submit Report", exact: true })
     .click();
@@ -338,7 +542,7 @@ test("a source-based Report produces distinct claim evidence with unknown observ
   await publicContext.close();
 });
 
-test("an interrupted first account stays Report-only and rejects unsupported claims or invented supports", async ({
+test("unsupported model output stays private and retryable without a no-match marker", async ({
   page,
   browser,
 }) => {
@@ -368,13 +572,15 @@ test("an interrupted first account stays Report-only and rejects unsupported cla
       await page.request.post(`/api/reports/${report.id}/process`)
     ).json();
     expect(result.state).toBe("pending");
-    const publicReport = await (
-      await page.request.get(`/api/happenings/${report.id}`)
+    expect(
+      (await page.request.get(`/api/happenings/${report.id}`)).status(),
+    ).toBe(404);
+    const ownerReport = await (
+      await page.request.get(`/api/reports/${report.id}`)
     ).json();
-    expect(publicReport.account).toBeNull();
-    expect(publicReport.category).toBe("pending");
-    expect(publicReport.reports[0].originalText).toBe(text);
-    expect(publicReport.observations).toHaveLength(0);
+    expect(ownerReport.state).toBe("pending");
+    expect(ownerReport.originalText).toBe(text);
+    expect(ownerReport.matchingOutcome).toBeNull();
     const other = await browser.newContext();
     const stranger = await other.newPage();
     await signIn(stranger);
@@ -390,9 +596,12 @@ test("an interrupted first account stays Report-only and rejects unsupported cla
   }
 });
 
-test("a candidate is context only and a pending update leaves its published account unchanged", async ({
+test("a selected Happening stays unchanged until the contributor confirms the match", async ({
   page,
 }) => {
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text: "The south entrance looks different.", mode: "failure" },
+  });
   await page.goto("/?happening=bridge");
   const before = await (
     await page.request.get("/api/happenings/bridge")
@@ -419,16 +628,36 @@ test("a candidate is context only and a pending update leaves its published acco
   expect(after.account).toEqual(before.account);
   expect(after.reports).toEqual(before.reports);
   await page.request.post("http://127.0.0.1:3101/control", {
-    data: { text: "The south entrance looks different.", mode: "success" },
+    data: {
+      text: "The south entrance looks different.",
+      mode: "match",
+      candidateId: "bridge",
+    },
   });
-  const result = await (
-    await page.request.post(`/api/reports/${id}/process`)
-  ).json();
-  expect(result.state).toBe("clarification");
+  await page.getByRole("button", { name: "Retry account update" }).click();
+  await expect(
+    page.getByText("Suggested Happening", { exact: true }),
+  ).toBeVisible();
   expect((await page.request.get(`/api/happenings/${id}`)).status()).toBe(404);
+  const afterReview = await (
+    await page.request.get("/api/happenings/bridge")
+  ).json();
+  expect(afterReview.account).toEqual(before.account);
+  expect(afterReview.reports).toHaveLength(before.reports.length);
+  await page
+    .getByRole("button", { name: "Use this Happening", exact: true })
+    .click();
+  await expect(
+    page.getByText("Report saved · account published", { exact: true }),
+  ).toBeVisible();
+  const attached = await (
+    await page.request.get("/api/happenings/bridge")
+  ).json();
+  expect(attached.reports).toHaveLength(before.reports.length + 1);
+  expect(attached.account.version).toBe(before.account.version + 1);
   expect(
-    (await (await page.request.get("/api/happenings/bridge")).json()).account,
-  ).toEqual(before.account);
+    attached.reports.map((item: { originalText: string }) => item.originalText),
+  ).toContain("The south entrance looks different.");
 });
 
 test("invalid contribution metadata and cross-origin writes are rejected without losing public browsing", async ({
