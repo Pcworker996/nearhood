@@ -2,6 +2,8 @@
 
 Source: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), with the browser/real HTTP API/PostgreSQL testing boundary in ADR 0003. This document describes the implementation target; verification results are recorded separately.
 
+Local implementation and [review/verification results](reviews/2026-10-19-issue-4-implementation.md) are committed. Ticket #4 remains open: real provider credentials/model selection and the proposed clarification-answer interaction are outstanding.
+
 ## Agreed behavior and responsibilities
 
 - Public browsing remains available. Contribution uses Google-only Supabase PKCE sign-in, verified by the server with `getUser`. The browser retains its draft across redirects. A person chooses a public display name; email and Google profile names are never copied into public evidence.
