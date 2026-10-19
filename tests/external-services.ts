@@ -101,7 +101,7 @@ const server = createServer(async (req, res) => {
       : passages.at(-1)!;
     const observations = passages.map((passage, i) => ({
       key: `o${i}`,
-      excerpt: mode === "drop-qualification" ? stripped : text,
+      ...(mode === "drop-qualification" ? { excerpt: stripped } : {}),
       subject: passage.split(/\bis\b|\bhas\b/)[0].trim(),
       spatialScope:
         passage.match(/(?:north|south|east) (?:path|entrance)/)?.[0] ?? null,
@@ -117,12 +117,9 @@ const server = createServer(async (req, res) => {
               observations,
               claims: [
                 {
-                  statement:
-                    mode === "unsupported"
-                      ? "The whole neighborhood is safe."
-                      : mode === "drop-qualification"
-                        ? stripped
-                        : text,
+                  ...(mode === "unsupported"
+                    ? { statement: "The whole neighborhood is safe." }
+                    : {}),
                   observationKeys:
                     mode === "bad-reference"
                       ? ["invented"]

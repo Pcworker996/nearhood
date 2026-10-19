@@ -48,6 +48,9 @@ test("public readers can browse but cannot submit or process Reports", async ({
 test("a Google contributor keeps a draft and chosen name, then reloads a saved Report after processing failure", async ({
   page,
 }, testInfo) => {
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text: "A fallen tree blocks the north path.", mode: "failure" },
+  });
   await page.goto("/");
   await page.getByRole("button", { name: "Contribute", exact: true }).click();
   await page
@@ -195,6 +198,34 @@ test("processing begins after the original is saved and concurrent retries publi
   expect(detail.reports).toHaveLength(1);
   expect(detail.observations).toHaveLength(1);
   expect(detail.account.version).toBe(1);
+});
+
+test("a long Report can publish multiple scoped Observations without model echoing its evidence", async ({
+  page,
+}) => {
+  await signIn(page);
+  const text = `The north entrance is blocked${" with a barrier".repeat(220)}. The south entrance is blocked${" with a barrier".repeat(220)}.`;
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text, mode: "success" },
+  });
+  const report = await (
+    await page.request.post("/api/reports", { data: submission(text) })
+  ).json();
+  const result = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  expect(result.state).toBe("published");
+  const detail = await (
+    await page.request.get(`/api/happenings/${report.id}`)
+  ).json();
+  expect(detail.observations).toHaveLength(2);
+  expect(detail.account.claims).toHaveLength(1);
+  expect(detail.account.claims[0].statement).toBe(text);
+  expect(
+    detail.observations
+      .map((o: { spatialScope: string }) => o.spatialScope)
+      .sort(),
+  ).toEqual(["north entrance", "south entrance"]);
 });
 
 test("cancelled Google sign-in keeps a chosen-time source-based draft on the same origin", async ({
