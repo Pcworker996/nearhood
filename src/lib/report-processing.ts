@@ -13,7 +13,12 @@ export async function processReport(id: string, contributorId: string) {
   );
   if (!lease.rowCount) return savedReport(id, contributorId);
   try {
-    const { extraction, model } = await extractReport(report);
+    const { extraction, model } = await extractReport({
+      originalText: report.originalText,
+      observedAt: report.observedAt,
+      provenance: report.provenance,
+      sourceUrl: report.sourceUrl,
+    });
     // No matching is implied by a selected detail or matching coordinates.
     // Unrelated/ambiguous observations remain unassigned and cannot support an account.
     if (!report.clearlyNew || !extraction.sameOccurrence) {

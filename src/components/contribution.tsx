@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import type { Coordinates } from "@/lib/happenings";
 import { ReportCard } from "./report-card";
-import type { Report } from "@/lib/happenings";
+import type { SavedReport } from "@/lib/happenings";
 
 const ContributionPin = dynamic(() => import("./contribution-pin"), {
   ssr: false,
@@ -21,13 +21,6 @@ type Draft = {
   chosenTime: string;
   provenance: string;
   sourceUrl: string;
-  clearlyNew: boolean;
-  candidateId: string | null;
-};
-type Saved = Report & {
-  state: string;
-  happeningId: string | null;
-  locationName: string;
   clearlyNew: boolean;
   candidateId: string | null;
 };
@@ -54,7 +47,7 @@ export default function Contribution({
   const [signedIn, setSignedIn] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
-  const [saved, setSaved] = useState<Saved | null>(null);
+  const [saved, setSaved] = useState<SavedReport | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [storageError, setStorageError] = useState("");
@@ -121,13 +114,14 @@ export default function Contribution({
   useEffect(() => {
     if (!draft) return;
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      if (saved) localStorage.removeItem(DRAFT_KEY);
+      else localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     } catch {
       setStorageError(
         "Draft storage is unavailable. Sign-in may not preserve your draft.",
       );
     }
-  }, [draft]);
+  }, [draft, saved]);
   useEffect(() => {
     if (saved?.state !== "processing") return;
     const timer = setInterval(() => {
@@ -207,6 +201,8 @@ export default function Contribution({
       }
       setSaved(result);
       window.history.replaceState({}, "", `/?contribute=1&report=${result.id}`);
+      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem(retryKey);
       setBusy(false);
       void process(result.id);
     } catch (e) {
@@ -286,6 +282,7 @@ export default function Contribution({
                   originalText: "",
                   timeChoice: "",
                   sourceUrl: "",
+                  clearlyNew: false,
                 });
                 setSaved(null);
                 setSubmissionStarted(false);

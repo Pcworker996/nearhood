@@ -107,6 +107,54 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
   await expect(
     page.getByText("A fallen tree blocks the north path.", { exact: true }),
   ).toBeVisible();
+  await page.goto("/?happening=lamp");
+  const lamp = await (await page.request.get("/api/happenings/lamp")).json();
+  await page.getByRole("button", { name: "Add an update" }).click();
+  await expect(page.getByLabel("What did you observe?")).toHaveValue("");
+  await expect(page.getByLabel("Latitude", { exact: true })).toHaveValue(
+    String(lamp.lat),
+  );
+});
+
+test("model claims cannot strip uncertainty around abbreviations or line breaks", async ({
+  page,
+}) => {
+  await signIn(page);
+  for (const text of [
+    "I cannot confirm that Dr. Smith saw flooding.",
+    "I cannot confirm:\nThe road is closed.",
+  ]) {
+    await page.request.post("http://127.0.0.1:3101/control", {
+      data: { text, mode: "drop-qualification" },
+    });
+    const report = await (
+      await page.request.post("/api/reports", { data: submission(text) })
+    ).json();
+    const rejected = await (
+      await page.request.post(`/api/reports/${report.id}/process`)
+    ).json();
+    expect(rejected.state).toBe("pending");
+    await page.request.post("http://127.0.0.1:3101/control", {
+      data: { text, mode: "success" },
+    });
+    const result = await (
+      await page.request.post(`/api/reports/${report.id}/process`)
+    ).json();
+    expect(result.state).toBe("published");
+    const detail = await (
+      await page.request.get(`/api/happenings/${report.id}`)
+    ).json();
+    expect(detail.account.claims).toHaveLength(1);
+    expect(detail.account.claims[0].statement).toBe(text);
+    expect(detail.reports[0].originalText).toBe(text);
+    const evidence = await (
+      await page.request.get(
+        `/api/happenings/${report.id}/claims/${detail.account.claims[0].id}`,
+      )
+    ).json();
+    for (const pair of evidence.evidence)
+      expect(pair.observation.describedState).toBe(text);
+  }
 });
 
 test("processing begins after the original is saved and concurrent retries publish it only once", async ({
@@ -169,7 +217,9 @@ test("cancelled Google sign-in keeps a chosen-time source-based draft on the sam
     .getByLabel("Source link (optional)")
     .fill("https://example.test/notice");
   await page.getByRole("button", { name: "Continue with Google" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Sign-in did not complete" })).toBeVisible();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Sign-in did not complete" }),
+  ).toBeVisible();
   await expect(page.getByLabel("What did you observe?")).toHaveValue(
     "The notice describes a closed entrance.",
   );
@@ -227,28 +277,32 @@ test("a source-based Report produces distinct claim evidence with unknown observ
   const publicContext = await browser.newContext();
   const reader = await publicContext.newPage();
   await reader.goto(`/?happening=${id}`);
-  await reader
-    .getByRole("button", { name: "The north path is blocked.", exact: true })
-    .click();
+  await reader.getByRole("button", { name: text, exact: true }).click();
   const evidence = reader.getByRole("dialog");
   await expect(
     evidence.getByText("Derived Observation", { exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(2);
   await expect(
     evidence.getByText("Observation time unknown", { exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(2);
   await expect(
     evidence.getByRole("link", { name: "Open source link" }),
-  ).toBeVisible();
+  ).toHaveCount(2);
   const supports = await (
     await reader.request.get(
       `/api/happenings/${id}/claims/${detail.account.claims[0].id}`,
     )
   ).json();
-  expect(supports.evidence).toHaveLength(1);
-  expect(supports.evidence[0].observation.describedState).toBe(
-    "The north path is blocked.",
-  );
+  expect(supports.evidence).toHaveLength(2);
+  expect(supports.evidence[0].observation.describedState).toBe(text);
+  expect(
+    supports.evidence
+      .map(
+        (e: { observation: { spatialScope: string } }) =>
+          e.observation.spatialScope,
+      )
+      .sort(),
+  ).toEqual(["north path", "south path"]);
   expect((await reader.request.get(`/api/reports/${id}`)).status()).toBe(401);
   await publicContext.close();
 });

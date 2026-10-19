@@ -179,6 +179,10 @@ export default function HappeningDetailView({
                 />
               ) : null;
             })}
+            {!detail.observations.length &&
+              detail.reports.map((report) => (
+                <ReportCard key={report.id} report={report} />
+              ))}
           </section>
         )}
         {(section === "account" || section === "uncertainty") && (
@@ -189,6 +193,13 @@ export default function HappeningDetailView({
               {detail.account?.uncertainty.map((item) => (
                 <p key={item}>{item}</p>
               ))}
+              {!detail.account && (
+                <p>
+                  No Shared account has been published. Current conditions
+                  remain unknown; inspect the original Report for its
+                  contributor's words.
+                </p>
+              )}
             </div>
           </aside>
         )}

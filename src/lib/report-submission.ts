@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { database } from "./database";
+import type { SavedReport } from "./happenings";
 
 export class SubmissionError extends Error {
   constructor(
@@ -117,7 +118,7 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
   FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id`;
 
 export async function savedReport(id: string, contributorId: string) {
-  const { rows } = await database().query(
+  const { rows } = await database().query<SavedReport>(
     `${savedSelect} WHERE r.id=$1 AND r.contributor_id=$2`,
     [id, contributorId],
   );

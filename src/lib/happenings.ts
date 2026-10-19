@@ -52,6 +52,15 @@ export type Observation = {
   spatialScope: string | null;
   observedAt: string | null;
 };
+export type ReportProcessingState =
+  "saved" | "processing" | "pending" | "clarification" | "published";
+export type SavedReport = Report & {
+  state: ReportProcessingState;
+  happeningId: string | null;
+  locationName: string;
+  clearlyNew: boolean;
+  candidateId: string | null;
+};
 export type HappeningDetail = Happening & {
   reports: Report[];
   observations: Observation[];

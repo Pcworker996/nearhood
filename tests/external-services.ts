@@ -96,11 +96,15 @@ const server = createServer(async (req, res) => {
     const passages = text
       .match(/[^.!?]+[.!?]+|[^.!?]+$/g)!
       .map((s) => s.trim());
-    const observations = passages.map((excerpt, i) => ({
+    const stripped = text.includes("\n")
+      ? text.split("\n").at(-1)!
+      : passages.at(-1)!;
+    const observations = passages.map((passage, i) => ({
       key: `o${i}`,
-      excerpt,
-      subject: excerpt.split(" ")[0],
-      spatialScope: null,
+      excerpt: mode === "drop-qualification" ? stripped : text,
+      subject: passage.split(/\bis\b|\bhas\b/)[0].trim(),
+      spatialScope:
+        passage.match(/(?:north|south|east) (?:path|entrance)/)?.[0] ?? null,
     }));
     return json({
       choices: [
@@ -111,14 +115,20 @@ const server = createServer(async (req, res) => {
               category: "disruption",
               sameOccurrence: true,
               observations,
-              claims: observations.map((o) => ({
-                statement:
-                  mode === "unsupported"
-                    ? "The whole neighborhood is safe."
-                    : o.excerpt,
-                observationKeys:
-                  mode === "bad-reference" ? ["invented"] : [o.key],
-              })),
+              claims: [
+                {
+                  statement:
+                    mode === "unsupported"
+                      ? "The whole neighborhood is safe."
+                      : mode === "drop-qualification"
+                        ? stripped
+                        : text,
+                  observationKeys:
+                    mode === "bad-reference"
+                      ? ["invented"]
+                      : observations.map((o) => o.key),
+                },
+              ],
             }),
           },
         },

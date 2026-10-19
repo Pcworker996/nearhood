@@ -171,7 +171,9 @@ export default function NearhoodBrowser({
     return (
       <Contribution
         coordinates={detail ?? reference}
-        candidateId={detail?.id ?? null}
+        candidateId={
+          detail?.category === "pending" ? null : (detail?.id ?? null)
+        }
         mapTilerKey={mapTilerKey}
         onBack={back}
       />
@@ -278,7 +280,7 @@ export default function NearhoodBrowser({
               <strong>
                 {selected
                   ? "Back to all highlights"
-                  : `${happenings.length} happenings in view`}
+                  : `${happenings.filter((h) => h.category !== "pending").length} happenings in view${happenings.some((h) => h.category === "pending") ? ` · ${happenings.filter((h) => h.category === "pending").length} pending Reports` : ""}`}
               </strong>
             </span>
             <span className={`toggle-icon ${expanded ? "up" : "down"}`}>
@@ -336,11 +338,19 @@ export default function NearhoodBrowser({
                   [
                     [
                       "Disruptions and safety",
-                      happenings.filter((h) => h.category !== "activity"),
+                      happenings.filter(
+                        (h) =>
+                          h.category === "disruption" ||
+                          h.category === "safety",
+                      ),
                     ],
                     [
                       "Activities",
                       happenings.filter((h) => h.category === "activity"),
+                    ],
+                    [
+                      "Pending Reports",
+                      happenings.filter((h) => h.category === "pending"),
                     ],
                   ] as const
                 ).map(
