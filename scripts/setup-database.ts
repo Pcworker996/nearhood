@@ -12,6 +12,21 @@ try {
   await client.query(
     "CREATE TABLE IF NOT EXISTS public.nearhood_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())",
   );
+  await client.query(
+    "ALTER TABLE public.nearhood_migrations ENABLE ROW LEVEL SECURITY",
+  );
+  await client.query("REVOKE ALL ON public.nearhood_migrations FROM PUBLIC");
+  // Existing Supabase projects may grant public-schema tables to Data API roles.
+  for (const role of ["anon", "authenticated"]) {
+    const exists = await client.query(
+      "SELECT 1 FROM pg_roles WHERE rolname=$1",
+      [role],
+    );
+    if (exists.rowCount)
+      await client.query(
+        `REVOKE ALL ON public.nearhood_migrations FROM ${role}`,
+      );
+  }
   const files = (await readdir("db/migrations"))
     .filter((name) => name.endsWith(".sql"))
     .sort();

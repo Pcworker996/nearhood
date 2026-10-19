@@ -13,7 +13,7 @@ import { poolConfig } from "./postgres-config";
 const globalDatabase = globalThis as typeof globalThis & {
   nearhoodPool?: Pool;
 };
-function database() {
+export function database() {
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required.");
   globalDatabase.nearhoodPool ??= new Pool({
     ...poolConfig(process.env.DATABASE_URL),
@@ -44,6 +44,48 @@ async function currentAccount(id: string): Promise<SharedAccount | null> {
   return { ...account, claims: claims.rows };
 }
 
+// Report-only projections are not Happenings or Shared accounts. They disappear
+// when publication creates the actual Happening at the same stable identifier.
+async function pendingReports(
+  bounds?: Bounds,
+  id?: string,
+): Promise<HappeningDetail[]> {
+  const { rows } = await database().query(
+    `SELECT r.id, r.contributor_id AS "contributorId", c.display_name AS "displayName", r.original_text AS "originalText",
+    r.observed_at AS "observedAt", r.submitted_at AS "submittedAt", r.provenance, r.source_url AS "sourceUrl",
+    p.location_name AS "locationName", extensions.ST_Y(r.location::extensions.geometry) AS lat, extensions.ST_X(r.location::extensions.geometry) AS lng
+    FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id
+    WHERE p.clearly_new AND p.state IN ('saved','processing','pending')
+    AND ($1::text IS NULL OR r.id=$1) AND ($2::double precision IS NULL OR
+    (extensions.ST_Y(r.location::extensions.geometry) BETWEEN $3 AND $5 AND
+    CASE WHEN $2 <= $4 THEN extensions.ST_X(r.location::extensions.geometry) BETWEEN $2 AND $4
+    ELSE extensions.ST_X(r.location::extensions.geometry) >= $2 OR extensions.ST_X(r.location::extensions.geometry) <= $4 END))`,
+    [
+      id ?? null,
+      bounds?.west ?? null,
+      bounds?.south ?? null,
+      bounds?.east ?? null,
+      bounds?.north ?? null,
+    ],
+  );
+  return rows.map(({ locationName, ...report }) => ({
+    id: report.id,
+    title: `Pending Report near ${locationName}`,
+    locationName,
+    lat: report.lat,
+    lng: report.lng,
+    category: "pending",
+    status: "Report saved · account update pending",
+    demo: false,
+    startsAt: null,
+    endsAt: null,
+    contributorCount: 1,
+    account: null,
+    reports: [report],
+    observations: [],
+  }));
+}
+
 export async function listHappenings(bounds: Bounds): Promise<Happening[]> {
   const { rows } = await database().query<Happening>(
     `${happeningSelect} WHERE
@@ -53,9 +95,19 @@ export async function listHappenings(bounds: Bounds): Promise<Happening[]> {
     ORDER BY h.title`,
     [bounds.west, bounds.south, bounds.east, bounds.north],
   );
-  return Promise.all(
+  const published = await Promise.all(
     rows.map(async (h) => ({ ...h, account: await currentAccount(h.id) })),
   );
+  const pending = await pendingReports(bounds);
+  return [
+    ...published,
+    ...pending
+      .filter((p) => !published.some((h) => h.id === p.id))
+      .map(
+        ({ reports: _reports, observations: _observations, ...marker }) =>
+          marker,
+      ),
+  ];
 }
 
 export async function happeningDetail(
@@ -65,7 +117,7 @@ export async function happeningDetail(
     `${happeningSelect} WHERE h.id=$1`,
     [id],
   );
-  if (!rows[0]) return null;
+  if (!rows[0]) return (await pendingReports(undefined, id))[0] ?? null;
   const [account, reports, observations] = await Promise.all([
     currentAccount(id),
     database().query<Report>(

@@ -9,6 +9,7 @@
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "db:setup": "tsx scripts/setup-database.ts",
+    "model:check": "tsx scripts/check-report-model.ts",
     "test": "playwright test",
     "test:browse": "playwright test tests/browse.spec.ts"
   },

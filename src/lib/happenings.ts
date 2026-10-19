@@ -25,7 +25,7 @@ export type SharedAccount = {
 export type Happening = Coordinates & {
   id: string;
   title: string;
-  category: "disruption" | "safety" | "activity";
+  category: "disruption" | "safety" | "activity" | "pending";
   locationName: string;
   status: string;
   demo: boolean;

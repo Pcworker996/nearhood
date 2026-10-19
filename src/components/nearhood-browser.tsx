@@ -12,6 +12,7 @@ import { DEMO_BOUNDS, DEMO_CENTER } from "@/lib/happenings";
 import type { MapDestination } from "./neighborhood-map";
 import HappeningDetailView from "./happening-detail";
 import { FigmaIcon } from "./figma-icon";
+import Contribution from "./contribution";
 
 const NeighborhoodMap = dynamic(() => import("./neighborhood-map"), {
   ssr: false,
@@ -21,6 +22,7 @@ const categoryLabels = {
   disruption: "Disruption",
   safety: "Safety concern",
   activity: "Activity",
+  pending: "Pending Report",
 };
 function distanceLabel(h: Coordinates, reference: Coordinates) {
   const radians = (value: number) => (value * Math.PI) / 180;
@@ -52,11 +54,15 @@ export default function NearhoodBrowser({
   const [locationMessage, setLocationMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
+  const [contributing, setContributing] = useState(false);
   const onBounds = useCallback((b: Bounds) => setBounds(b), []);
   useEffect(() => {
     const readUrl = () => {
       const id = new URLSearchParams(window.location.search).get("happening");
       setDetailId(id);
+      setContributing(
+        new URLSearchParams(window.location.search).has("contribute"),
+      );
     };
     readUrl();
     window.addEventListener("popstate", readUrl);
@@ -118,7 +124,13 @@ export default function NearhoodBrowser({
   }
   function back() {
     setDetailId(null);
+    setContributing(false);
+    setRetry((r) => r + 1);
     window.history.pushState({}, "", "/");
+  }
+  function contribute() {
+    setContributing(true);
+    window.history.pushState({}, "", "/?contribute=1");
   }
   function returnToDemo() {
     setSelectedId(null);
@@ -155,9 +167,23 @@ export default function NearhoodBrowser({
       { timeout: 10000, maximumAge: 60000 },
     );
   }
+  if (contributing)
+    return (
+      <Contribution
+        coordinates={detail ?? reference}
+        candidateId={detail?.id ?? null}
+        mapTilerKey={mapTilerKey}
+        onBack={back}
+      />
+    );
   if (detailId)
     return detail ? (
-      <HappeningDetailView key={detail.id} detail={detail} onBack={back} />
+      <HappeningDetailView
+        key={detail.id}
+        detail={detail}
+        onBack={back}
+        onContribute={contribute}
+      />
     ) : (
       <main className="detail-content">
         <button className="text-button" onClick={back}>
@@ -366,7 +392,7 @@ export default function NearhoodBrowser({
           <FigmaIcon name="discover" />
           <span>Discover</span>
         </button>
-        <button disabled title="Contribution follows in ticket #4">
+        <button onClick={contribute}>
           <span className="contribute-icon">
             <FigmaIcon name="contribute" />
           </span>

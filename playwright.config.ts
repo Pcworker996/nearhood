@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
+  workers: 1,
   use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure" },
   projects: [
     {
@@ -17,15 +18,27 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: "npm run db:setup -- --seed && npm run dev -- --port 3100",
-    env: {
-      DATABASE_URL:
-        process.env.TEST_DATABASE_URL ??
-        "postgresql://127.0.0.1:55432/nearhood_test",
+  webServer: [
+    {
+      command: "npx tsx tests/external-services.ts",
+      url: "http://127.0.0.1:3101/health",
+      reuseExistingServer: false,
     },
-    url: "http://127.0.0.1:3100",
-    reuseExistingServer: false,
-    timeout: 120000,
-  },
+    {
+      command: "npm run db:setup -- --seed && npm run dev -- --port 3100",
+      env: {
+        SUPABASE_URL: "http://127.0.0.1:3101",
+        SUPABASE_PUBLISHABLE_KEY: "external-fixture-publishable-key",
+        NEBIUS_BASE_URL: "http://127.0.0.1:3101/v1",
+        NEBIUS_API_KEY: "external-fixture-key",
+        NEBIUS_MODEL: "nvidia/test-nemotron-fixture",
+        DATABASE_URL:
+          process.env.TEST_DATABASE_URL ??
+          "postgresql://127.0.0.1:55432/nearhood_test",
+      },
+      url: "http://127.0.0.1:3100",
+      reuseExistingServer: false,
+      timeout: 120000,
+    },
+  ],
 });

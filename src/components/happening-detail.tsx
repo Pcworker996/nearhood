@@ -9,9 +9,11 @@ type Section = "account" | "evidence" | "timeline" | "uncertainty";
 export default function HappeningDetailView({
   detail,
   onBack,
+  onContribute,
 }: {
   detail: HappeningDetail;
   onBack: () => void;
+  onContribute: () => void;
 }) {
   const [section, setSection] = useState<Section>("account");
   const [claimId, setClaimId] = useState<string | null>(null);
@@ -61,7 +63,14 @@ export default function HappeningDetailView({
       </header>
       <main className="detail-content">
         <span className={`badge ${detail.category}`}>{detail.status}</span>
+        <p>
+          {detail.contributorCount}{" "}
+          {detail.contributorCount === 1 ? "contributor" : "contributors"}
+        </p>
         <h1>{detail.title}</h1>
+        <button className="primary-button" onClick={onContribute}>
+          Add an update
+        </button>
         <p className="muted">
           Provisional current understanding ·{" "}
           {detail.account

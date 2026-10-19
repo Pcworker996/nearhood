@@ -1,0 +1,33 @@
+# Report submission — ticket #4
+
+Source: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), with the browser/real HTTP API/PostgreSQL testing boundary in ADR 0003. This document describes the implementation target; verification results are recorded separately.
+
+## Agreed behavior and responsibilities
+
+- Public browsing remains available. Contribution uses Google-only Supabase PKCE sign-in, verified by the server with `getUser`. The browser retains its draft across redirects. A person chooses a public display name; email and Google profile names are never copied into public evidence.
+- The form collects original words, an adjustable pin (latitude/longitude), location description, explicit observation time or unknown, provenance, and an optional contributor-cited HTTP(S) source URL. It does not ask for a category. An existing detail supplies candidate context only. A contributor can explicitly identify a clearly new situation; uncertain membership remains pending for matching in #5/#6.
+- `POST /api/reports` saves the immutable original before processing. A client-generated UUID is an idempotency key bound to the verified contributor; replay with changed content is rejected. `GET /api/reports/:id` exposes only that contributor's saved submission and processing state. Public pending markers expose the Report's public metadata, never auth data.
+- Processing is a separate authorized `POST /api/reports/:id/process`. Persisted states are saved → processing → published, pending (failure), or clarification. A bounded lease and attempt token permit retry after interruption and reject obsolete completion. No worker or browser memory is needed to retain a Report. Reload offers retry/resume of the saved Report; retry never inserts another Report.
+- The backend calls Nebius Token Factory for structured extraction, category proposal and initial evidence-linked claims. The exact Nemotron identifier remains unset until a live structured-output/evidence/latency check succeeds. Tests control the external HTTP service, never internal application data.
+- Initial claims are conservatively extractive: complete verbatim passages from the original Report, with subject/scope restricted to the cited passage. Published claim statements must equal their cited Observation passage. IDs, timestamps, membership and references are assigned/checked by software. This deliberately limits first-account prose; it does not establish truth or independent corroboration. Missing times/scopes stay unknown and source links are never fetched.
+- Publication inserts Observations, one new Happening, account and support links atomically. It cannot mutate a selected candidate or its existing account. A failed first Report has a Report-only marker and inspectable original evidence, with no invented category or account. Ambiguous membership has no map pin. Publication replaces the Report-only projection at the same stable URL.
+
+## Decision awaiting product confirmation
+
+Ticket #4 proposes retaining one Report for separate occurrences, keeping its claims unassigned and asking a focused clarification. This remains pending user confirmation before implementing that path. Automatic distribution across Happenings is excluded. Clarification answers, if confirmed, will be separate attributed and timestamped records, never edits to the original text.
+
+## Acceptance and failure checks
+
+Use browser journeys and real API/persistence for sign-in/draft preservation, chosen public name/private email, unauthorized requests, unknown times, source-based reports, multiple scoped claims, saved-before-processing, failed-processing reload and retry, public Report-only evidence, candidate isolation, invalid references/unsupported passages, and duplicate/concurrent submissions. A real runtime integration check complements controlled tests. Missing service credentials leave live verification incomplete and must not be represented as passing.
+
+## Setup and verification commands
+
+1. Apply `db/migrations/20261019154515_report_submission.sql` with the existing `npm run db:setup` runner. The filename was generated with the Supabase CLI and moved into the repository's established migration directory. No production migration is performed by tests.
+2. Set `APP_ORIGIN`, `SUPABASE_URL`, and `SUPABASE_PUBLISHABLE_KEY` (see `.env.example`). Enable only Google as a sign-in provider and allow the exact `/auth/callback` redirect in Supabase and Google's corresponding Supabase callback in Google Cloud. Provider credentials stay in Supabase.
+3. Set `NEBIUS_API_KEY`; run `npm run model:check`. It discovers available exact NVIDIA Nemotron identifiers and checks structured extraction, grounded references, multiple scoped claims, unknown/source-based information, separate occurrences, and latency. Inspect `.local/report-model-check.json` and set `NEBIUS_MODEL` to the selected passing identifier. There is deliberately no unverified model default.
+4. Run `npm run typecheck`, `npx playwright test tests/contribute.spec.ts`, `npm test`, and `npm run build`. Tests use HTTP fixtures for external auth/model services, including a PKCE verifier check, with real application routes and the isolated local PostgreSQL database. Fixtures do not authorize requests in production or introduce an application auth bypass.
+5. Walk through real Google sign-in and a live model-backed submission before declaring ticket #4 complete. Controlled-service success does not prove Google dashboard setup, hosted migrations, or runtime model eligibility/quality.
+
+The Supabase security advisor cannot run against this standalone local PostgreSQL installation because it lacks Supabase's `anon`/`authenticated` roles and internal schemas. Direct catalog checks verify RLS and private-schema boundaries. The migration ledger now enables RLS and revokes Data API grants when those roles exist.
+
+Official integration references: [Supabase server client](https://supabase.com/docs/guides/auth/server-side/creating-a-client), [Google PKCE sign-in](https://supabase.com/docs/guides/auth/social-login/auth-google), [Nebius structured output](https://docs.tokenfactory.nebius.com/ai-models-inference/json), and [chat completion contract](https://docs.tokenfactory.nebius.com/api-reference/inference/create-chat-completion). The current Supabase changelog's November 10 CBC cipher removal does not affect the modern Node.js TLS client used here.
