@@ -1,0 +1,1316 @@
+[
+  {
+    "artifact": "report-model-check",
+    "checkedAt": "2026-10-22T14:56:51.967Z",
+    "strategy": "staged-v1",
+    "versions": [
+      "report-extraction-v5",
+      "report-matching-v3"
+    ],
+    "selected": null,
+    "results": [
+      {
+        "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+        "cases": [
+          {
+            "case": 1,
+            "split": "development",
+            "originalText": "The same orange barriers still block the footbridge.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 2317,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "orange-barriers-block-footbridge",
+                  "subject": "orange barriers",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 52,
+                      "text": "The same orange barriers still block the footbridge."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "block the footbridge",
+                  "spatialScope": "footbridge",
+                  "timeWording": "still",
+                  "uncertainty": "The word 'same' implies continuity with a prior state, but no earlier occurrence is described in this report.",
+                  "excerpt": "The same orange barriers still block the footbridge."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "The same orange barriers still block the footbridge.",
+                  "observationKeys": [
+                    "orange-barriers-block-footbridge"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "bridge",
+              "evidenceIds": [
+                "bridge-bars"
+              ],
+              "reason": "Both reports describe orange barriers at the Eastbank footbridge within 30 minutes of each other; the later report says the 'same' barriers 'still' block the footbridge, indicating continuity with the earlier observation of barriers across both entrances."
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 1390,
+                "usage": {
+                  "promptTokens": 734,
+                  "completionTokens": 132
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 919,
+                "usage": {
+                  "promptTokens": 988,
+                  "completionTokens": 94
+                }
+              }
+            ]
+          },
+          {
+            "case": 2,
+            "split": "development",
+            "originalText": "The north entrance has orange barriers. The south entrance is open.",
+            "expected": "match",
+            "passed": false,
+            "error": "Semantic match result was incorrect.",
+            "latencyMs": 1902,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "north-entrance-barriers",
+                  "subject": "north entrance",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 40,
+                      "text": "The north entrance has orange barriers. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "has orange barriers",
+                  "spatialScope": "north entrance",
+                  "timeWording": "The north entrance has orange barriers.",
+                  "uncertainty": null,
+                  "excerpt": "The north entrance has orange barriers. The south entrance is open."
+                },
+                {
+                  "key": "south-entrance-open",
+                  "subject": "south entrance",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 40,
+                      "end": 67,
+                      "text": "The south entrance is open."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "is open",
+                  "spatialScope": "south entrance",
+                  "timeWording": "The south entrance is open.",
+                  "uncertainty": null,
+                  "excerpt": "The north entrance has orange barriers. The south entrance is open."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "The north entrance has orange barriers. The south entrance is open.",
+                  "observationKeys": [
+                    "north-entrance-barriers",
+                    "south-entrance-open"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "uncertain",
+              "evidenceIds": [
+                "bridge-bars"
+              ],
+              "question": "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure."
+            },
+            "assessments": [
+              {
+                "candidateId": "bridge",
+                "continuity": "unknown",
+                "chronology": "conflict",
+                "scope": "overlapping",
+                "evidenceIds": [
+                  "bridge-bars"
+                ],
+                "reason": "The candidate report states both entrances had barriers at 11:30, while the new report at 12:00 says only the north entrance has barriers and the south is open. The overlapping location and adjacent times suggest the same footbridge, but the differing entrance states create a chronology conflict; evidence cannot yet un"
+              }
+            ],
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 862,
+                "usage": {
+                  "promptTokens": 760,
+                  "completionTokens": 211
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 1039,
+                "usage": {
+                  "promptTokens": 1053,
+                  "completionTokens": 113
+                }
+              }
+            ]
+          },
+          {
+            "case": 3,
+            "split": "development",
+            "originalText": "A community notice says the riverside path is closed.",
+            "expected": "no_match",
+            "passed": true,
+            "latencyMs": 1119,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "riverside-path-closed",
+                  "subject": "riverside path",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 53,
+                      "text": "A community notice says the riverside path is closed."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "closed",
+                  "spatialScope": "riverside path",
+                  "timeWording": null,
+                  "uncertainty": "A community notice says",
+                  "excerpt": "A community notice says the riverside path is closed."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "A community notice says the riverside path is closed.",
+                  "observationKeys": [
+                    "riverside-path-closed"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "no_match"
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 654,
+                "usage": {
+                  "promptTokens": 721,
+                  "completionTokens": 115
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 465,
+                "usage": {
+                  "promptTokens": 646,
+                  "completionTokens": 8
+                }
+              }
+            ]
+          },
+          {
+            "case": 4,
+            "split": "development",
+            "originalText": "A tree blocks the park path. Across town, a separate streetlamp is broken.",
+            "expected": "unassigned_multiple",
+            "passed": true,
+            "latencyMs": 876,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "multiple",
+              "sameOccurrence": false,
+              "observations": [
+                {
+                  "key": "tree-blocks-park-path",
+                  "subject": "tree blocking park path",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 29,
+                      "text": "A tree blocks the park path. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "A tree blocks the park path.",
+                  "spatialScope": "park path",
+                  "timeWording": null,
+                  "uncertainty": null,
+                  "excerpt": "A tree blocks the park path. Across town, a separate streetlamp is broken."
+                },
+                {
+                  "key": "streetlamp-broken-across-town",
+                  "subject": "streetlamp broken",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 29,
+                      "end": 74,
+                      "text": "Across town, a separate streetlamp is broken."
+                    }
+                  ],
+                  "occurrenceGroup": 1,
+                  "describedCondition": "A separate streetlamp is broken.",
+                  "spatialScope": null,
+                  "timeWording": null,
+                  "uncertainty": null,
+                  "excerpt": "A tree blocks the park path. Across town, a separate streetlamp is broken."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "A tree blocks the park path. Across town, a separate streetlamp is broken.",
+                  "observationKeys": [
+                    "tree-blocks-park-path",
+                    "streetlamp-broken-across-town"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "no_match"
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 876,
+                "usage": {
+                  "promptTokens": 749,
+                  "completionTokens": 211
+                }
+              }
+            ]
+          },
+          {
+            "case": 5,
+            "split": "development_former_holdout",
+            "originalText": "That corner at Alder and 3rd is still dark; the lamp is not lighting.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 1790,
+            "extraction": {
+              "category": "safety",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "lamp-not-lighting",
+                  "subject": "lamp at Alder and 3rd corner",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 69,
+                      "text": "That corner at Alder and 3rd is still dark; the lamp is not lighting."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "lamp is not lighting; corner is still dark",
+                  "spatialScope": "corner at Alder and 3rd",
+                  "timeWording": "That corner at Alder and 3rd is still dark; the lamp is not lighting.",
+                  "uncertainty": null,
+                  "excerpt": "That corner at Alder and 3rd is still dark; the lamp is not lighting."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "That corner at Alder and 3rd is still dark; the lamp is not lighting.",
+                  "observationKeys": [
+                    "lamp-not-lighting"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "lamp",
+              "evidenceIds": [
+                "lamp-dark"
+              ],
+              "reason": "Both reports describe the same streetlamp at Alder and 3rd being dark at the identical timestamp (2026-10-19T02:00:00Z) and location, indicating a single ongoing outage."
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 1057,
+                "usage": {
+                  "promptTokens": 754,
+                  "completionTokens": 148
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 733,
+                "usage": {
+                  "promptTokens": 1039,
+                  "completionTokens": 96
+                }
+              }
+            ]
+          },
+          {
+            "case": 6,
+            "split": "development_former_holdout",
+            "originalText": "An unrelated sticker has been placed on the pole at Alder and 3rd. I am not reporting the lighting problem.",
+            "expected": "no_match",
+            "passed": false,
+            "error": "Semantic match result was incorrect.",
+            "latencyMs": 2007,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "sticker-on-pole",
+                  "subject": "pole at Alder and 3rd",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 67,
+                      "text": "An unrelated sticker has been placed on the pole at Alder and 3rd. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "unrelated sticker has been placed on the pole",
+                  "spatialScope": "pole at Alder and 3rd",
+                  "timeWording": "An unrelated sticker has been placed on the pole at Alder and 3rd.",
+                  "uncertainty": null,
+                  "excerpt": "An unrelated sticker has been placed on the pole at Alder and 3rd. I am not reporting the lighting problem."
+                },
+                {
+                  "key": "lighting-problem-not-reported",
+                  "subject": "lighting problem at Alder and 3rd",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 67,
+                      "end": 107,
+                      "text": "I am not reporting the lighting problem."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "not reporting the lighting problem",
+                  "spatialScope": null,
+                  "timeWording": "I am not reporting the lighting problem.",
+                  "uncertainty": "Contributor explicitly states they are not reporting the lighting problem; existence and nature of any lighting problem are not described.",
+                  "excerpt": "An unrelated sticker has been placed on the pole at Alder and 3rd. I am not reporting the lighting problem."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "An unrelated sticker has been placed on the pole at Alder and 3rd. I am not reporting the lighting problem.",
+                  "observationKeys": [
+                    "sticker-on-pole",
+                    "lighting-problem-not-reported"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "uncertain",
+              "evidenceIds": [
+                "lamp-dark"
+              ],
+              "question": "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure."
+            },
+            "assessments": [
+              {
+                "candidateId": "lamp",
+                "continuity": "unknown",
+                "chronology": "consistent",
+                "scope": "overlapping",
+                "evidenceIds": [
+                  "lamp-dark"
+                ],
+                "reason": "The sticker report explicitly states it is not reporting the lighting problem, so there is no evidence linking or distinguishing the sticker from the lamp outage; both occur at the same location and time, making continuity unknown but chronology consistent and scope overlapping."
+              }
+            ],
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 983,
+                "usage": {
+                  "promptTokens": 789,
+                  "completionTokens": 271
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 1023,
+                "usage": {
+                  "promptTokens": 1153,
+                  "completionTokens": 96
+                }
+              }
+            ]
+          },
+          {
+            "case": 7,
+            "split": "development_former_holdout",
+            "originalText": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 1878,
+            "extraction": {
+              "category": "safety",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "streetlamp-lit",
+                  "subject": "streetlamp at Alder and 3rd",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 50,
+                      "text": "At 10 pm, the streetlamp at Alder and 3rd is lit. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "lit at 10 pm",
+                  "spatialScope": "Alder and 3rd",
+                  "timeWording": "At 10 pm",
+                  "uncertainty": null,
+                  "excerpt": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then."
+                },
+                {
+                  "key": "conflict-report",
+                  "subject": "streetlamp at Alder and 3rd",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 50,
+                      "end": 103,
+                      "text": "This conflicts with the report that it was dark then."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "conflicts with report that it was dark at 10 pm",
+                  "spatialScope": "Alder and 3rd",
+                  "timeWording": "At 10 pm",
+                  "uncertainty": "conflicts with another report; condition uncertain",
+                  "excerpt": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then.",
+                  "observationKeys": [
+                    "streetlamp-lit",
+                    "conflict-report"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "lamp",
+              "evidenceIds": [
+                "lamp-dark"
+              ],
+              "reason": "Both reports describe the streetlamp at Alder and 3rd at 10 pm on 2026-10-19; one says lit, the other dark, indicating conflicting observations of the same occurrence."
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 952,
+                "usage": {
+                  "promptTokens": 799,
+                  "completionTokens": 252
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 926,
+                "usage": {
+                  "promptTokens": 1136,
+                  "completionTokens": 91
+                }
+              }
+            ]
+          },
+          {
+            "case": 8,
+            "split": "development_former_holdout",
+            "originalText": "The lamp at Alder and 3rd is dark again. I do not know whether it was repaired between observations.",
+            "expected": "uncertain",
+            "passed": true,
+            "latencyMs": 1580,
+            "extraction": {
+              "category": "safety",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "lamp-dark-again",
+                  "subject": "lamp at Alder and 3rd",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 41,
+                      "text": "The lamp at Alder and 3rd is dark again. "
+                    },
+                    {
+                      "start": 41,
+                      "end": 100,
+                      "text": "I do not know whether it was repaired between observations."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "dark again; unknown whether repaired between observations",
+                  "spatialScope": "Alder and 3rd",
+                  "timeWording": "2026-10-19T02:00:00Z",
+                  "uncertainty": "Reporter does not know whether the lamp was repaired between observations",
+                  "excerpt": "The lamp at Alder and 3rd is dark again. I do not know whether it was repaired between observations."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "The lamp at Alder and 3rd is dark again. I do not know whether it was repaired between observations.",
+                  "observationKeys": [
+                    "lamp-dark-again"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "uncertain",
+              "evidenceIds": [
+                "lamp-dark"
+              ],
+              "question": "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure."
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 779,
+                "usage": {
+                  "promptTokens": 785,
+                  "completionTokens": 160
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 800,
+                "usage": {
+                  "promptTokens": 1063,
+                  "completionTokens": 125
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": "report-model-held-out",
+    "checkedAt": "2026-10-22T14:58:16.301Z",
+    "strategy": "staged-v1",
+    "versions": [
+      "report-extraction-v5",
+      "report-matching-v3"
+    ],
+    "selected": null,
+    "results": [
+      {
+        "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+        "cases": [
+          {
+            "case": 1,
+            "split": "held_out",
+            "originalText": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path.",
+            "expected": "match",
+            "passed": false,
+            "error": "Semantic match result was incorrect.",
+            "latencyMs": 2270,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "north-entrance-barriers",
+                  "subject": "orange barriers at north entrance",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 69,
+                      "end": 135,
+                      "text": "At the north entrance, the orange barriers remain across the path."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "orange barriers remain across the path",
+                  "spatialScope": "north entrance",
+                  "timeWording": "just now",
+                  "uncertainty": "reporter observed barriers at north entrance while walking through south entrance; condition at north entrance not directly traversed",
+                  "excerpt": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path."
+                },
+                {
+                  "key": "south-entrance-traversal",
+                  "subject": "south entrance access",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 69,
+                      "text": "I walked through the south entrance of Eastbank footbridge just now. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "walked through the south entrance",
+                  "spatialScope": "south entrance",
+                  "timeWording": "just now",
+                  "uncertainty": null,
+                  "excerpt": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path.",
+                  "observationKeys": [
+                    "north-entrance-barriers",
+                    "south-entrance-traversal"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "uncertain",
+              "evidenceIds": [
+                "bridge-bars"
+              ],
+              "question": "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure."
+            },
+            "assessments": [
+              {
+                "candidateId": "bridge",
+                "continuity": "unknown",
+                "chronology": "consistent",
+                "scope": "overlapping",
+                "evidenceIds": [
+                  "bridge-bars"
+                ],
+                "reason": "The candidate report (11:30) states both entrances have barriers; the new report (12:00) confirms barriers at the north entrance and shows the south entrance was passable. The overlapping but not identical spatial scopes and the 30‑minute gap leave it unclear whether this is the same closure event or a changed one, so "
+              }
+            ],
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 1172,
+                "usage": {
+                  "promptTokens": 789,
+                  "completionTokens": 237
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 1091,
+                "usage": {
+                  "promptTokens": 1091,
+                  "completionTokens": 119
+                }
+              }
+            ]
+          },
+          {
+            "case": 2,
+            "split": "held_out",
+            "originalText": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 1908,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "entrances-clear",
+                  "subject": "both footbridge entrances",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 59,
+                      "text": "At 11:30 both footbridge entrances were clear of barriers. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "clear of barriers",
+                  "spatialScope": "both footbridge entrances",
+                  "timeWording": "At 11:30",
+                  "uncertainty": null,
+                  "excerpt": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then."
+                },
+                {
+                  "key": "disagrees-with-report",
+                  "subject": "report saying both were blocked then",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 59,
+                      "end": 130,
+                      "text": "My observation disagrees with the report saying both were blocked then."
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "disagrees with the report saying both were blocked then",
+                  "spatialScope": "both footbridge entrances",
+                  "timeWording": "At 11:30",
+                  "uncertainty": "My observation disagrees with the report saying both were blocked then",
+                  "excerpt": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then.",
+                  "observationKeys": [
+                    "entrances-clear",
+                    "disagrees-with-report"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "bridge",
+              "evidenceIds": [
+                "bridge-bars"
+              ],
+              "reason": "Both reports describe the same footbridge entrances at the same time (11:30) but give opposite conditions: one says clear of barriers, the other says orange barriers across the path. This is a direct disagreement about the same occurrence, so continuity is same with chronology conflict."
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 1230,
+                "usage": {
+                  "promptTokens": 795,
+                  "completionTokens": 243
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 677,
+                "usage": {
+                  "promptTokens": 1101,
+                  "completionTokens": 101
+                }
+              }
+            ]
+          },
+          {
+            "case": 3,
+            "split": "held_out",
+            "originalText": "A new pothole is in the footbridge deck. This is a separate issue from the orange entrance barriers; I am reporting only the pothole.",
+            "expected": "no_match",
+            "passed": true,
+            "latencyMs": 1467,
+            "extraction": {
+              "category": "safety",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "pothole-footbridge-deck",
+                  "subject": "pothole on footbridge deck",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 41,
+                      "text": "A new pothole is in the footbridge deck. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "A new pothole is in the footbridge deck.",
+                  "spatialScope": "footbridge deck",
+                  "timeWording": null,
+                  "uncertainty": null,
+                  "excerpt": "A new pothole is in the footbridge deck. This is a separate issue from the orange entrance barriers; I am reporting only the pothole."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "A new pothole is in the footbridge deck. This is a separate issue from the orange entrance barriers; I am reporting only the pothole.",
+                  "observationKeys": [
+                    "pothole-footbridge-deck"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "no_match"
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 677,
+                "usage": {
+                  "promptTokens": 799,
+                  "completionTokens": 124
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 789,
+                "usage": {
+                  "promptTokens": 1004,
+                  "completionTokens": 99
+                }
+              }
+            ]
+          },
+          {
+            "case": 4,
+            "split": "held_out",
+            "originalText": "After a week away I see orange barriers across the footbridge entrance. I did not observe whether it reopened or closed again while I was away.",
+            "expected": "uncertain",
+            "passed": true,
+            "latencyMs": 1649,
+            "extraction": {
+              "category": "disruption",
+              "occurrence": "single",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "orange-barriers-entrance",
+                  "subject": "orange barriers across footbridge entrance",
+                  "sourceRef": "submitted_report",
+                  "sourceSupport": [
+                    {
+                      "start": 0,
+                      "end": 72,
+                      "text": "After a week away I see orange barriers across the footbridge entrance. "
+                    }
+                  ],
+                  "occurrenceGroup": 0,
+                  "describedCondition": "orange barriers present across the footbridge entrance",
+                  "spatialScope": "footbridge entrance",
+                  "timeWording": "After a week away I see orange barriers across the footbridge entrance.",
+                  "uncertainty": "I did not observe whether it reopened or closed again while I was away.",
+                  "excerpt": "After a week away I see orange barriers across the footbridge entrance. I did not observe whether it reopened or closed again while I was away."
+                }
+              ],
+              "claims": [
+                {
+                  "statement": "After a week away I see orange barriers across the footbridge entrance. I did not observe whether it reopened or closed again while I was away.",
+                  "observationKeys": [
+                    "orange-barriers-entrance"
+                  ]
+                }
+              ]
+            },
+            "matching": {
+              "kind": "uncertain",
+              "evidenceIds": [
+                "bridge-bars"
+              ],
+              "question": "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure."
+            },
+            "runs": [
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-extraction-v5",
+                "thinking": "disabled",
+                "latencyMs": 661,
+                "usage": {
+                  "promptTokens": 793,
+                  "completionTokens": 112
+                }
+              },
+              {
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "version": "report-matching-v3",
+                "thinking": "disabled",
+                "latencyMs": 987,
+                "usage": {
+                  "promptTokens": 1022,
+                  "completionTokens": 118
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": "report-model-baseline",
+    "checkedAt": "2026-10-22T14:42:54.135Z",
+    "strategy": "combined-fafe184",
+    "versions": null,
+    "selected": null,
+    "results": [
+      {
+        "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+        "cases": [
+          {
+            "case": 1,
+            "split": "development",
+            "originalText": "The same orange barriers still block the footbridge.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 3648,
+            "extraction": {
+              "category": "disruption",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "barriers-block-footbridge",
+                  "subject": "orange barriers",
+                  "spatialScope": "footbridge",
+                  "excerpt": "The same orange barriers still block the footbridge."
+                }
+              ],
+              "claims": [
+                {
+                  "observationKeys": [
+                    "barriers-block-footbridge"
+                  ],
+                  "statement": "The same orange barriers still block the footbridge."
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "bridge",
+              "evidenceIds": [
+                "bridge-bars"
+              ]
+            }
+          },
+          {
+            "case": 2,
+            "split": "development",
+            "originalText": "The north entrance has orange barriers. The south entrance is open.",
+            "expected": "match",
+            "passed": false,
+            "error": "Unsupported clarification question or evidence",
+            "latencyMs": 3978
+          },
+          {
+            "case": 3,
+            "split": "development",
+            "originalText": "A community notice says the riverside path is closed.",
+            "expected": "no_match",
+            "passed": false,
+            "error": "Unsupported Observation passage",
+            "latencyMs": 3075
+          },
+          {
+            "case": 4,
+            "split": "development",
+            "originalText": "A tree blocks the park path. Across town, a separate streetlamp is broken.",
+            "expected": "unassigned_multiple",
+            "passed": false,
+            "error": "Unsupported Observation passage",
+            "latencyMs": 2966
+          },
+          {
+            "case": 5,
+            "split": "held_out",
+            "originalText": "That corner at Alder and 3rd is still dark; the lamp is not lighting.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 3997,
+            "extraction": {
+              "category": "disruption",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "lamp-dark",
+                  "subject": "lamp",
+                  "spatialScope": "Alder and 3rd",
+                  "excerpt": "That corner at Alder and 3rd is still dark; the lamp is not lighting."
+                }
+              ],
+              "claims": [
+                {
+                  "observationKeys": [
+                    "lamp-dark"
+                  ],
+                  "statement": "That corner at Alder and 3rd is still dark; the lamp is not lighting."
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "lamp",
+              "evidenceIds": [
+                "lamp-dark"
+              ]
+            }
+          },
+          {
+            "case": 6,
+            "split": "held_out",
+            "originalText": "An unrelated sticker has been placed on the pole at Alder and 3rd. I am not reporting the lighting problem.",
+            "expected": "no_match",
+            "passed": false,
+            "error": "Unsupported Observation passage",
+            "latencyMs": 6951
+          },
+          {
+            "case": 7,
+            "split": "held_out",
+            "originalText": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 7625,
+            "extraction": {
+              "category": "disruption",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "lit-observation",
+                  "subject": "streetlamp at Alder and 3rd is lit",
+                  "spatialScope": "Alder and 3rd",
+                  "excerpt": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then."
+                }
+              ],
+              "claims": [
+                {
+                  "observationKeys": [
+                    "lit-observation"
+                  ],
+                  "statement": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then."
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "lamp",
+              "evidenceIds": [
+                "lamp-dark"
+              ]
+            }
+          },
+          {
+            "case": 8,
+            "split": "held_out",
+            "originalText": "The lamp at Alder and 3rd is dark again. I do not know whether it was repaired between observations.",
+            "expected": "uncertain",
+            "passed": false,
+            "error": "Semantic match result was incorrect.",
+            "latencyMs": 8112,
+            "extraction": {
+              "category": "disruption",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "lamp-dark-again",
+                  "subject": "lamp at Alder and 3rd",
+                  "spatialScope": "Alder and 3rd",
+                  "excerpt": "The lamp at Alder and 3rd is dark again. I do not know whether it was repaired between observations."
+                }
+              ],
+              "claims": [
+                {
+                  "observationKeys": [
+                    "lamp-dark-again"
+                  ],
+                  "statement": "The lamp at Alder and 3rd is dark again. I do not know whether it was repaired between observations."
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "lamp",
+              "evidenceIds": [
+                "lamp-dark"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": "report-model-baseline-held-out",
+    "checkedAt": "2026-10-22T14:59:31.453Z",
+    "strategy": "combined-fafe184",
+    "versions": null,
+    "selected": null,
+    "results": [
+      {
+        "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+        "cases": [
+          {
+            "case": 1,
+            "split": "held_out",
+            "originalText": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 7326,
+            "extraction": {
+              "category": "disruption",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "south-entrance",
+                  "subject": "south entrance of Eastbank footbridge",
+                  "spatialScope": "south entrance",
+                  "excerpt": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path."
+                },
+                {
+                  "key": "north-entrance",
+                  "subject": "north entrance",
+                  "spatialScope": "north entrance",
+                  "excerpt": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path."
+                }
+              ],
+              "claims": [
+                {
+                  "observationKeys": [
+                    "south-entrance",
+                    "north-entrance"
+                  ],
+                  "statement": "I walked through the south entrance of Eastbank footbridge just now. At the north entrance, the orange barriers remain across the path."
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "bridge",
+              "evidenceIds": [
+                "bridge-bars"
+              ]
+            }
+          },
+          {
+            "case": 2,
+            "split": "held_out",
+            "originalText": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then.",
+            "expected": "match",
+            "passed": true,
+            "latencyMs": 4735,
+            "extraction": {
+              "category": "disruption",
+              "sameOccurrence": true,
+              "observations": [
+                {
+                  "key": "entrances-clear",
+                  "subject": "both footbridge entrances",
+                  "spatialScope": "both footbridge entrances",
+                  "excerpt": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then."
+                }
+              ],
+              "claims": [
+                {
+                  "observationKeys": [
+                    "entrances-clear"
+                  ],
+                  "statement": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then."
+                }
+              ]
+            },
+            "matching": {
+              "kind": "match",
+              "candidateId": "bridge",
+              "evidenceIds": [
+                "bridge-bars"
+              ]
+            }
+          },
+          {
+            "case": 3,
+            "split": "held_out",
+            "originalText": "A new pothole is in the footbridge deck. This is a separate issue from the orange entrance barriers; I am reporting only the pothole.",
+            "expected": "no_match",
+            "passed": false,
+            "error": "Invalid no-match recommendation",
+            "latencyMs": 4967
+          },
+          {
+            "case": 4,
+            "split": "held_out",
+            "originalText": "After a week away I see orange barriers across the footbridge entrance. I did not observe whether it reopened or closed again while I was away.",
+            "expected": "uncertain",
+            "passed": false,
+            "error": "Unsupported clarification question or evidence",
+            "latencyMs": 4818
+          }
+        ]
+      }
+    ]
+  }
+]

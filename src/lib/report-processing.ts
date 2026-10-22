@@ -1,13 +1,17 @@
 import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { database } from "./database";
-import type {
-  MatchCandidate,
-  MatchRecommendation,
-  SavedReport,
-} from "./happenings";
-import { nearbyCandidates } from "./report-matching";
-import { extractReport, type Extraction } from "./report-model";
+import type { MatchRecommendation, SavedReport } from "./happenings";
+import { nearbyCandidates, type CandidateSearch } from "./report-matching";
+import {
+  extractReportInfo,
+  compareReport,
+  EXTRACTION_VERSION,
+  MATCHING_VERSION,
+  extractionInput,
+  type Extraction,
+  type CandidateAssessment,
+} from "./report-model";
 import { savedReport, SubmissionError } from "./report-submission";
 
 type MatchChoice =
@@ -22,139 +26,174 @@ export async function processReport(
   const report = await savedReport(id, contributorId);
   if (
     report.state === "published" ||
-    ((report.state === "match_review" || report.state === "clarification") &&
+    (report.extractionReady &&
+      (report.state === "match_review" || report.state === "clarification") &&
       !refresh)
   )
     return report;
-
   const attempt = randomUUID();
+  const stage = report.extractionReady ? "matching" : "extraction";
   const lease = await database().query(
     `UPDATE nearhood.report_processing SET state='processing', attempt=$3,
-      lease_until=now()+interval '60 seconds'
+      processing_stage=$5, pending_reason=NULL, lease_until=now()+interval '60 seconds'
     WHERE report_id=$1 AND contributor_id=$2 AND (
-      state IN ('saved','pending') OR
-      (state='processing' AND lease_until < now()) OR
+      state IN ('saved','pending') OR (state='processing' AND lease_until < now()) OR
       ($4::boolean AND state IN ('match_review','clarification'))
     ) RETURNING report_id`,
-    [id, contributorId, attempt, refresh],
+    [id, contributorId, attempt, refresh || !report.extractionReady, stage],
   );
   if (!lease.rowCount) return savedReport(id, contributorId);
-
   try {
-    const candidates = await nearbyCandidates({
-      lat: report.lat,
-      lng: report.lng,
-      observedAt: report.observedAt,
-      candidateHint: report.candidateId,
-    });
-    const { extraction, matching, model } = await extractReport({
-      originalText: report.originalText,
-      observedAt: report.observedAt,
-      locationName: report.locationName,
-      lat: report.lat,
-      lng: report.lng,
-      provenance: report.provenance,
-      sourceUrl: report.sourceUrl,
-      candidateHint: report.candidateId,
-      candidates,
-    });
-    if (!extraction.sameOccurrence) {
-      await storeReview({
-        id,
-        attempt,
-        candidates,
-        matching: null,
-        extraction,
-        model,
-        state: "clarification",
+    if (stage === "extraction") {
+      const { extraction, run } = await extractReportInfo(report);
+      await database().query(
+        `UPDATE nearhood.report_processing SET state=$3, processing_stage='matching',
+          extraction=$4::jsonb, extraction_version=$5, extraction_input=$6, extraction_model=$7,
+          stage_runs=jsonb_build_object('extraction',$8::jsonb), pending_reason=$9,
+          candidate_ids=ARRAY[]::text[], candidate_packet='[]'::jsonb, recommendation=NULL,
+          assessments='[]'::jsonb, coverage='{}'::jsonb, snapshot_fingerprint=NULL, matching_version=NULL,
+          matching_outcome=NULL, decision_source=NULL, decision_actor=NULL, decision_at=NULL,
+          decision_candidate_ids=ARRAY[]::text[], attempt=NULL, lease_until=NULL
+        WHERE report_id=$1 AND attempt=$2 AND state='processing' AND lease_until > now()`,
+        [
+          id,
+          attempt,
+          extraction.sameOccurrence ? "saved" : "clarification",
+          JSON.stringify(extraction),
+          EXTRACTION_VERSION,
+          extractionInput(report),
+          run.model,
+          JSON.stringify(run),
+          extraction.sameOccurrence
+            ? null
+            : extraction.occurrence === "multiple"
+              ? "separate_occurrences"
+              : "unclear_occurrence",
+        ],
+      );
+    } else {
+      const checkpoint = await database().query<{
+        extraction: Extraction;
+        extraction_model: string;
+      }>(
+        `SELECT extraction, extraction_model FROM nearhood.report_processing
+        WHERE report_id=$1 AND attempt=$2 AND extraction_version=$3 AND extraction_input=$4`,
+        [id, attempt, EXTRACTION_VERSION, extractionInput(report)],
+      );
+      const extracted = checkpoint.rows[0];
+      if (!extracted) throw Error("Extraction checkpoint changed");
+      if (!extracted.extraction.sameOccurrence) {
+        await database().query(
+          `UPDATE nearhood.report_processing SET state='clarification',
+          pending_reason=$3, attempt=NULL, lease_until=NULL WHERE report_id=$1 AND attempt=$2 AND lease_until>now()`,
+          [
+            id,
+            attempt,
+            extracted.extraction.occurrence === "multiple"
+              ? "separate_occurrences"
+              : "unclear_occurrence",
+          ],
+        );
+        return savedReport(id, contributorId);
+      }
+      const search = await nearbyCandidates({
+        lat: report.lat,
+        lng: report.lng,
+        observedAt: report.observedAt,
+        candidateHint: report.candidateId,
       });
-      return savedReport(id, contributorId);
+      const snapshot = await database().query(
+        `UPDATE nearhood.report_processing SET candidate_ids=$3::text[],
+        candidate_packet=$4::jsonb, coverage=$5::jsonb, snapshot_fingerprint=$6,
+        recommendation=NULL, assessments='[]'::jsonb, matching_version=NULL,
+        matching_outcome=NULL, decision_source=NULL, decision_actor=NULL, decision_at=NULL
+        WHERE report_id=$1 AND attempt=$2 AND state='processing' AND lease_until>now() RETURNING report_id`,
+        [
+          id,
+          attempt,
+          search.candidates.map((c) => c.id),
+          JSON.stringify(search.candidates),
+          JSON.stringify(search.coverage),
+          search.fingerprint,
+        ],
+      );
+      if (!snapshot.rowCount) return savedReport(id, contributorId);
+      const result = await compareReport(
+        report,
+        extracted.extraction,
+        search.candidates,
+        search.coverage,
+      );
+      const state =
+        result.matching.kind === "match"
+          ? "match_review"
+          : result.matching.kind === "uncertain"
+            ? "clarification"
+            : "processing";
+      const recorded = await database().query(
+        `UPDATE nearhood.report_processing SET state=$3, candidate_ids=$4::text[], candidate_packet=$5::jsonb,
+          recommendation=$6::jsonb, assessments=$7::jsonb, coverage=$8::jsonb, snapshot_fingerprint=$9,
+          matching_version=$10, stage_runs=stage_runs || jsonb_build_object('matching',$11::jsonb),
+          pending_reason=$12, model_id=$13,
+          matching_outcome=CASE WHEN $3='processing' THEN 'create_new' ELSE NULL END,
+          decision_source=CASE WHEN $3='processing' THEN 'model_no_match' ELSE NULL END,
+          decision_at=CASE WHEN $3='processing' THEN now() ELSE NULL END, decision_actor=NULL,
+          decision_candidate_ids=ARRAY[]::text[],
+          attempt=CASE WHEN $3='processing' THEN attempt ELSE NULL END,
+          lease_until=CASE WHEN $3='processing' THEN lease_until ELSE NULL END
+        WHERE report_id=$1 AND attempt=$2 AND state='processing' AND lease_until > now() RETURNING report_id`,
+        [
+          id,
+          attempt,
+          state,
+          search.candidates.map((c) => c.id),
+          JSON.stringify(search.candidates),
+          JSON.stringify(result.matching),
+          JSON.stringify(result.assessments),
+          JSON.stringify(search.coverage),
+          search.fingerprint,
+          MATCHING_VERSION,
+          JSON.stringify(result.run),
+          result.matching.kind === "uncertain"
+            ? search.coverage.poolTruncated ||
+              Object.keys(search.coverage.omittedEvidence).length > 0
+              ? "incomplete_coverage"
+              : "unclear_continuity"
+            : null,
+          result.run.model,
+        ],
+      );
+      if (recorded.rowCount && result.matching.kind === "no_match") {
+        await publishForAttempt({
+          id,
+          attempt,
+          report,
+          extraction: extracted.extraction,
+          model: result.run.model,
+          search,
+        });
+      }
     }
-    if (matching.kind === "match") {
-      await storeReview({
-        id,
-        attempt,
-        candidates,
-        matching,
-        extraction,
-        model,
-        state: "match_review",
-      });
-      return savedReport(id, contributorId);
-    }
-    if (matching.kind === "uncertain") {
-      await storeReview({
-        id,
-        attempt,
-        candidates,
-        matching,
-        extraction,
-        model,
-        state: "clarification",
-      });
-      return savedReport(id, contributorId);
-    }
-
-    const recorded = await database().query(
-      `UPDATE nearhood.report_processing SET candidate_ids=$3::text[],
-        candidate_packet=$4::jsonb, recommendation=$5::jsonb,
-        extraction=$6::jsonb, matching_outcome='create_new',
-        decision_source='model_no_match', decision_actor=NULL,
-        decision_candidate_ids=ARRAY[]::text[], decision_at=now(),
-        model_id=$7
-      WHERE report_id=$1 AND attempt=$2 AND state='processing' RETURNING report_id`,
+  } catch (error) {
+    const oversized =
+      error instanceof Error &&
+      error.message === "Matching evidence exceeds input budget";
+    await database().query(
+      `UPDATE nearhood.report_processing SET state=$3, pending_reason=$4,
+      coverage=coverage || jsonb_build_object('inputBudgetExceeded',$5::boolean),
+      matching_outcome=NULL, decision_source=NULL, decision_actor=NULL, decision_at=NULL,
+      decision_candidate_ids=ARRAY[]::text[],
+      attempt=NULL, lease_until=NULL WHERE report_id=$1 AND attempt=$2 AND state='processing'`,
       [
         id,
         attempt,
-        candidates.map((candidate) => candidate.id),
-        JSON.stringify(candidates),
-        JSON.stringify(matching),
-        JSON.stringify(extraction),
-        model,
+        oversized ? "clarification" : "pending",
+        oversized ? "evidence_budget" : `${stage}_failed`,
+        oversized,
       ],
-    );
-    if (!recorded.rowCount) return savedReport(id, contributorId);
-    await publishForAttempt({ id, attempt, report, extraction, model });
-  } catch {
-    // Preserve the original Report and any successful no-match decision. A
-    // failed search/model call never becomes evidence that no candidate exists.
-    await database().query(
-      `UPDATE nearhood.report_processing SET state='pending', attempt=NULL, lease_until=NULL
-      WHERE report_id=$1 AND attempt=$2 AND state='processing'`,
-      [id, attempt],
     );
   }
   return savedReport(id, contributorId);
-}
-
-async function storeReview(input: {
-  id: string;
-  attempt: string;
-  candidates: MatchCandidate[];
-  matching: MatchRecommendation | null;
-  extraction: Extraction;
-  model: string;
-  state: "match_review" | "clarification";
-}) {
-  const { rowCount } = await database().query(
-    `UPDATE nearhood.report_processing SET state=$3, attempt=NULL, lease_until=NULL,
-      candidate_ids=$4::text[], candidate_packet=$5::jsonb, recommendation=$6::jsonb,
-      extraction=$7::jsonb, matching_outcome=NULL, decision_source=NULL,
-      decision_actor=NULL, decision_candidate_ids=ARRAY[]::text[], decision_at=NULL,
-      happening_id=NULL, model_id=$8
-    WHERE report_id=$1 AND attempt=$2 AND state='processing'`,
-    [
-      input.id,
-      input.attempt,
-      input.state,
-      input.candidates.map((candidate) => candidate.id),
-      JSON.stringify(input.candidates),
-      input.matching ? JSON.stringify(input.matching) : null,
-      JSON.stringify(input.extraction),
-      input.model,
-    ],
-  );
-  if (!rowCount) throw Error("Report processing attempt was superseded");
 }
 
 async function publishForAttempt(input: {
@@ -163,14 +202,27 @@ async function publishForAttempt(input: {
   report: SavedReport;
   extraction: Extraction;
   model: string;
+  search: CandidateSearch;
 }) {
   const client = await database().connect();
   try {
     await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(70420261022)");
+    const fresh = await nearbyCandidates(
+      {
+        lat: input.report.lat,
+        lng: input.report.lng,
+        observedAt: input.report.observedAt,
+        candidateHint: input.report.candidateId,
+      },
+      client,
+    );
+    if (fresh.fingerprint !== input.search.fingerprint)
+      throw Error("Candidate evidence changed before publication");
+
     const locked = await client.query(
-      `SELECT report_id FROM nearhood.report_processing
-      WHERE report_id=$1 AND attempt=$2 AND state='processing' AND lease_until > now()
-      FOR UPDATE`,
+      `SELECT report_id FROM nearhood.report_processing WHERE report_id=$1
+      AND attempt=$2 AND state='processing' AND lease_until>now() FOR UPDATE`,
       [input.id, input.attempt],
     );
     if (!locked.rowCount) {
@@ -185,8 +237,7 @@ async function publishForAttempt(input: {
     });
     await client.query(
       `UPDATE nearhood.report_processing SET state='published', happening_id=$3,
-        attempt=NULL, lease_until=NULL, model_id=$4
-      WHERE report_id=$1 AND attempt=$2`,
+      attempt=NULL, lease_until=NULL, model_id=$4, pending_reason=NULL WHERE report_id=$1 AND attempt=$2`,
       [input.id, input.attempt, input.id, input.model],
     );
     await client.query("COMMIT");
@@ -207,6 +258,20 @@ export async function confirmReportMatch(
   const client = await database().connect();
   try {
     await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(70420261022)");
+    const fresh =
+      report.state === "published"
+        ? null
+        : await nearbyCandidates(
+            {
+              lat: report.lat,
+              lng: report.lng,
+              observedAt: report.observedAt,
+              candidateHint: report.candidateId,
+            },
+            client,
+          );
+
     const { rows } = await client.query<{
       state: string;
       candidate_ids: string[];
@@ -216,10 +281,20 @@ export async function confirmReportMatch(
       decision_source: string | null;
       happening_id: string | null;
       recommendation: MatchRecommendation | null;
+      extraction_version: string | null;
+      extraction_input: string | null;
+      matching_version: string | null;
+      snapshot_fingerprint: string | null;
+      assessments: CandidateAssessment[];
+      coverage: {
+        poolTruncated?: boolean;
+        omittedEvidence?: Record<string, number>;
+      };
     }>(
       `SELECT state, candidate_ids, extraction, model_id,
         matching_outcome, decision_source, happening_id,
-        recommendation
+        recommendation, extraction_version, extraction_input, matching_version,
+        snapshot_fingerprint, assessments, coverage
       FROM nearhood.report_processing WHERE report_id=$1 AND contributor_id=$2
       FOR UPDATE`,
       [id, contributorId],
@@ -249,9 +324,20 @@ export async function confirmReportMatch(
       )
     )
       throw new SubmissionError("Matching suggestions are not ready yet.", 409);
-    if (!processing.extraction || !processing.model_id)
+    if (
+      !processing.extraction ||
+      !processing.model_id ||
+      processing.extraction_version !== EXTRACTION_VERSION ||
+      processing.extraction_input !== extractionInput(report) ||
+      processing.matching_version !== MATCHING_VERSION
+    )
       throw new SubmissionError(
         "Matching suggestions need to be refreshed.",
+        409,
+      );
+    if (processing.snapshot_fingerprint !== fresh?.fingerprint)
+      throw new SubmissionError(
+        "Nearby evidence changed. Refresh the suggestions before deciding.",
         409,
       );
     if (
@@ -273,7 +359,7 @@ export async function confirmReportMatch(
       );
     if (
       choice.choice === "match" &&
-      (!processing.candidate_ids.includes(choice.candidateId) ||
+      (!report.candidates.some((c) => c.id === choice.candidateId) ||
         !choice.candidateIdsShown.includes(choice.candidateId))
     )
       throw new SubmissionError(
@@ -285,11 +371,49 @@ export async function confirmReportMatch(
       new Set(choice.candidateIdsShown).size !==
         choice.candidateIdsShown.length ||
       choice.candidateIdsShown.some(
-        (candidateId) => !processing.candidate_ids.includes(candidateId),
+        (candidateId) => !report.candidates.some((c) => c.id === candidateId),
       )
     )
       throw new SubmissionError(
         "Refresh the nearby suggestions before deciding.",
+      );
+
+    if (
+      choice.choice === "create_new" &&
+      (processing.coverage.poolTruncated ||
+        Object.keys(processing.coverage.omittedEvidence ?? {}).length > 0 ||
+        processing.assessments.some(
+          (a) =>
+            a.continuity !== "separate" &&
+            !choice.candidateIdsShown.includes(a.candidateId),
+        ))
+    )
+      throw new SubmissionError(
+        "Other nearby evidence is still uncertain. Leave this Report unassigned or refresh the suggestions.",
+        409,
+      );
+
+    // Existing-Happening publications lock the same rows; check their versions after locking.
+    await client.query(
+      "SELECT id FROM nearhood.happenings WHERE id=ANY($1::text[]) ORDER BY id FOR UPDATE",
+      [processing.candidate_ids],
+    );
+    const versions = await client.query<{ id: string; version: number }>(
+      `SELECT h.id,
+      COALESCE((SELECT MAX(a.version) FROM nearhood.shared_accounts a WHERE a.happening_id=h.id),0)::int AS version
+      FROM nearhood.happenings h WHERE h.id=ANY($1::text[])`,
+      [processing.candidate_ids],
+    );
+    if (
+      versions.rows.some(
+        (v) =>
+          fresh?.candidates.find((c) => c.id === v.id)?.accountVersion !==
+          v.version,
+      )
+    )
+      throw new SubmissionError(
+        "Nearby evidence changed. Refresh the suggestions before deciding.",
+        409,
       );
 
     const currentCandidates = await client.query<{ id: string }>(
@@ -379,8 +503,8 @@ async function publishEvidence(
     observationIds.set(observation.key, observationId);
     await client.query(
       `INSERT INTO nearhood.observations
-        (id,report_id,subject,described_state,spatial_scope,observed_at)
-      VALUES ($1,$2,$3,$4,$5,$6)`,
+        (id,report_id,subject,described_state,spatial_scope,observed_at,source_support)
+      VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb)`,
       [
         observationId,
         report.id,
@@ -388,6 +512,7 @@ async function publishEvidence(
         observation.excerpt,
         observation.spatialScope,
         report.observedAt,
+        JSON.stringify(observation.sourceSupport),
       ],
     );
     await client.query(

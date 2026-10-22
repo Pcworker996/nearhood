@@ -42,6 +42,14 @@ export function ReportCard({
           <p>
             {observation.subject}: {observation.describedState}
           </p>
+          {!!observation.sourceSupport?.length && (
+            <details>
+              <summary>Supporting passages</summary>
+              {observation.sourceSupport.map((p) => (
+                <blockquote key={`${p.start}:${p.end}`}>{p.text}</blockquote>
+              ))}
+            </details>
+          )}
           <p>Spatial scope: {observation.spatialScope ?? "Unknown"}</p>
           <p>Observation time: {dateLabel(observation.observedAt)}</p>
         </div>

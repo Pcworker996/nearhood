@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { database } from "./database";
 import type { SavedReport } from "./happenings";
+import { EXTRACTION_VERSION, extractionInput } from "./report-model";
 
 export class SubmissionError extends Error {
   constructor(
@@ -112,16 +113,70 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
   p.candidate_ids AS "candidateIds", p.candidate_packet AS candidates,
   p.recommendation, p.matching_outcome AS "matchingOutcome",
   p.decision_candidate_ids AS "decisionCandidateIds",
+  p.processing_stage AS "processingStage", p.pending_reason AS "pendingReason",
+  p.extraction_version AS "extractionVersion", p.extraction_input AS "extractionInput", p.assessments,
   CASE WHEN p.state='processing' AND p.lease_until < now() THEN 'pending' ELSE p.state END AS state
   FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id`;
 
 export async function savedReport(id: string, contributorId: string) {
-  const { rows } = await database().query<SavedReport>(
-    `${savedSelect} WHERE r.id=$1 AND r.contributor_id=$2`,
-    [id, contributorId],
-  );
+  const { rows } = await database().query<
+    SavedReport & {
+      extractionVersion: string | null;
+      extractionInput: string | null;
+      assessments: { candidateId: string; continuity: string }[];
+    }
+  >(`${savedSelect} WHERE r.id=$1 AND r.contributor_id=$2`, [
+    id,
+    contributorId,
+  ]);
   if (!rows[0]) throw new SubmissionError("Report not found.", 404);
-  return rows[0];
+  const {
+    extractionVersion,
+    extractionInput: input,
+    assessments,
+    ...report
+  } = rows[0];
+  const order = assessments
+    .slice()
+    .sort(
+      (a, b) =>
+        Number(a.continuity === "separate") -
+        Number(b.continuity === "separate"),
+    );
+  report.candidates = (
+    order.length
+      ? order.flatMap((a) =>
+          report.candidates.filter((c) => c.id === a.candidateId),
+        )
+      : report.candidates
+  ).slice(0, 5);
+  const extractionReady =
+    extractionVersion === EXTRACTION_VERSION &&
+    input === extractionInput(report);
+  if (
+    !extractionReady &&
+    ["match_review", "clarification"].includes(report.state)
+  ) {
+    report.state = "pending";
+    report.pendingReason = "refresh_required";
+    report.recommendation = null;
+    report.candidates = [];
+  }
+  const nextAction: SavedReport["nextAction"] =
+    report.state === "published"
+      ? "none"
+      : report.state === "processing"
+        ? "wait"
+        : report.state === "pending"
+          ? "retry"
+          : report.state === "match_review" ||
+              (report.state === "clarification" &&
+                report.recommendation?.kind === "uncertain")
+            ? "review"
+            : report.state === "clarification"
+              ? "none"
+              : "process";
+  return { ...report, extractionReady, nextAction };
 }
 
 export async function saveReport(input: ReportInput, contributorId: string) {

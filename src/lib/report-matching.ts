@@ -1,10 +1,12 @@
+import type { PoolClient } from "pg";
+import { createHash } from "node:crypto";
 import { database } from "./database";
 import type { MatchCandidate, MatchEvidence } from "./happenings";
 
 export const MATCHING_SCOPE = {
   radiusMeters: 1500,
   temporalWindowDays: 30,
-  maxCandidates: 5,
+  maxCandidates: 20,
   evidencePerCandidate: 3,
 } as const;
 
@@ -13,19 +15,24 @@ type CandidateRow = Omit<MatchCandidate, "evidence"> & {
 };
 type EvidenceRow = MatchEvidence & {
   happeningId: string;
+  evidenceCount: number;
 };
 
-export async function nearbyCandidates(input: {
-  lat: number;
-  lng: number;
-  observedAt: string | null;
-  candidateHint: string | null;
-}): Promise<MatchCandidate[]> {
-  const { rows: candidates } = await database().query<CandidateRow>(
+export async function nearbyCandidates(
+  input: {
+    lat: number;
+    lng: number;
+    observedAt: string | null;
+    candidateHint: string | null;
+  },
+  query: Pick<PoolClient, "query"> = database(),
+): Promise<CandidateSearch> {
+  const { rows: candidates } = await query.query<CandidateRow>(
     `WITH submitted AS (
       SELECT extensions.ST_SetSRID(extensions.ST_MakePoint($1,$2),4326)::extensions.geography AS location
     )
     SELECT h.id, h.title, h.category, h.location_name AS "locationName",
+      (SELECT COALESCE(MAX(a.version),0)::int FROM nearhood.shared_accounts a WHERE a.happening_id=h.id) AS "accountVersion",
       extensions.ST_Y(h.location::extensions.geometry) AS lat,
       extensions.ST_X(h.location::extensions.geometry) AS lng,
       LEAST(extensions.ST_Distance(h.location, submitted.location),
@@ -57,12 +64,30 @@ export async function nearbyCandidates(input: {
       MATCHING_SCOPE.radiusMeters,
       MATCHING_SCOPE.temporalWindowDays,
       input.candidateHint,
-      MATCHING_SCOPE.maxCandidates,
+      MATCHING_SCOPE.maxCandidates + 1,
     ],
   );
-  if (!candidates.length) return [];
+  const poolTruncated = candidates.length > MATCHING_SCOPE.maxCandidates;
+  const omittedCandidateIds = candidates
+    .slice(MATCHING_SCOPE.maxCandidates)
+    .map((c) => c.id);
+  candidates.splice(MATCHING_SCOPE.maxCandidates);
+  if (!candidates.length)
+    return {
+      candidates: [],
+      coverage: {
+        poolTruncated: false,
+        omittedCandidateIds: [],
+        omittedEvidence: {},
+      },
+      fingerprint: snapshotFingerprint([], {
+        poolTruncated: false,
+        omittedCandidateIds: [],
+        omittedEvidence: {},
+      }),
+    };
 
-  const { rows: evidence } = await database().query<EvidenceRow>(
+  const { rows: evidence } = await query.query<EvidenceRow>(
     `WITH requested AS (
       SELECT id, ordinality FROM unnest($1::text[]) WITH ORDINALITY AS items(id, ordinality)
     ), ranked AS (
@@ -74,7 +99,13 @@ export async function nearbyCandidates(input: {
         extensions.ST_Y(r.location::extensions.geometry) AS lat,
         extensions.ST_X(r.location::extensions.geometry) AS lng,
         o.subject, o.described_state AS "describedState", o.spatial_scope AS "spatialScope",
+        COUNT(*) OVER (PARTITION BY m.happening_id)::int AS "evidenceCount",
         ROW_NUMBER() OVER (PARTITION BY m.happening_id ORDER BY
+          CASE WHEN o.id=(SELECT oi.id FROM nearhood.observation_memberships mi
+            JOIN nearhood.observations oi ON oi.id=mi.observation_id
+            JOIN nearhood.reports ri ON ri.id=oi.report_id
+            WHERE mi.happening_id=m.happening_id ORDER BY ri.submitted_at, oi.id LIMIT 1) THEN 0 ELSE 1 END,
+          CASE WHEN o.id=(SELECT MIN(oi.id) FROM nearhood.observations oi WHERE oi.report_id=r.id) THEN 0 ELSE 1 END,
           CASE WHEN $2::timestamptz IS NOT NULL AND o.observed_at IS NULL THEN 1 ELSE 0 END,
           CASE WHEN $2::timestamptz IS NOT NULL AND o.observed_at IS NOT NULL
             THEN ABS(EXTRACT(EPOCH FROM (o.observed_at-$2::timestamptz))) END ASC NULLS LAST,
@@ -88,7 +119,7 @@ export async function nearbyCandidates(input: {
       LEFT JOIN nearhood.report_processing p ON p.report_id=r.id
       ORDER BY q.ordinality, evidence_position
     )
-    SELECT "happeningId", "observationId", "reportId", "originalText", "displayName",
+    SELECT "evidenceCount", "happeningId", "observationId", "reportId", "originalText", "displayName",
       "observedAt", "submittedAt", provenance, "sourceUrl", "reportLocationName", lat, lng, subject,
       "describedState", "spatialScope"
     FROM ranked WHERE evidence_position <= $3::int
@@ -100,17 +131,45 @@ export async function nearbyCandidates(input: {
     ],
   );
   const evidenceByHappening = new Map<string, MatchEvidence[]>();
+  const omittedEvidence: Record<string, number> = {};
   for (const item of evidence) {
-    const { happeningId, ...itemEvidence } = item;
+    const { happeningId, evidenceCount, ...itemEvidence } = item;
+    if (evidenceCount > MATCHING_SCOPE.evidencePerCandidate)
+      omittedEvidence[happeningId] =
+        evidenceCount - MATCHING_SCOPE.evidencePerCandidate;
     const current = evidenceByHappening.get(happeningId) ?? [];
     current.push(itemEvidence);
     evidenceByHappening.set(happeningId, current);
   }
-  return candidates.map(
+  const packet = candidates.map(
     ({ timeDistanceSeconds: _timeDistanceSeconds, ...candidate }) => ({
       ...candidate,
       distanceMeters: Math.round(candidate.distanceMeters),
       evidence: evidenceByHappening.get(candidate.id) ?? [],
     }),
   );
+  const coverage = { poolTruncated, omittedCandidateIds, omittedEvidence };
+  return {
+    candidates: packet,
+    coverage,
+    fingerprint: snapshotFingerprint(packet, coverage),
+  };
+}
+
+export type CandidateSearch = {
+  candidates: MatchCandidate[];
+  coverage: {
+    poolTruncated: boolean;
+    omittedCandidateIds: string[];
+    omittedEvidence: Record<string, number>;
+  };
+  fingerprint: string;
+};
+export function snapshotFingerprint(
+  candidates: MatchCandidate[],
+  coverage: CandidateSearch["coverage"],
+) {
+  return createHash("sha256")
+    .update(JSON.stringify({ candidates, coverage }))
+    .digest("hex");
 }

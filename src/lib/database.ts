@@ -18,6 +18,9 @@ export function database() {
   globalDatabase.nearhoodPool ??= new Pool({
     ...poolConfig(process.env.DATABASE_URL),
     max: 5,
+    connectionTimeoutMillis: 5000,
+    statement_timeout: 5000,
+    idle_in_transaction_session_timeout: 10000,
   });
   return globalDatabase.nearhoodPool;
 }
@@ -56,6 +59,7 @@ async function pendingReports(
     p.location_name AS "locationName", extensions.ST_Y(r.location::extensions.geometry) AS lat, extensions.ST_X(r.location::extensions.geometry) AS lng
     FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id
     WHERE p.matching_outcome='create_new' AND p.state='pending'
+    AND p.pending_reason IS DISTINCT FROM 'refresh_required'
     AND ($1::text IS NULL OR r.id=$1) AND ($2::double precision IS NULL OR
     (extensions.ST_Y(r.location::extensions.geometry) BETWEEN $3 AND $5 AND
     CASE WHEN $2 <= $4 THEN extensions.ST_X(r.location::extensions.geometry) BETWEEN $2 AND $4
@@ -131,7 +135,7 @@ export async function happeningDetail(
     ),
     database().query<Observation>(
       `SELECT o.id, o.report_id AS "reportId", o.subject, o.described_state AS "describedState",
-      o.spatial_scope AS "spatialScope", o.observed_at AS "observedAt" FROM nearhood.observations o
+      o.source_support AS "sourceSupport", o.spatial_scope AS "spatialScope", o.observed_at AS "observedAt" FROM nearhood.observations o
       JOIN nearhood.observation_memberships m ON m.observation_id=o.id WHERE m.happening_id=$1
       ORDER BY o.observed_at DESC NULLS LAST, o.id`,
       [id],

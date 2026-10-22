@@ -45,6 +45,7 @@ export type Report = Coordinates & {
   sourceUrl: string | null;
 };
 export type Observation = {
+  sourceSupport?: { start: number; end: number; text: string }[];
   id: string;
   reportId: string;
   subject: string;
@@ -82,12 +83,22 @@ export type MatchCandidate = Coordinates & {
   locationName: string;
   distanceMeters: number;
   evidence: MatchEvidence[];
+  accountVersion?: number;
 };
 export type MatchRecommendation =
-  | { kind: "match"; candidateId: string; evidenceIds: string[] }
+  | {
+      kind: "match";
+      candidateId: string;
+      evidenceIds: string[];
+      reason?: string;
+    }
   | { kind: "no_match" }
   | { kind: "uncertain"; evidenceIds: string[]; question: string };
 export type SavedReport = Report & {
+  processingStage: "extraction" | "matching";
+  extractionReady: boolean;
+  nextAction: "process" | "retry" | "review" | "wait" | "none";
+  pendingReason: string | null;
   state: ReportProcessingState;
   happeningId: string | null;
   locationName: string;

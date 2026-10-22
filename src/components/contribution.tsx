@@ -133,6 +133,17 @@ export default function Contribution({
     }, 2000);
     return () => clearInterval(timer);
   }, [saved?.id, saved?.state]);
+  useEffect(() => {
+    if (saved?.nextAction === "process" && signedIn && !busy && !error)
+      void process(saved.id);
+  }, [
+    saved?.id,
+    saved?.nextAction,
+    saved?.processingStage,
+    signedIn,
+    busy,
+    error,
+  ]);
 
   function update(change: Partial<Draft>) {
     setDraft((d) => (d ? { ...d, ...change } : d));
@@ -316,6 +327,10 @@ export default function Contribution({
                       : "Report saved · account update pending"}
             </p>
             <ReportCard report={saved} />
+            {saved.recommendation?.kind === "match" &&
+              saved.recommendation.reason && (
+                <p>{saved.recommendation.reason}</p>
+              )}
             {saved.state === "match_review" && (
               <section className="match-review" aria-label="Match review">
                 {saved.recommendation?.kind === "match" ? (
@@ -454,9 +469,11 @@ export default function Contribution({
               )}
             {saved.state === "clarification" && !saved.recommendation && (
               <p>
-                This Report may describe more than one or an unclear situation.
-                It remains unassigned; no Happening or account has been
-                published.
+                {saved.pendingReason === "separate_occurrences"
+                  ? "Your report describes separate situations. We’ve saved it, but haven’t added it to a Happening."
+                  : saved.pendingReason === "evidence_budget"
+                    ? "The nearby evidence is too large to compare safely. Your Report is saved and remains unassigned."
+                    : "We cannot tell whether this describes one situation. Your Report is saved and remains unassigned."}
               </p>
             )}
             {(saved.state === "pending" || saved.state === "saved") && (

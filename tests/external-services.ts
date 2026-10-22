@@ -108,75 +108,87 @@ const server = createServer(async (req, res) => {
       return json({ error: "Controlled provider outage" }, 503);
     if (mode === "slow")
       await new Promise((resolve) => setTimeout(resolve, 1500));
+    const extracting =
+      body.response_format.json_schema.name.startsWith("report_extraction_");
+    if (
+      (extracting && mode === "extraction-failure") ||
+      (!extracting && mode === "matching-failure")
+    )
+      return json({ error: "Controlled stage outage" }, 503);
+    if (extracting && input.candidates)
+      return json({ error: "Extraction must not receive candidates" }, 400);
     const passages = text
       .match(/[^.!?]+[.!?]+|[^.!?]+$/g)!
-      .map((s) => s.trim());
-    const stripped = text.includes("\n")
-      ? text.split("\n").at(-1)!
-      : passages.at(-1)!;
-    const observations = passages.map((passage, i) => ({
-      key: `o${i}`,
-      ...(mode === "drop-qualification" ? { excerpt: stripped } : {}),
-      subject: passage.split(/\bis\b|\bhas\b/)[0].trim(),
-      spatialScope:
-        passage.match(/(?:north|south|east) (?:path|entrance)/)?.[0] ?? null,
-    }));
-    const candidate = input.candidates.find(
-      (item: { id: string }) => item.id === scenario.candidateId,
+      .map((s: string) => s.trim());
+    const observations = passages
+      .slice(0, 12)
+      .map((passage: string, i: number) => ({
+        key: `o${i}`,
+        subject: passage
+          .split(/\bis\b|\bhas\b/)[0]
+          .trim()
+          .slice(0, 80),
+        sourceRef: mode === "bad-reference" ? "invented" : "submitted_report",
+        sourceIds: [
+          mode === "bad-source"
+            ? "invented"
+            : (input.sourcePassages?.[
+                Math.min(i, (input.sourcePassages?.length ?? 1) - 1)
+              ]?.id ?? "s0"),
+        ],
+        occurrenceGroup: mode === "multiple" ? i : 0,
+        describedCondition: null,
+        spatialScope:
+          passage.match(/(?:north|south|east) (?:path|entrance)/)?.[0] ?? null,
+        timeWording: null,
+        uncertainty: null,
+        ...(mode === "unsupported"
+          ? { statement: "The neighborhood is safe" }
+          : {}),
+        ...(mode === "drop-qualification" ? { excerpt: passages.at(-1) } : {}),
+      }));
+    const assessments = (input.candidates ?? []).map(
+      (candidate: { id: string; evidence: { observationId: string }[] }) => ({
+        candidateId: candidate.id,
+        continuity:
+          mode === "many-matches"
+            ? "same"
+            : candidate.id === scenario.candidateId
+              ? mode === "uncertain"
+                ? "unknown"
+                : "same"
+              : "separate",
+        chronology: "consistent",
+        scope: "same",
+        evidenceIds: [candidate.evidence[0].observationId],
+        reason: "The supplied original evidence describes this occurrence.",
+      }),
     );
-    const evidenceIds =
-      candidate?.evidence.map(
-        (item: { observationId: string }) => item.observationId,
-      ) ?? [];
-    const matching =
-      mode === "match"
-        ? {
-            kind: "match",
-            candidateId: scenario.candidateId ?? candidate?.id,
-            evidenceIds: evidenceIds.slice(0, 1),
-            question: null,
-          }
-        : mode === "uncertain"
-          ? {
-              kind: "uncertain",
-              candidateId: null,
-              evidenceIds: evidenceIds.slice(0, 1),
-              question:
-                "Was this at the footbridge, or at a different nearby crossing?",
-            }
-          : {
-              kind: "no_match",
-              candidateId: null,
-              evidenceIds: [],
-              question: null,
-            };
+    assessments.sort(
+      (a: { candidateId: string }, b: { candidateId: string }) =>
+        Number(b.candidateId === scenario.candidateId) -
+        Number(a.candidateId === scenario.candidateId),
+    );
     return json({
       choices: [
         {
           finish_reason: "stop",
           message: {
-            content: JSON.stringify({
-              category: "disruption",
-              sameOccurrence: true,
-              observations,
-              claims: [
-                {
-                  ...(mode === "unsupported"
-                    ? { statement: "The whole neighborhood is safe." }
-                    : {}),
-                  observationKeys:
-                    mode === "bad-reference"
-                      ? ["invented"]
-                      : observations.map((o) => o.key),
-                },
-              ],
-              matching,
-            }),
+            content: JSON.stringify(
+              extracting
+                ? {
+                    category: "disruption",
+
+                    observations,
+                  }
+                : { assessments },
+            ),
           },
         },
       ],
     });
   }
+
   json({ error: "Unknown fixture endpoint" }, 404);
 });
 server.listen(3101, "127.0.0.1");

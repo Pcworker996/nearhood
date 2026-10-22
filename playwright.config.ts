@@ -27,6 +27,7 @@ export default defineConfig({
     {
       command: "npm run db:setup -- --seed && npm run dev -- --port 3100",
       env: {
+        APP_ORIGIN: "http://127.0.0.1:3100",
         SUPABASE_URL: "http://127.0.0.1:3101",
         SUPABASE_PUBLISHABLE_KEY: "external-fixture-publishable-key",
         NEBIUS_BASE_URL: "http://127.0.0.1:3101/v1",

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "db:setup": "tsx scripts/setup-database.ts",
     "model:check": "tsx scripts/check-report-model.ts",
+    "test:model": "node --import tsx --test scripts/check-report-model.test.ts",
     "test": "playwright test",
     "test:browse": "playwright test tests/browse.spec.ts"
   },

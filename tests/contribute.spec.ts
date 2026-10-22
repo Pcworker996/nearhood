@@ -1,6 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 
+async function processSaved(page: Page, id: string) {
+  let response = await page.request.post(`/api/reports/${id}/process`);
+  const report = await response.json();
+  if (report.nextAction === "process")
+    response = await page.request.post(`/api/reports/${id}/process`);
+  return response;
+}
+
 async function signIn(page: Page) {
   await page.goto("/?contribute=1");
   await page.getByRole("button", { name: "Continue with Google" }).click();
@@ -61,9 +69,7 @@ test("a semantic match is recommended with evidence but attached only after conf
       }),
     })
   ).json();
-  const reviewed = await (
-    await page.request.post(`/api/reports/${report.id}/process`)
-  ).json();
+  const reviewed = await (await processSaved(page, report.id)).json();
   expect(reviewed.state).toBe("match_review");
   expect(reviewed.candidateIds).toContain("picnic");
   expect(reviewed.candidates).toHaveLength(5);
@@ -73,7 +79,7 @@ test("a semantic match is recommended with evidence but attached only after conf
       (candidate: { id: string }) => candidate.id === "picnic",
     ).category,
   ).toBe("activity");
-  expect(reviewed.recommendation).toEqual({
+  expect(reviewed.recommendation).toMatchObject({
     kind: "match",
     candidateId: "picnic",
     evidenceIds: expect.any(Array),
@@ -155,24 +161,40 @@ test("an uncertain match asks a focused question and records the contributor's a
   page,
 }) => {
   await signIn(page);
+  // Isolate rejection from histories added by the other browser project.
+  const lat = 5 + Math.random();
+  const candidates: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    const words = `A barrier blocks remote sector ${i}.`;
+    await page.request.post("http://127.0.0.1:3101/control", {
+      data: { text: words, mode: "success" },
+    });
+    const seeded = await (
+      await page.request.post("/api/reports", {
+        data: submission(words, { lat, lng: 125 }),
+      })
+    ).json();
+    expect((await (await processSaved(page, seeded.id)).json()).state).toBe(
+      "published",
+    );
+    candidates.push(seeded.id);
+  }
   const text = "A barrier is near the footbridge entrance.";
   await page.request.post("http://127.0.0.1:3101/control", {
-    data: { text, mode: "uncertain", candidateId: "bridge" },
+    data: { text, mode: "uncertain", candidateId: candidates[0] },
   });
   const report = await (
     await page.request.post("/api/reports", {
       data: submission(text, {
-        lat: 42.336,
-        lng: -83.0457,
+        lat,
+        lng: 125,
         locationName: "North footbridge approach",
         observedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-        candidateId: "bridge",
+        candidateId: candidates[0],
       }),
     })
   ).json();
-  const clarification = await (
-    await page.request.post(`/api/reports/${report.id}/process`)
-  ).json();
+  const clarification = await (await processSaved(page, report.id)).json();
   expect(clarification.state).toBe("clarification");
   expect(clarification.recommendation.kind).toBe("uncertain");
   expect(
@@ -185,7 +207,7 @@ test("an uncertain match asks a focused question and records the contributor's a
   ).toBeVisible();
   await expect(
     page.getByText(
-      "Was this at the footbridge, or at a different nearby crossing?",
+      "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -199,7 +221,10 @@ test("an uncertain match asks a focused question and records the contributor's a
     await page.request.get(`/api/reports/${report.id}`)
   ).json();
   expect(decided.matchingOutcome).toBe("create_new");
-  expect(decided.decisionCandidateIds).toEqual(decided.candidateIds);
+  expect(decided.decisionCandidateIds).toHaveLength(5);
+  expect(decided.candidateIds).toEqual(
+    expect.arrayContaining(decided.decisionCandidateIds),
+  );
   expect(decided.happeningId).toBe(report.id);
 });
 
@@ -223,9 +248,7 @@ test("a successful empty nearby search creates a Happening without a newness que
       }),
     })
   ).json();
-  const processed = await (
-    await page.request.post(`/api/reports/${report.id}/process`)
-  ).json();
+  const processed = await (await processSaved(page, report.id)).json();
   expect(processed.state).toBe("published");
   expect(processed.candidateIds).toEqual([]);
   expect(processed.matchingOutcome).toBe("create_new");
@@ -264,6 +287,10 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
     .getByLabel("What did you observe?")
     .fill("A fallen tree blocks the north path.");
   await page.getByLabel("Public display name").fill("River Neighbor");
+  await page
+    .getByLabel("Latitude", { exact: true })
+    .fill(String(8 + Math.random()));
+  await page.getByLabel("Longitude", { exact: true }).fill("130");
   await page.getByLabel("Observation time").selectOption("unknown");
   await page.getByRole("button", { name: "Continue with Google" }).click();
   await expect(page.getByLabel("What did you observe?")).toHaveValue(
@@ -337,18 +364,16 @@ test("model claims cannot strip uncertainty around abbreviations or line breaks"
       data: { text, mode: "drop-qualification" },
     });
     const report = await (
-      await page.request.post("/api/reports", { data: submission(text) })
+      await page.request.post("/api/reports", {
+        data: submission(text, { lat: -30 + Math.random(), lng: 110 }),
+      })
     ).json();
-    const rejected = await (
-      await page.request.post(`/api/reports/${report.id}/process`)
-    ).json();
+    const rejected = await (await processSaved(page, report.id)).json();
     expect(rejected.state).toBe("pending");
     await page.request.post("http://127.0.0.1:3101/control", {
       data: { text, mode: "success" },
     });
-    const result = await (
-      await page.request.post(`/api/reports/${report.id}/process`)
-    ).json();
+    const result = await (await processSaved(page, report.id)).json();
     expect(result.state).toBe("published");
     const detail = await (
       await page.request.get(`/api/happenings/${report.id}`)
@@ -377,6 +402,10 @@ test("processing begins after the original is saved and concurrent retries publi
   await page.getByLabel("What did you observe?").fill(text);
   await page.getByLabel("Public display name").fill("Path Walker");
   await page.getByLabel("Observation time").selectOption("now");
+  await page
+    .getByLabel("Latitude", { exact: true })
+    .fill(String(-35 + Math.random()));
+  await page.getByLabel("Longitude", { exact: true }).fill("110");
   const saveResponse = page.waitForResponse(
     (r) => r.url().endsWith("/api/reports") && r.request().method() === "POST",
   );
@@ -414,11 +443,11 @@ test("a long Report can publish multiple scoped Observations without model echoi
     data: { text, mode: "success" },
   });
   const report = await (
-    await page.request.post("/api/reports", { data: submission(text) })
+    await page.request.post("/api/reports", {
+      data: submission(text, { lat: -30 + Math.random(), lng: 110 }),
+    })
   ).json();
-  const result = await (
-    await page.request.post(`/api/reports/${report.id}/process`)
-  ).json();
+  const result = await (await processSaved(page, report.id)).json();
   expect(result.state).toBe("published");
   const detail = await (
     await page.request.get(`/api/happenings/${report.id}`)
@@ -568,9 +597,7 @@ test("unsupported model output stays private and retryable without a no-match ma
         })
       ).status(),
     ).toBe(409);
-    const result = await (
-      await page.request.post(`/api/reports/${report.id}/process`)
-    ).json();
+    const result = await (await processSaved(page, report.id)).json();
     expect(result.state).toBe("pending");
     expect(
       (await page.request.get(`/api/happenings/${report.id}`)).status(),
