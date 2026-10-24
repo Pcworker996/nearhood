@@ -1,0 +1,91 @@
+{
+  "report": {
+    "originalText": "A tree blocks the park path. Across town, a separate streetlamp is broken.",
+    "observedAt": null,
+    "locationName": "Eastbank park",
+    "lat": 42.334,
+    "lng": -83.047,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "multiple",
+    "scopes": ["park path"]
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "path",
+        "subject": "Park path",
+        "sourceRef": "submitted_report",
+        "sourceIds": ["s0"],
+        "occurrenceGroup": 0,
+        "describedCondition": "blocked by a tree",
+        "spatialScope": "park path",
+        "timeWording": null,
+        "uncertainty": null
+      },
+      {
+        "key": "lamp",
+        "subject": "Streetlamp",
+        "sourceRef": "submitted_report",
+        "sourceIds": ["s1"],
+        "occurrenceGroup": 1,
+        "describedCondition": "broken",
+        "spatialScope": null,
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  },
+  "expected": {
+    "category": "disruption",
+    "occurrence": "multiple",
+    "sameOccurrence": false,
+    "observations": [
+      {
+        "key": "path",
+        "subject": "Park path",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 0,
+            "end": 29,
+            "text": "A tree blocks the park path. "
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "blocked by a tree",
+        "spatialScope": "park path",
+        "timeWording": null,
+        "uncertainty": null,
+        "excerpt": "A tree blocks the park path. Across town, a separate streetlamp is broken."
+      },
+      {
+        "key": "lamp",
+        "subject": "Streetlamp",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 29,
+            "end": 74,
+            "text": "Across town, a separate streetlamp is broken."
+          }
+        ],
+        "occurrenceGroup": 1,
+        "describedCondition": "broken",
+        "spatialScope": null,
+        "timeWording": null,
+        "uncertainty": null,
+        "excerpt": "A tree blocks the park path. Across town, a separate streetlamp is broken."
+      }
+    ],
+    "claims": [
+      {
+        "statement": "A tree blocks the park path. Across town, a separate streetlamp is broken.",
+        "observationKeys": ["path", "lamp"]
+      }
+    ]
+  }
+}

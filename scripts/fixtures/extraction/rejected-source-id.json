@@ -1,0 +1,28 @@
+{
+  "report": {
+    "originalText": "The north entrance has orange barriers.",
+    "observedAt": null,
+    "locationName": "Eastbank footbridge",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "north",
+        "subject": "North entrance",
+        "sourceRef": "submitted_report",
+        "sourceIds": ["s9"],
+        "occurrenceGroup": 0,
+        "describedCondition": null,
+        "spatialScope": "north entrance",
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  },
+  "error": "Unsupported Observation source passage"
+}

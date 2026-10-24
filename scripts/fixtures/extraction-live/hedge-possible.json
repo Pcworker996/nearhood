@@ -1,0 +1,15 @@
+{
+  "report": {
+    "originalText": "The streetlamp at Alder and 3rd might be dark; it was hard to tell in the rain.",
+    "observedAt": "2026-10-22T02:00:00Z",
+    "locationName": "Alder and 3rd",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "qualified": ["lamp"]
+  }
+}

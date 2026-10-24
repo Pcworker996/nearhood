@@ -1,0 +1,63 @@
+{
+  "report": {
+    "originalText": "The north entrance has orange barriers. This does not mean the south entrance is closed.",
+    "observedAt": "2026-10-19T12:00:00Z",
+    "locationName": "Eastbank footbridge",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "scopes": ["north entrance"],
+    "unreported": ["south"]
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "north",
+        "subject": "North entrance",
+        "sourceRef": "submitted_report",
+        "sourceIds": ["s0"],
+        "occurrenceGroup": 0,
+        "describedCondition": "blocked by orange barriers",
+        "spatialScope": "NORTH ENTRANCE",
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  },
+  "expected": {
+    "category": "disruption",
+    "occurrence": "single",
+    "sameOccurrence": true,
+    "observations": [
+      {
+        "key": "north",
+        "subject": "North entrance",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 0,
+            "end": 40,
+            "text": "The north entrance has orange barriers. "
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "blocked by orange barriers",
+        "spatialScope": "north entrance",
+        "timeWording": null,
+        "uncertainty": null,
+        "excerpt": "The north entrance has orange barriers. This does not mean the south entrance is closed."
+      }
+    ],
+    "claims": [
+      {
+        "statement": "The north entrance has orange barriers. This does not mean the south entrance is closed.",
+        "observationKeys": ["north"]
+      }
+    ]
+  }
+}

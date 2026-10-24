@@ -1,0 +1,16 @@
+{
+  "report": {
+    "originalText": "Barriers block the left lane of the bridge. Traffic was too heavy to see the right lane.",
+    "observedAt": "2026-10-22T09:00:00Z",
+    "locationName": "Main Street bridge",
+    "lat": 42.331,
+    "lng": -83.049,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "scopes": ["left lane"],
+    "unreported": ["right lane"]
+  }
+}

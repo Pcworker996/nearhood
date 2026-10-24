@@ -1,0 +1,91 @@
+{
+  "report": {
+    "originalText": "The north entrance has orange barriers. The south entrance is open.",
+    "observedAt": "2026-10-19T12:00:00Z",
+    "locationName": "Eastbank footbridge",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "scopes": ["north entrance", "south entrance"]
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "north",
+        "subject": "North entrance",
+        "sourceRef": "submitted_report",
+        "sourceIds": ["s0"],
+        "occurrenceGroup": 0,
+        "describedCondition": "blocked by orange barriers",
+        "spatialScope": "north entrance",
+        "timeWording": null,
+        "uncertainty": null
+      },
+      {
+        "key": "south",
+        "subject": "South entrance",
+        "sourceRef": "submitted_report",
+        "sourceIds": ["s1"],
+        "occurrenceGroup": 0,
+        "describedCondition": "open",
+        "spatialScope": "South entrance",
+        "timeWording": null,
+        "uncertainty": "whether it stays open is unknown"
+      }
+    ]
+  },
+  "expected": {
+    "category": "disruption",
+    "occurrence": "single",
+    "sameOccurrence": true,
+    "observations": [
+      {
+        "key": "north",
+        "subject": "North entrance",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 0,
+            "end": 40,
+            "text": "The north entrance has orange barriers. "
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "blocked by orange barriers",
+        "spatialScope": "north entrance",
+        "timeWording": null,
+        "uncertainty": null,
+        "excerpt": "The north entrance has orange barriers. The south entrance is open."
+      },
+      {
+        "key": "south",
+        "subject": "South entrance",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 40,
+            "end": 67,
+            "text": "The south entrance is open."
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "open",
+        "spatialScope": "south entrance",
+        "timeWording": null,
+        "uncertainty": "whether it stays open is unknown",
+        "excerpt": "The north entrance has orange barriers. The south entrance is open."
+      }
+    ],
+    "claims": [
+      {
+        "statement": "The north entrance has orange barriers. The south entrance is open.",
+        "observationKeys": ["north", "south"]
+      }
+    ]
+  }
+}

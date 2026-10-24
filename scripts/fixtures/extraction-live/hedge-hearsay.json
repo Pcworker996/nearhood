@@ -1,0 +1,15 @@
+{
+  "report": {
+    "originalText": "A neighbor said the library ramp is blocked. I have not seen it myself.",
+    "observedAt": null,
+    "locationName": "Eastbank library",
+    "lat": 42.336,
+    "lng": -83.043,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "qualified": ["ramp"]
+  }
+}

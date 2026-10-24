@@ -1,0 +1,28 @@
+{
+  "report": {
+    "originalText": "The streetlamp was dark.",
+    "observedAt": "2026-10-19T02:00:00Z",
+    "locationName": "Alder and 3rd",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "lamp",
+        "subject": "Streetlamp",
+        "sourceRef": "submitted_report",
+        "sourceIds": ["s0"],
+        "occurrenceGroup": 0,
+        "describedCondition": "dark",
+        "spatialScope": null,
+        "timeWording": "yesterday",
+        "uncertainty": null
+      }
+    ]
+  },
+  "error": "Unsupported scope/time wording"
+}

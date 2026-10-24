@@ -1,0 +1,15 @@
+{
+  "report": {
+    "originalText": "The riverside path is flooded. I did not look at the playground.",
+    "observedAt": null,
+    "locationName": "Riverside park",
+    "lat": 42.335,
+    "lng": -83.044,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "unreported": ["playground"]
+  }
+}

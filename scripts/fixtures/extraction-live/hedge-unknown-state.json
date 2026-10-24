@@ -1,0 +1,16 @@
+{
+  "report": {
+    "originalText": "The west gate is closed. I don't know whether the east gate is open or closed.",
+    "observedAt": "2026-10-22T09:00:00Z",
+    "locationName": "Riverside park",
+    "lat": 42.335,
+    "lng": -83.044,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "scopes": ["west gate"],
+    "unreported": ["east gate"]
+  }
+}

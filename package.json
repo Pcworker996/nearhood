@@ -11,8 +11,11 @@
     "db:setup": "tsx scripts/setup-database.ts",
     "model:check": "tsx scripts/check-report-model.ts",
     "test:model": "node --import tsx --test scripts/check-report-model.test.ts",
+    "test:extraction": "node --import tsx --test scripts/extract-report-output.test.ts",
+    "extraction:live": "node --import tsx scripts/check-extraction-live.ts",
     "test": "playwright test",
-    "test:browse": "playwright test tests/browse.spec.ts"
+    "test:browse": "playwright test tests/browse.spec.ts",
+    "verify": "bash scripts/verify-local.sh"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
