@@ -107,7 +107,7 @@ In SQL, the `UPDATE` computes `compatible = extraction_version = EXTRACTION_VERS
 | Env | Default | Test value | Purpose |
 | --- | --- | --- | --- |
 | `NEARHOOD_LEASE_SECONDS` | 60 | 6 | Reach lease expiry within a test |
-| `NEARHOOD_MODEL_TIMEOUT_MS` | 25000 | 4000 | Reach the provider abort within a test |
+| `NEARHOOD_MODEL_TIMEOUT_MS` | 25000 | 10000 | Reach the provider abort within a test. It must exceed the test lease, so a held call can outlive its lease. |
 
 The fixture at `tests/external-services.ts` gains three controls:
 - **Hold:** `POST /control { text, mode, hold: n }` holds the n-th model call for that text until `POST /release { text }`.
@@ -133,6 +133,7 @@ The recommendation is `match` only when exactly one assessment is plausible and 
 
 - **Status copy (Illustrative wording, Proposed rule).** When `state = 'clarification'` and `pendingReason` is `separate_occurrences` or `unclear_occurrence`, the status line reads "Report saved · not added to a Happening".
 - **Docs.** ADR 0005 says 25 s, not 35 s, and its front matter is repaired. The stages implementation doc and the ticket describe v6 as unevaluated, with v5 numbers labelled historical.
+- **Test isolation.** Mobile and desktop runs must not draw overlapping random coordinates, so one project's Reports never enter the other's candidate pool. "an oversized evidence packet stays unassigned" failed once on desktop for this reason during phase 1.
 - **Marker (D4-A).** A `browse.spec.ts` test creates a second published Happening at the seeded footbridge coordinates, then selects the seeded marker. It is marked `test.fail()` with a link to a new issue. The existing marker test stays isolated through `npm run verify`.
 
 ## Failure and recovery
@@ -156,7 +157,7 @@ Every phase ends with `npm run verify` passing. The browser count rises from 60 
 - [ ] **Late completion.** Lease is 6 s and the fixture holds extraction call 1. POST A is held. After 7 s, POST B leases and finishes. Then A is released. The stored checkpoint carries call 2's marker, A's POST returns the current state, and the call count shows 2 extraction calls with no third.
 - [ ] **One call per POST.** A full journey's call count equals the number of process POSTs.
 - [ ] **Interrupted reason.** Lease is 6 s and the fixture holds and never releases. After 7 s, `GET` shows `pending` with `extraction_interrupted` and `nextAction: retry`.
-- [ ] **Provider timeout.** The model timeout is 4 s and the fixture holds. The POST returns within 9 s with `pending` and `extraction_failed`.
+- [ ] **Provider timeout.** The model timeout is 10 s and the fixture holds. The POST returns within 15 s with `pending` and `extraction_failed`.
 - [ ] **Version skew (D1-A).** The lease test includes a row whose stored version is `report-extraction-v99`. `acquireLease` returns null and the row is unchanged.
 - [ ] **Confirmation set.** A unit test checks `reviewSet` ordering and the five-card cap. In `confirmReportMatch`, the only Report fields used come from `ReportContext`, which the type system enforces. The existing "not-supplied" 400 test still passes.
 - [ ] **Concurrent confirmation.** Two identical `/match` POSTs both return 200 and the account version rises by 1. A different choice afterwards returns 409. A second signed-in user's `/match` returns 404.
