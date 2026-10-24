@@ -4,6 +4,7 @@ import type { MatchCandidate, SavedReport } from "./happenings";
 import {
   EXTRACTION_VERSION,
   extractionInput,
+  isPlausible,
   type CandidateAssessment,
 } from "./report-model";
 
@@ -125,15 +126,11 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
 
 export function reviewSet(
   packet: MatchCandidate[],
-  assessments: Pick<CandidateAssessment, "candidateId" | "continuity">[],
+  assessments: CandidateAssessment[],
 ) {
   const order = assessments
     .slice()
-    .sort(
-      (a, b) =>
-        Number(a.continuity === "separate") -
-        Number(b.continuity === "separate"),
-    );
+    .sort((a, b) => Number(!isPlausible(a)) - Number(!isPlausible(b)));
   return (
     order.length
       ? order.flatMap((a) => packet.filter((c) => c.id === a.candidateId))

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
+import { projectLatitude } from "./project-coordinates";
 import { leaseSeconds, modelTimeoutMs } from "./server-timing";
 
 const fixture = "http://127.0.0.1:3101";
@@ -585,4 +586,137 @@ test("a provider that never answers leaves the Report pending after the model ti
     pendingReason: "extraction_failed",
     nextAction: "retry",
   });
+});
+
+async function publishedHappening(
+  page: Page,
+  lat: number,
+  lng: number,
+  observedAt: string | null,
+) {
+  const originalText = `A barrier blocks the remote path. ${randomUUID()}`;
+  const report = await save(page, originalText, "success", {
+    lat,
+    lng,
+    observedAt,
+    locationName: "Remote path",
+  });
+  await page.request.post(`/api/reports/${report.id}/process`);
+  const published = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  expect(published.state).toBe("published");
+  expect(published.happeningId).toBe(report.id);
+  return published;
+}
+
+test("a conflicting separate assessment stays unassigned until that Happening is shown", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(60000);
+  await signIn(page);
+  const lat = projectLatitude(testInfo, 70);
+  const lng = 16;
+  const conflicting = await publishedHappening(page, lat, lng, null);
+  const other = await publishedHappening(page, lat, lng, null);
+  const before = await (
+    await page.request.get(`/api/happenings/${conflicting.happeningId}`)
+  ).json();
+  const originalText = `The remote barrier is still across the path. ${randomUUID()}`;
+  const report = await save(page, originalText, "separate-conflict", {
+    lat,
+    lng,
+    locationName: "Remote path",
+  });
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: {
+      text: originalText,
+      mode: "separate-conflict",
+      candidateId: conflicting.happeningId,
+    },
+  });
+  await page.request.post(`/api/reports/${report.id}/process`);
+  const review = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  expect(review.state).toBe("clarification");
+  expect(review.happeningId).toBeNull();
+  expect(review.candidateIds).toContain(conflicting.happeningId);
+  expect(
+    review.candidates.some(
+      (candidate: { id: string }) => candidate.id === conflicting.happeningId,
+    ),
+  ).toBe(true);
+  expect(
+    (await page.request.get(`/api/happenings/${report.id}`)).status(),
+  ).toBe(404);
+  const during = await (
+    await page.request.get(`/api/happenings/${conflicting.happeningId}`)
+  ).json();
+  expect(during.account).toEqual(before.account);
+  expect(during.reports).toHaveLength(before.reports.length);
+  expect(during.observations).toHaveLength(before.observations.length);
+  expect(
+    (
+      await page.request.post(`/api/reports/${report.id}/match`, {
+        data: {
+          choice: "create_new",
+          candidateIdsShown: [other.happeningId],
+        },
+      })
+    ).status(),
+  ).toBe(409);
+  expect(
+    (await page.request.get(`/api/happenings/${report.id}`)).status(),
+  ).toBe(404);
+  const created = await page.request.post(`/api/reports/${report.id}/match`, {
+    data: {
+      choice: "create_new",
+      candidateIdsShown: [conflicting.happeningId],
+    },
+  });
+  expect(created.status()).toBe(200);
+  expect((await created.json()).happeningId).toBe(report.id);
+  const after = await (
+    await page.request.get(`/api/happenings/${conflicting.happeningId}`)
+  ).json();
+  expect(after.account).toEqual(before.account);
+  expect(after.reports).toHaveLength(before.reports.length);
+  expect(after.observations).toHaveLength(before.observations.length);
+});
+
+test("a Happening observed 31 days earlier remains a candidate and stays unassigned", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(60000);
+  await signIn(page);
+  const lat = projectLatitude(testInfo, 72);
+  const lng = 18;
+  const old = await publishedHappening(
+    page,
+    lat,
+    lng,
+    new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString(),
+  );
+  const originalText = `The remote barrier has returned. ${randomUUID()}`;
+  const report = await save(page, originalText, "uncertain", {
+    lat,
+    lng,
+    observedAt: new Date().toISOString(),
+    locationName: "Remote path",
+  });
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: {
+      text: originalText,
+      mode: "uncertain",
+      candidateId: old.happeningId,
+    },
+  });
+  await page.request.post(`/api/reports/${report.id}/process`);
+  const review = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  expect(review.candidateIds).toContain(old.happeningId);
+  expect(review.state).toBe("clarification");
+  expect(review.happeningId).toBeNull();
 });

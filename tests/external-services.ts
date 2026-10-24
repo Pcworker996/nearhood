@@ -172,21 +172,27 @@ const server = createServer(async (req, res) => {
         ...(mode === "drop-qualification" ? { excerpt: passages.at(-1) } : {}),
       }));
     const assessments = (input.candidates ?? []).map(
-      (candidate: { id: string; evidence: { observationId: string }[] }) => ({
-        candidateId: candidate.id,
-        continuity:
-          mode === "many-matches"
-            ? "same"
-            : candidate.id === scenario.candidateId
-              ? mode === "uncertain"
-                ? "unknown"
-                : "same"
-              : "separate",
-        chronology: "consistent",
-        scope: "same",
-        evidenceIds: [candidate.evidence[0].observationId],
-        reason: "The supplied original evidence describes this occurrence.",
-      }),
+      (candidate: { id: string; evidence: { observationId: string }[] }) => {
+        const named = candidate.id === scenario.candidateId;
+        return {
+          candidateId: candidate.id,
+          continuity:
+            mode === "many-matches"
+              ? "same"
+              : mode === "separate-conflict" && named
+                ? "separate"
+                : named
+                  ? mode === "uncertain"
+                    ? "unknown"
+                    : "same"
+                  : "separate",
+          chronology:
+            mode === "separate-conflict" && named ? "conflict" : "consistent",
+          scope: "same",
+          evidenceIds: [candidate.evidence[0].observationId],
+          reason: "The supplied original evidence describes this occurrence.",
+        };
+      },
     );
     assessments.sort(
       (a: { candidateId: string }, b: { candidateId: string }) =>

@@ -10,6 +10,7 @@ import { nearbyCandidates, type CandidateSearch } from "./report-matching";
 import {
   extractReportInfo,
   compareReport,
+  isPlausible,
   EXTRACTION_REVISION,
   EXTRACTION_VERSION,
   LEASE_SECONDS,
@@ -417,7 +418,7 @@ export async function confirmReportMatch(
         Object.keys(processing.coverage.omittedEvidence ?? {}).length > 0 ||
         processing.assessments.some(
           (a) =>
-            a.continuity !== "separate" &&
+            isPlausible(a) &&
             !choice.candidateIdsShown.includes(a.candidateId),
         ))
     )

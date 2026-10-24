@@ -1,7 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { MatchCandidate } from "../src/lib/happenings";
+import type { CandidateAssessment } from "../src/lib/report-model";
 import { reviewSet } from "../src/lib/report-submission";
+
+function assessment(
+  candidateId: string,
+  continuity: CandidateAssessment["continuity"],
+  chronology: CandidateAssessment["chronology"] = "consistent",
+): CandidateAssessment {
+  return {
+    candidateId,
+    continuity,
+    chronology,
+    scope: "same",
+    evidenceIds: ["evidence"],
+    reason: "Stored assessment.",
+  };
+}
 
 const packet = ["a", "b", "c", "d", "e", "f", "g"].map(
   (id): MatchCandidate => ({
@@ -19,14 +35,14 @@ const ids = (candidates: MatchCandidate[]) => candidates.map((c) => c.id);
 
 test("the review set follows the assessment order, puts separate candidates last and shows five", () => {
   const assessments = [
-    { candidateId: "c", continuity: "separate" },
-    { candidateId: "a", continuity: "same" },
-    { candidateId: "e", continuity: "unknown" },
-    { candidateId: "b", continuity: "separate" },
-    { candidateId: "d", continuity: "unknown" },
-    { candidateId: "g", continuity: "unknown" },
-    { candidateId: "f", continuity: "unknown" },
-  ] as const;
+    assessment("c", "separate"),
+    assessment("a", "same"),
+    assessment("e", "unknown"),
+    assessment("b", "separate"),
+    assessment("d", "unknown"),
+    assessment("g", "unknown"),
+    assessment("f", "unknown"),
+  ];
   assert.deepEqual(ids(reviewSet(packet, [...assessments])), [
     "a",
     "e",
@@ -39,6 +55,25 @@ test("the review set follows the assessment order, puts separate candidates last
     "e",
     "c",
     "b",
+  ]);
+});
+
+test("a conflicting separate assessment stays ahead of other separate candidates", () => {
+  const assessments = [
+    assessment("c", "separate"),
+    assessment("a", "separate", "conflict"),
+    assessment("e", "separate"),
+    assessment("b", "separate"),
+    assessment("d", "separate"),
+    assessment("g", "separate"),
+    assessment("f", "separate"),
+  ];
+  assert.deepEqual(ids(reviewSet(packet, assessments)), [
+    "a",
+    "c",
+    "e",
+    "b",
+    "d",
   ]);
 });
 

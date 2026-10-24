@@ -74,6 +74,8 @@ export type CandidateAssessment = {
   evidenceIds: string[];
   reason: string;
 };
+export const isPlausible = (a: CandidateAssessment) =>
+  a.continuity !== "separate" || a.chronology === "conflict";
 export type ModelRun = {
   model: string;
   version: string;
@@ -535,12 +537,12 @@ export async function compareReport(
       reason: item.reason,
     };
   });
-  const plausible = assessments.filter((a) => a.continuity !== "separate");
+  const plausible = assessments.filter(isPlausible);
   let matching: MatchRecommendation;
   if (
     (incomplete && plausible.length === 0) ||
     plausible.length > 1 ||
-    plausible.some((a) => a.continuity === "unknown")
+    plausible.some((a) => a.continuity !== "same")
   )
     matching = {
       kind: "uncertain",

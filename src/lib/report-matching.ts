@@ -5,7 +5,6 @@ import type { MatchCandidate, MatchEvidence } from "./happenings";
 
 export const MATCHING_SCOPE = {
   radiusMeters: 1500,
-  temporalWindowDays: 30,
   maxCandidates: 20,
   evidencePerCandidate: 3,
 } as const;
@@ -51,18 +50,14 @@ export async function nearbyCandidates(
         COALESCE(MIN(extensions.ST_Distance(r.location, submitted.location)),
           extensions.ST_Distance(h.location, submitted.location))) <= $4::double precision
       AND COUNT(DISTINCT o.id) > 0
-      AND ($3::timestamptz IS NULL OR BOOL_OR(o.id IS NULL OR o.observed_at IS NULL
-        OR o.observed_at BETWEEN $3::timestamptz - make_interval(days => $5::int)
-          AND $3::timestamptz + make_interval(days => $5::int)))
-    ORDER BY CASE WHEN $6::text IS NOT NULL AND h.id=$6 THEN 0 ELSE 1 END,
+    ORDER BY CASE WHEN $5::text IS NOT NULL AND h.id=$5 THEN 0 ELSE 1 END,
       "timeDistanceSeconds" ASC NULLS LAST, "distanceMeters" ASC, h.id
-    LIMIT $7::int`,
+    LIMIT $6::int`,
     [
       input.lng,
       input.lat,
       input.observedAt,
       MATCHING_SCOPE.radiusMeters,
-      MATCHING_SCOPE.temporalWindowDays,
       input.candidateHint,
       MATCHING_SCOPE.maxCandidates + 1,
     ],
