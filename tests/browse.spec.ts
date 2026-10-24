@@ -1,4 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
+import { Client } from "pg";
+import { projectLatitude } from "./project-coordinates";
 
 test("selecting a map marker opens its preview even when highlights are collapsed", async ({
   page,
@@ -185,4 +188,99 @@ test("claim evidence is specific to the selected claim and cannot cross Happenin
       (await fetch("/api/happenings/lamp/claims/bridge-barriers")).status,
   );
   expect(status).toBe(404);
+});
+
+async function movePublishedReport(id: string, lng: number, lat: number) {
+  const client = new Client({
+    connectionString:
+      process.env.TEST_DATABASE_URL ??
+      "postgresql://127.0.0.1:55432/nearhood_test",
+  });
+  await client.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `UPDATE nearhood.reports
+       SET location = extensions.ST_SetSRID(extensions.ST_MakePoint($2, $3), 4326)::extensions.geography
+       WHERE id = $1`,
+      [id, lng, lat],
+    );
+    await client.query(
+      `UPDATE nearhood.happenings
+       SET location = extensions.ST_SetSRID(extensions.ST_MakePoint($2, $3), 4326)::extensions.geography
+       WHERE id = $1`,
+      [id, lng, lat],
+    );
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    await client.end();
+  }
+}
+
+test("a second published Happening at the footbridge covers the seeded marker", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/?contribute=1");
+  await page.getByRole("button", { name: "Continue with Google" }).click();
+  await expect(
+    page.getByRole("button", { name: "Submit Report", exact: true }),
+  ).toBeVisible();
+  const originalText = `A new pothole is in the footbridge deck. ${randomUUID()}`;
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text: originalText, mode: "success" },
+  });
+  const report = await (
+    await page.request.post("/api/reports", {
+      data: {
+        requestKey: randomUUID(),
+        originalText,
+        displayName: "Test Neighbor",
+        lat: projectLatitude(testInfo, 78),
+        lng: 16,
+        locationName: "Eastbank footbridge",
+        observedAt: new Date().toISOString(),
+        provenance: "firsthand",
+        sourceUrl: null,
+        candidateId: null,
+      },
+    })
+  ).json();
+  await page.request.post(`/api/reports/${report.id}/process`);
+  const published = await (
+    await page.request.post(`/api/reports/${report.id}/process`)
+  ).json();
+  let parkedId: string | null = null;
+  try {
+    if (
+      published.state === "published" &&
+      typeof published.happeningId === "string"
+    )
+      parkedId = published.happeningId;
+    expect(published.state).toBe("published");
+    expect(published.happeningId).toBe(report.id);
+    // Earlier tests add Observations to the seeded bridge, and omitted
+    // evidence then blocks a no-match publication at its coordinates.
+    await movePublishedReport(report.id, -83.0457, 42.3328);
+    await page.goto("/");
+    await page
+      .getByRole("button", { name: /Nearby highlights.*happenings in view/ })
+      .click();
+    // Overlapping markers at one position. https://github.com/Pcworker996/nebius-hack/issues/17
+    test.fail();
+    await page
+      .getByRole("button", {
+        name: "Select map marker: Eastbank footbridge closure",
+      })
+      .click({ timeout: 5000 });
+    await expect(
+      page.getByRole("button", { name: "View full details" }),
+    ).toBeVisible();
+  } finally {
+    // The other project runs this file afterwards. A pin left on the
+    // footbridge covers the seeded marker for every later click.
+    if (parkedId) await movePublishedReport(parkedId, 179, -89);
+  }
 });

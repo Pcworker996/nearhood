@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
+import { projectLatitude } from "./project-coordinates";
 
 async function processSaved(page: Page, id: string) {
   let response = await page.request.post(`/api/reports/${id}/process`);
@@ -159,10 +160,10 @@ test("a semantic match is recommended with evidence but attached only after conf
 
 test("an uncertain match asks a focused question and records the contributor's answer", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
   // Isolate rejection from histories added by the other browser project.
-  const lat = 5 + Math.random();
+  const lat = projectLatitude(testInfo, 5);
   const candidates: string[] = [];
   for (let i = 0; i < 5; i++) {
     const words = `A barrier blocks remote sector ${i}.`;
@@ -230,11 +231,11 @@ test("an uncertain match asks a focused question and records the contributor's a
 
 test("a successful empty nearby search creates a Happening without a newness question", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
   const text = "A branch blocks the rural trail.";
-  const lat = -60 + Math.random() * 120;
-  const lng = -180 + Math.random() * 360;
+  const lat = projectLatitude(testInfo, -45);
+  const lng = 4;
   await page.request.post("http://127.0.0.1:3101/control", {
     data: { text, mode: "uncertain" },
   });
@@ -289,7 +290,7 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
   await page.getByLabel("Public display name").fill("River Neighbor");
   await page
     .getByLabel("Latitude", { exact: true })
-    .fill(String(8 + Math.random()));
+    .fill(String(projectLatitude(testInfo, 8)));
   await page.getByLabel("Longitude", { exact: true }).fill("130");
   await page.getByLabel("Observation time").selectOption("unknown");
   await page.getByRole("button", { name: "Continue with Google" }).click();
@@ -354,7 +355,7 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
 
 test("model claims cannot strip uncertainty around abbreviations or line breaks", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
   for (const text of [
     "I cannot confirm that Dr. Smith saw flooding.",
@@ -365,7 +366,10 @@ test("model claims cannot strip uncertainty around abbreviations or line breaks"
     });
     const report = await (
       await page.request.post("/api/reports", {
-        data: submission(text, { lat: -30 + Math.random(), lng: 110 }),
+        data: submission(text, {
+          lat: projectLatitude(testInfo, -30),
+          lng: 110,
+        }),
       })
     ).json();
     const rejected = await (await processSaved(page, report.id)).json();
@@ -393,7 +397,7 @@ test("model claims cannot strip uncertainty around abbreviations or line breaks"
 
 test("processing begins after the original is saved and concurrent retries publish it only once", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
   const text = "A large branch blocks the east path.";
   await page.request.post("http://127.0.0.1:3101/control", {
@@ -404,7 +408,7 @@ test("processing begins after the original is saved and concurrent retries publi
   await page.getByLabel("Observation time").selectOption("now");
   await page
     .getByLabel("Latitude", { exact: true })
-    .fill(String(-35 + Math.random()));
+    .fill(String(projectLatitude(testInfo, -35)));
   await page.getByLabel("Longitude", { exact: true }).fill("110");
   const saveResponse = page.waitForResponse(
     (r) => r.url().endsWith("/api/reports") && r.request().method() === "POST",
@@ -436,7 +440,7 @@ test("processing begins after the original is saved and concurrent retries publi
 
 test("a long Report can publish multiple scoped Observations without model echoing its evidence", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
   const text = `The north entrance is blocked${" with a barrier".repeat(220)}. The south entrance is blocked${" with a barrier".repeat(220)}.`;
   await page.request.post("http://127.0.0.1:3101/control", {
@@ -444,7 +448,7 @@ test("a long Report can publish multiple scoped Observations without model echoi
   });
   const report = await (
     await page.request.post("/api/reports", {
-      data: submission(text, { lat: -30 + Math.random(), lng: 110 }),
+      data: submission(text, { lat: projectLatitude(testInfo, -40), lng: 110 }),
     })
   ).json();
   const result = await (await processSaved(page, report.id)).json();
@@ -626,9 +630,9 @@ test("unsupported model output stays private and retryable without a no-match ma
 test("identical concurrent confirmations publish once and other contributors cannot confirm", async ({
   page,
   browser,
-}) => {
+}, testInfo) => {
   await signIn(page);
-  const lat = 22 + Math.random();
+  const lat = projectLatitude(testInfo, 22);
   const earlier = `A barrier blocks the remote crossing. ${randomUUID()}`;
   await page.request.post("http://127.0.0.1:3101/control", {
     data: { text: earlier, mode: "success" },

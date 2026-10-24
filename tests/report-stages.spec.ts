@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, test, type TestInfo } from "@playwright/test";
 import { projectLatitude } from "./project-coordinates";
 import { leaseSeconds, modelTimeoutMs } from "./server-timing";
 
@@ -12,10 +12,10 @@ async function modelCalls(page: Page, text: string) {
   ).json();
 }
 
-async function saveHeld(page: Page, label: string) {
+async function saveHeld(page: Page, label: string, testInfo: TestInfo) {
   const originalText = `A cart blocks the ${label} ramp. ${randomUUID()}`;
   const report = await save(page, originalText, "success", {
-    lat: 33 + Math.random(),
+    lat: projectLatitude(testInfo, 33),
     lng: -160,
   });
   await page.request.post(`${fixture}/control`, {
@@ -71,10 +71,10 @@ async function save(
 
 test("an overflowing candidate pool cannot turn no-match judgments into a new Happening", async ({
   page,
-}) => {
+}, testInfo) => {
   test.setTimeout(60000);
   await signIn(page);
-  const lat = -12 + Math.random();
+  const lat = projectLatitude(testInfo, -12);
   for (let i = 0; i < 21; i++) {
     const report = await save(
       page,
@@ -106,10 +106,10 @@ test("an overflowing candidate pool cannot turn no-match judgments into a new Ha
 
 test("an oversized evidence packet stays unassigned without losing the saved extraction", async ({
   page,
-}) => {
+}, testInfo) => {
   test.setTimeout(60000);
   await signIn(page);
-  const lat = 15 + Math.random();
+  const lat = projectLatitude(testInfo, 15);
   for (let i = 0; i < 10; i++) {
     const angle = (i * Math.PI) / 5;
     const originalText = `A branch blocks sector ${i}${" with debris".repeat(650)}.`;
@@ -200,9 +200,9 @@ test("a saved extraction survives reload and matching failure without repeating 
 
 test("candidate comparison reaches a relevant Happening beyond the old nearest five", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
-  const lat = -25 + Math.random();
+  const lat = projectLatitude(testInfo, -25);
   let targetId = "";
   for (let i = 0; i < 6; i++) {
     const seeded = await save(
@@ -331,6 +331,10 @@ test("separate situations stay saved with an explanation and never acquire membe
       "Your report describes separate situations. We’ve saved it, but haven’t added it to a Happening.",
     ),
   ).toBeVisible();
+  await expect(
+    page.getByText("Report saved · not added to a Happening", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Could you clarify?")).toHaveCount(0);
   await page.reload();
   await expect(page.getByText(originalText, { exact: true })).toBeVisible();
 });
@@ -385,9 +389,9 @@ test("rejecting five displayed suggestions cannot discard an unshown plausible m
 
 test("concurrent empty-search publications cannot both create a Happening", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
-  const lat = -55 + Math.random();
+  const lat = projectLatitude(testInfo, -55);
   const a = await save(
     page,
     `A tree blocks the remote trail. ${randomUUID()}`,
@@ -418,9 +422,9 @@ test("concurrent empty-search publications cannot both create a Happening", asyn
 
 test("omitted candidate evidence prevents unsupported new-Happening creation", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
-  const lat = -65 + Math.random();
+  const lat = projectLatitude(testInfo, -65);
   const first = await save(
     page,
     "The tree fell. The north path is blocked. The south path is clear. The cause is unknown.",
@@ -454,12 +458,12 @@ test("omitted candidate evidence prevents unsupported new-Happening creation", a
 
 test("Observation support is an exact localized passage and invalid source IDs never publish", async ({
   page,
-}) => {
+}, testInfo) => {
   await signIn(page);
   const originalText =
     "I cannot verify the cause. A branch blocks the north path.";
   const first = await save(page, originalText, "success", {
-    lat: -75 + Math.random(),
+    lat: projectLatitude(testInfo, -75),
     lng: 30,
   });
   await page.request.post(`/api/reports/${first.id}/process`);
@@ -497,10 +501,10 @@ test("Observation support is an exact localized passage and invalid source IDs n
 
 test("a late extraction cannot replace the checkpoint saved by the request that took over its lease", async ({
   page,
-}) => {
+}, testInfo) => {
   test.setTimeout(60000);
   await signIn(page);
-  const { id, originalText, held } = await saveHeld(page, "late");
+  const { id, originalText, held } = await saveHeld(page, "late", testInfo);
   await page.waitForTimeout((leaseSeconds + 1) * 1000);
   const takeover = await (
     await page.request.post(`/api/reports/${id}/process`)
@@ -552,10 +556,14 @@ test("each processing request makes one model call across a full journey", async
 
 test("an expired lease shows interrupted extraction with a retry", async ({
   page,
-}) => {
+}, testInfo) => {
   test.setTimeout(60000);
   await signIn(page);
-  const { id, originalText, held } = await saveHeld(page, "interrupted");
+  const { id, originalText, held } = await saveHeld(
+    page,
+    "interrupted",
+    testInfo,
+  );
   await page.waitForTimeout((leaseSeconds + 1) * 1000);
   expect(
     await (await page.request.get(`/api/reports/${id}`)).json(),
@@ -572,10 +580,14 @@ test("an expired lease shows interrupted extraction with a retry", async ({
 
 test("a provider that never answers leaves the Report pending after the model timeout", async ({
   page,
-}) => {
+}, testInfo) => {
   test.setTimeout(60000);
   await signIn(page);
-  const { originalText, held, started } = await saveHeld(page, "timeout");
+  const { originalText, held, started } = await saveHeld(
+    page,
+    "timeout",
+    testInfo,
+  );
   const result = await (await held).json();
   const elapsed = Date.now() - started;
   await release(page, originalText);

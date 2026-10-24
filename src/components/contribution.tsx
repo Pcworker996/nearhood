@@ -323,7 +323,10 @@ export default function Contribution({
                   : saved.state === "match_review"
                     ? "Report saved · review the suggested Happening"
                     : saved.state === "clarification"
-                      ? "Report saved · matching needs clarification"
+                      ? saved.pendingReason === "separate_occurrences" ||
+                        saved.pendingReason === "unclear_occurrence"
+                        ? "Report saved · not added to a Happening"
+                        : "Report saved · matching needs clarification"
                       : "Report saved · account update pending"}
             </p>
             <ReportCard report={saved} />
