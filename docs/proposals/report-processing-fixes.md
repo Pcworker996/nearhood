@@ -1,6 +1,6 @@
 # Proposal: Fix stale processing, matching rules, and verification gaps for #4
 
-**Status:** Decisions D1 to D5 agreed 2026-10-23. Not implemented.
+**Status:** Decisions D1 to D5 agreed 2026-10-23. Phases 0 to 3 implemented and locally verified on branch `fix/issue-4-processing` (`7b2eb7b`, `64d746e`, `462fa41`, `9e9fcfd`), not pushed. Phase 4 pending.
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-23.
 **Related issues:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4). Evidence: [acceptance audit](../reviews/2026-10-23-issue-4-acceptance-audit.md).
 **Decision requested:** Agree the implementation contract in phases 1 to 3. Decisions D1 to D5 are answered.
