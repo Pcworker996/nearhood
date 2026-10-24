@@ -43,9 +43,12 @@ browser() {
 gate typecheck npm run typecheck
 gate test-model npm run test:model
 gate test-extraction npm run test:extraction
+gate test-review-set npm run test:review-set
 
 createdb -h "$host" -p "$port" "$db"
 trap 'dropdb -h "$host" -p "$port" --if-exists "$db"' EXIT
+gate test-lease env DATABASE_URL="postgresql://$host:$port/$db" \
+  bash -c 'npm run db:setup && npm run test:lease'
 if browser "$@"; then
   echo "PASS  browser"
 else

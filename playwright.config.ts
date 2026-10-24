@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { leaseSeconds, modelTimeoutMs } from "./tests/server-timing";
 
 export default defineConfig({
   testDir: "./tests",
@@ -33,6 +34,8 @@ export default defineConfig({
         NEBIUS_BASE_URL: "http://127.0.0.1:3101/v1",
         NEBIUS_API_KEY: "external-fixture-key",
         NEBIUS_MODEL: "nvidia/test-nemotron-fixture",
+        NEARHOOD_LEASE_SECONDS: String(leaseSeconds),
+        NEARHOOD_MODEL_TIMEOUT_MS: String(modelTimeoutMs),
         DATABASE_URL:
           process.env.TEST_DATABASE_URL ??
           "postgresql://127.0.0.1:55432/nearhood_test",

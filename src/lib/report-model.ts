@@ -6,9 +6,21 @@ import type {
 } from "./happenings";
 
 export const EXTRACTION_VERSION = "report-extraction-v6";
+export const EXTRACTION_REVISION = Number(
+  EXTRACTION_VERSION.match(/-v(\d+)$/)![1],
+);
 export const MATCHING_VERSION = "report-matching-v3";
-export const MODEL_TIMEOUT_MS = 25000;
 export const MATCHING_INPUT_BYTES = 65536;
+
+function testSetting(name: string, fallback: number) {
+  const raw = process.env.NODE_ENV === "production" ? "" : process.env[name];
+  if (!raw) return fallback;
+  if (!/^[1-9]\d{0,8}$/.test(raw))
+    throw Error(`${name} must be a positive integer.`);
+  return Number(raw);
+}
+export const MODEL_TIMEOUT_MS = testSetting("NEARHOOD_MODEL_TIMEOUT_MS", 25000);
+export const LEASE_SECONDS = testSetting("NEARHOOD_LEASE_SECONDS", 60);
 
 export type ReportContext = Pick<
   SavedReport,

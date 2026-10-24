@@ -623,6 +623,75 @@ test("unsupported model output stays private and retryable without a no-match ma
   }
 });
 
+test("identical concurrent confirmations publish once and other contributors cannot confirm", async ({
+  page,
+  browser,
+}) => {
+  await signIn(page);
+  const lat = 22 + Math.random();
+  const earlier = `A barrier blocks the remote crossing. ${randomUUID()}`;
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text: earlier, mode: "success" },
+  });
+  const happening = await (
+    await page.request.post("/api/reports", {
+      data: submission(earlier, { lat, lng: -170 }),
+    })
+  ).json();
+  expect((await (await processSaved(page, happening.id)).json()).state).toBe(
+    "published",
+  );
+  const text = `The crossing barrier is still there. ${randomUUID()}`;
+  await page.request.post("http://127.0.0.1:3101/control", {
+    data: { text, mode: "match", candidateId: happening.id },
+  });
+  const report = await (
+    await page.request.post("/api/reports", {
+      data: submission(text, { lat, lng: -170 }),
+    })
+  ).json();
+  expect((await (await processSaved(page, report.id)).json()).state).toBe(
+    "match_review",
+  );
+  const before = await (
+    await page.request.get(`/api/happenings/${happening.id}`)
+  ).json();
+  const choice = {
+    choice: "match",
+    candidateId: happening.id,
+    candidateIdsShown: [happening.id],
+  };
+  const confirmations = await Promise.all(
+    [1, 2].map(() =>
+      page.request.post(`/api/reports/${report.id}/match`, { data: choice }),
+    ),
+  );
+  expect(confirmations.map((r) => r.status())).toEqual([200, 200]);
+  const after = await (
+    await page.request.get(`/api/happenings/${happening.id}`)
+  ).json();
+  expect(after.account.version).toBe(before.account.version + 1);
+  expect(after.reports).toHaveLength(before.reports.length + 1);
+  expect(
+    (
+      await page.request.post(`/api/reports/${report.id}/match`, {
+        data: { choice: "create_new", candidateIdsShown: [happening.id] },
+      })
+    ).status(),
+  ).toBe(409);
+  const other = await browser.newContext();
+  const stranger = await other.newPage();
+  await signIn(stranger);
+  expect(
+    (
+      await stranger.request.post(`/api/reports/${report.id}/match`, {
+        data: choice,
+      })
+    ).status(),
+  ).toBe(404);
+  await other.close();
+});
+
 test("a selected Happening stays unchanged until the contributor confirms the match", async ({
   page,
 }) => {

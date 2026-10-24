@@ -12,6 +12,8 @@
     "model:check": "tsx scripts/check-report-model.ts",
     "test:model": "node --import tsx --test scripts/check-report-model.test.ts",
     "test:extraction": "node --import tsx --test scripts/extract-report-output.test.ts",
+    "test:review-set": "node --import tsx --test scripts/review-set.test.ts",
+    "test:lease": "node --import tsx --test scripts/report-lease.test.ts",
     "extraction:live": "node --import tsx scripts/check-extraction-live.ts",
     "test": "playwright test",
     "test:browse": "playwright test tests/browse.spec.ts",

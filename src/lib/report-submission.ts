@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { database } from "./database";
-import type { SavedReport } from "./happenings";
-import { EXTRACTION_VERSION, extractionInput } from "./report-model";
+import type { MatchCandidate, SavedReport } from "./happenings";
+import {
+  EXTRACTION_VERSION,
+  extractionInput,
+  type CandidateAssessment,
+} from "./report-model";
 
 export class SubmissionError extends Error {
   constructor(
@@ -113,17 +117,36 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
   p.candidate_ids AS "candidateIds", p.candidate_packet AS candidates,
   p.recommendation, p.matching_outcome AS "matchingOutcome",
   p.decision_candidate_ids AS "decisionCandidateIds",
-  p.processing_stage AS "processingStage", p.pending_reason AS "pendingReason",
+  p.processing_stage AS "processingStage",
+  CASE WHEN p.state='processing' AND p.lease_until < now() THEN p.processing_stage || '_interrupted' ELSE p.pending_reason END AS "pendingReason",
   p.extraction_version AS "extractionVersion", p.extraction_input AS "extractionInput", p.assessments,
   CASE WHEN p.state='processing' AND p.lease_until < now() THEN 'pending' ELSE p.state END AS state
   FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id`;
+
+export function reviewSet(
+  packet: MatchCandidate[],
+  assessments: Pick<CandidateAssessment, "candidateId" | "continuity">[],
+) {
+  const order = assessments
+    .slice()
+    .sort(
+      (a, b) =>
+        Number(a.continuity === "separate") -
+        Number(b.continuity === "separate"),
+    );
+  return (
+    order.length
+      ? order.flatMap((a) => packet.filter((c) => c.id === a.candidateId))
+      : packet
+  ).slice(0, 5);
+}
 
 export async function savedReport(id: string, contributorId: string) {
   const { rows } = await database().query<
     SavedReport & {
       extractionVersion: string | null;
       extractionInput: string | null;
-      assessments: { candidateId: string; continuity: string }[];
+      assessments: CandidateAssessment[];
     }
   >(`${savedSelect} WHERE r.id=$1 AND r.contributor_id=$2`, [
     id,
@@ -136,20 +159,7 @@ export async function savedReport(id: string, contributorId: string) {
     assessments,
     ...report
   } = rows[0];
-  const order = assessments
-    .slice()
-    .sort(
-      (a, b) =>
-        Number(a.continuity === "separate") -
-        Number(b.continuity === "separate"),
-    );
-  report.candidates = (
-    order.length
-      ? order.flatMap((a) =>
-          report.candidates.filter((c) => c.id === a.candidateId),
-        )
-      : report.candidates
-  ).slice(0, 5);
+  report.candidates = reviewSet(report.candidates, assessments);
   const extractionReady =
     extractionVersion === EXTRACTION_VERSION &&
     input === extractionInput(report);

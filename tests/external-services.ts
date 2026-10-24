@@ -4,7 +4,12 @@ import { createHash, randomUUID } from "node:crypto";
 
 const codes = new Map<string, { id: string; challenge: string }>();
 const tokens = new Map<string, string>();
-const scenarios = new Map<string, { mode: string; candidateId?: string }>();
+const scenarios = new Map<
+  string,
+  { mode: string; candidateId?: string; hold?: number }
+>();
+const calls = new Map<string, { extraction: number; matching: number }>();
+const held = new Map<string, () => void>();
 let cancelNextSignIn = false;
 const user = (id: string) => ({
   id,
@@ -33,9 +38,22 @@ const server = createServer(async (req, res) => {
     scenarios.set(body.text, {
       mode: body.mode,
       candidateId: body.candidateId,
+      hold: body.hold,
     });
     return json({ ok: true });
   }
+  if (url.pathname === "/release") {
+    held.get(body.text)?.();
+    held.delete(body.text);
+    return json({ ok: true });
+  }
+  if (url.pathname === "/calls")
+    return json(
+      calls.get(url.searchParams.get("text")!) ?? {
+        extraction: 0,
+        matching: 0,
+      },
+    );
   if (url.pathname === "/auth/v1/authorize") {
     if (cancelNextSignIn) {
       cancelNextSignIn = false;
@@ -104,12 +122,18 @@ const server = createServer(async (req, res) => {
     const text = input.report.originalText as string;
     const scenario = scenarios.get(text) ?? { mode: "failure" };
     const mode = scenario.mode;
+    const extracting =
+      body.response_format.json_schema.name.startsWith("report_extraction_");
+    const count = calls.get(text) ?? { extraction: 0, matching: 0 };
+    count[extracting ? "extraction" : "matching"]++;
+    calls.set(text, count);
+    const ordinal = count.extraction + count.matching;
+    if (ordinal === scenario.hold)
+      await new Promise<void>((resolve) => held.set(text, resolve));
     if (mode === "failure")
       return json({ error: "Controlled provider outage" }, 503);
     if (mode === "slow")
       await new Promise((resolve) => setTimeout(resolve, 1500));
-    const extracting =
-      body.response_format.json_schema.name.startsWith("report_extraction_");
     if (
       (extracting && mode === "extraction-failure") ||
       (!extracting && mode === "matching-failure")
@@ -124,10 +148,10 @@ const server = createServer(async (req, res) => {
       .slice(0, 12)
       .map((passage: string, i: number) => ({
         key: `o${i}`,
-        subject: passage
+        subject: `${passage
           .split(/\bis\b|\bhas\b/)[0]
           .trim()
-          .slice(0, 80),
+          .slice(0, 70)} (call ${ordinal})`,
         sourceRef: mode === "bad-reference" ? "invented" : "submitted_report",
         sourceIds: [
           mode === "bad-source"

@@ -1,48 +1,80 @@
 import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { database } from "./database";
-import type { MatchRecommendation, SavedReport } from "./happenings";
+import type {
+  MatchCandidate,
+  MatchRecommendation,
+  SavedReport,
+} from "./happenings";
 import { nearbyCandidates, type CandidateSearch } from "./report-matching";
 import {
   extractReportInfo,
   compareReport,
+  EXTRACTION_REVISION,
   EXTRACTION_VERSION,
+  LEASE_SECONDS,
   MATCHING_VERSION,
   extractionInput,
   type Extraction,
   type CandidateAssessment,
+  type ReportContext,
 } from "./report-model";
-import { savedReport, SubmissionError } from "./report-submission";
+import { reviewSet, savedReport, SubmissionError } from "./report-submission";
 
 type MatchChoice =
   | { choice: "match"; candidateId: string; candidateIdsShown: string[] }
   | { choice: "create_new"; candidateIdsShown: string[] };
+
+type Stage = SavedReport["processingStage"];
+type SubmittedReport = ReportContext & Pick<SavedReport, "id" | "candidateId">;
+
+// Every lease decision reads the locked row; callers cannot supply a stage.
+export async function acquireLease(input: {
+  id: string;
+  contributorId: string;
+  attempt: string;
+  refresh: boolean;
+  extractionInput: string;
+}): Promise<Stage | null> {
+  const compatible = `(extraction_version=$5 AND extraction_input=$6) IS TRUE`;
+  const { rows } = await database().query<{ processing_stage: Stage }>(
+    `UPDATE nearhood.report_processing SET state='processing', attempt=$3,
+      processing_stage=CASE WHEN ${compatible} THEN 'matching' ELSE 'extraction' END,
+      pending_reason=NULL, lease_until=now()+make_interval(secs => $8)
+    WHERE report_id=$1 AND contributor_id=$2 AND (
+      state IN ('saved','pending') OR (state='processing' AND lease_until < now()) OR
+      (state IN ('match_review','clarification') AND ($4::boolean OR NOT ${compatible}))
+    ) AND NOT COALESCE(substring(extraction_version FROM '-v([0-9]+)$')::numeric > $7, false)
+    RETURNING processing_stage`,
+    [
+      input.id,
+      input.contributorId,
+      input.attempt,
+      input.refresh,
+      EXTRACTION_VERSION,
+      input.extractionInput,
+      EXTRACTION_REVISION,
+      LEASE_SECONDS,
+    ],
+  );
+  return rows[0]?.processing_stage ?? null;
+}
 
 export async function processReport(
   id: string,
   contributorId: string,
   refresh = false,
 ) {
-  const report = await savedReport(id, contributorId);
-  if (
-    report.state === "published" ||
-    (report.extractionReady &&
-      (report.state === "match_review" || report.state === "clarification") &&
-      !refresh)
-  )
-    return report;
+  const report: SubmittedReport = await savedReport(id, contributorId);
   const attempt = randomUUID();
-  const stage = report.extractionReady ? "matching" : "extraction";
-  const lease = await database().query(
-    `UPDATE nearhood.report_processing SET state='processing', attempt=$3,
-      processing_stage=$5, pending_reason=NULL, lease_until=now()+interval '60 seconds'
-    WHERE report_id=$1 AND contributor_id=$2 AND (
-      state IN ('saved','pending') OR (state='processing' AND lease_until < now()) OR
-      ($4::boolean AND state IN ('match_review','clarification'))
-    ) RETURNING report_id`,
-    [id, contributorId, attempt, refresh || !report.extractionReady, stage],
-  );
-  if (!lease.rowCount) return savedReport(id, contributorId);
+  const stage = await acquireLease({
+    id,
+    contributorId,
+    attempt,
+    refresh,
+    extractionInput: extractionInput(report),
+  });
+  if (!stage) return savedReport(id, contributorId);
   try {
     if (stage === "extraction") {
       const { extraction, run } = await extractReportInfo(report);
@@ -199,7 +231,7 @@ export async function processReport(
 async function publishForAttempt(input: {
   id: string;
   attempt: string;
-  report: SavedReport;
+  report: SubmittedReport;
   extraction: Extraction;
   model: string;
   search: CandidateSearch;
@@ -254,27 +286,15 @@ export async function confirmReportMatch(
   contributorId: string,
   choice: MatchChoice,
 ) {
-  const report = await savedReport(id, contributorId);
+  const report: SubmittedReport = await savedReport(id, contributorId);
   const client = await database().connect();
   try {
     await client.query("BEGIN");
     await client.query("SELECT pg_advisory_xact_lock(70420261022)");
-    const fresh =
-      report.state === "published"
-        ? null
-        : await nearbyCandidates(
-            {
-              lat: report.lat,
-              lng: report.lng,
-              observedAt: report.observedAt,
-              candidateHint: report.candidateId,
-            },
-            client,
-          );
-
     const { rows } = await client.query<{
       state: string;
       candidate_ids: string[];
+      candidate_packet: MatchCandidate[];
       extraction: Extraction | null;
       model_id: string | null;
       matching_outcome: "matched" | "create_new" | null;
@@ -291,7 +311,7 @@ export async function confirmReportMatch(
         omittedEvidence?: Record<string, number>;
       };
     }>(
-      `SELECT state, candidate_ids, extraction, model_id,
+      `SELECT state, candidate_ids, candidate_packet, extraction, model_id,
         matching_outcome, decision_source, happening_id,
         recommendation, extraction_version, extraction_input, matching_version,
         snapshot_fingerprint, assessments, coverage
@@ -324,6 +344,15 @@ export async function confirmReportMatch(
       )
     )
       throw new SubmissionError("Matching suggestions are not ready yet.", 409);
+    const fresh = await nearbyCandidates(
+      {
+        lat: report.lat,
+        lng: report.lng,
+        observedAt: report.observedAt,
+        candidateHint: report.candidateId,
+      },
+      client,
+    );
     if (
       !processing.extraction ||
       !processing.model_id ||
@@ -335,7 +364,7 @@ export async function confirmReportMatch(
         "Matching suggestions need to be refreshed.",
         409,
       );
-    if (processing.snapshot_fingerprint !== fresh?.fingerprint)
+    if (processing.snapshot_fingerprint !== fresh.fingerprint)
       throw new SubmissionError(
         "Nearby evidence changed. Refresh the suggestions before deciding.",
         409,
@@ -357,9 +386,13 @@ export async function confirmReportMatch(
         "This Report cannot be assigned until its described occurrence is clear.",
         409,
       );
+    const shown = reviewSet(
+      processing.candidate_packet,
+      processing.assessments,
+    );
     if (
       choice.choice === "match" &&
-      (!report.candidates.some((c) => c.id === choice.candidateId) ||
+      (!shown.some((c) => c.id === choice.candidateId) ||
         !choice.candidateIdsShown.includes(choice.candidateId))
     )
       throw new SubmissionError(
@@ -371,7 +404,7 @@ export async function confirmReportMatch(
       new Set(choice.candidateIdsShown).size !==
         choice.candidateIdsShown.length ||
       choice.candidateIdsShown.some(
-        (candidateId) => !report.candidates.some((c) => c.id === candidateId),
+        (candidateId) => !shown.some((c) => c.id === candidateId),
       )
     )
       throw new SubmissionError(
@@ -407,7 +440,7 @@ export async function confirmReportMatch(
     if (
       versions.rows.some(
         (v) =>
-          fresh?.candidates.find((c) => c.id === v.id)?.accountVersion !==
+          fresh.candidates.find((c) => c.id === v.id)?.accountVersion !==
           v.version,
       )
     )
@@ -464,7 +497,7 @@ export async function confirmReportMatch(
 async function publishEvidence(
   client: PoolClient,
   input: {
-    report: SavedReport;
+    report: SubmittedReport;
     extraction: Extraction;
     happeningId: string;
     createHappening: boolean;

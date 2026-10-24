@@ -1,5 +1,36 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
+import { leaseSeconds, modelTimeoutMs } from "./server-timing";
+
+const fixture = "http://127.0.0.1:3101";
+type Page = import("@playwright/test").Page;
+
+async function modelCalls(page: Page, text: string) {
+  return (
+    await page.request.get(`${fixture}/calls?text=${encodeURIComponent(text)}`)
+  ).json();
+}
+
+async function saveHeld(page: Page, label: string) {
+  const originalText = `A cart blocks the ${label} ramp. ${randomUUID()}`;
+  const report = await save(page, originalText, "success", {
+    lat: 33 + Math.random(),
+    lng: -160,
+  });
+  await page.request.post(`${fixture}/control`, {
+    data: { text: originalText, mode: "success", hold: 1 },
+  });
+  const started = Date.now();
+  const held = page.request.post(`/api/reports/${report.id}/process`);
+  await expect
+    .poll(async () => (await modelCalls(page, originalText)).extraction)
+    .toBe(1);
+  return { id: report.id as string, originalText, held, started };
+}
+
+async function release(page: Page, text: string) {
+  await page.request.post(`${fixture}/release`, { data: { text } });
+}
 
 async function signIn(page: import("@playwright/test").Page) {
   await page.goto("/?contribute=1");
@@ -461,4 +492,97 @@ test("Observation support is an exact localized passage and invalid source IDs n
   expect(result.state).toBe("pending");
   expect(result.extractionReady).toBe(false);
   expect(result.happeningId).toBeNull();
+});
+
+test("a late extraction cannot replace the checkpoint saved by the request that took over its lease", async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  await signIn(page);
+  const { id, originalText, held } = await saveHeld(page, "late");
+  await page.waitForTimeout((leaseSeconds + 1) * 1000);
+  const takeover = await (
+    await page.request.post(`/api/reports/${id}/process`)
+  ).json();
+  expect(takeover.state).toBe("saved");
+  expect(takeover.extractionReady).toBe(true);
+  await release(page, originalText);
+  const late = await (await held).json();
+  expect(late).toEqual(
+    await (await page.request.get(`/api/reports/${id}`)).json(),
+  );
+  expect(await modelCalls(page, originalText)).toEqual({
+    extraction: 2,
+    matching: 0,
+  });
+  const published = await (
+    await page.request.post(`/api/reports/${id}/process`)
+  ).json();
+  expect(published.state).toBe("published");
+  const detail = await (await page.request.get(`/api/happenings/${id}`)).json();
+  expect(detail.observations.length).toBeGreaterThan(0);
+  for (const observation of detail.observations)
+    expect(observation.subject).toMatch(/\(call 2\)$/);
+  expect(await modelCalls(page, originalText)).toEqual({
+    extraction: 2,
+    matching: 1,
+  });
+});
+
+test("each processing request makes one model call across a full journey", async ({
+  page,
+}) => {
+  await signIn(page);
+  const originalText = `Orange barriers block the bridge path. ${randomUUID()}`;
+  const report = await save(page, originalText, "match");
+  const posts = [
+    await page.request.post(`/api/reports/${report.id}/process`),
+    await page.request.post(`/api/reports/${report.id}/process`),
+    await page.request.post(`/api/reports/${report.id}/process`, {
+      data: { refresh: true },
+    }),
+  ];
+  expect((await posts[1].json()).state).toBe("match_review");
+  expect((await posts[2].json()).state).toBe("match_review");
+  const calls = await modelCalls(page, originalText);
+  expect(calls).toEqual({ extraction: 1, matching: 2 });
+  expect(calls.extraction + calls.matching).toBe(posts.length);
+});
+
+test("an expired lease shows interrupted extraction with a retry", async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  await signIn(page);
+  const { id, originalText, held } = await saveHeld(page, "interrupted");
+  await page.waitForTimeout((leaseSeconds + 1) * 1000);
+  expect(
+    await (await page.request.get(`/api/reports/${id}`)).json(),
+  ).toMatchObject({
+    state: "pending",
+    pendingReason: "extraction_interrupted",
+    nextAction: "retry",
+  });
+  await release(page, originalText);
+  expect((await (await held).json()).pendingReason).toBe(
+    "extraction_interrupted",
+  );
+});
+
+test("a provider that never answers leaves the Report pending after the model timeout", async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  await signIn(page);
+  const { originalText, held, started } = await saveHeld(page, "timeout");
+  const result = await (await held).json();
+  const elapsed = Date.now() - started;
+  await release(page, originalText);
+  expect(elapsed).toBeGreaterThanOrEqual(modelTimeoutMs);
+  expect(elapsed).toBeLessThan(modelTimeoutMs + 5000);
+  expect(result).toMatchObject({
+    state: "pending",
+    pendingReason: "extraction_failed",
+    nextAction: "retry",
+  });
 });
