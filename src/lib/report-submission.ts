@@ -6,7 +6,7 @@ import {
   EXTRACTION_VERSION,
   MATCHING_REVISION,
   extractionInput,
-  isPlausible,
+  effectiveGrade,
   revision,
   type CandidateAssessment,
 } from "./report-model";
@@ -131,13 +131,16 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
 // The best suggestion plus at most four alternatives (ADR 0005).
 export const REVIEW_SET_SIZE = 5;
 
+const gradeRank = (a: CandidateAssessment) =>
+  ({ same: 0, unknown: 1, separate: 2 })[effectiveGrade(a)];
+
 export function reviewSet(
   packet: MatchCandidate[],
   assessments: CandidateAssessment[],
 ) {
   const order = assessments
     .slice()
-    .sort((a, b) => Number(!isPlausible(a)) - Number(!isPlausible(b)));
+    .sort((a, b) => gradeRank(a) - gradeRank(b));
   return (
     order.length
       ? order.flatMap((a) => packet.filter((c) => c.id === a.candidateId))

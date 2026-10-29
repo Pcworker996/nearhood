@@ -168,7 +168,8 @@ const scenarios: {
   { id: "D03", state: "clarification" },
   { id: "S03", state: "clarification" },
   { id: "U04", state: "match_review" },
-  { id: "P03", state: "clarification" },
+  // One same plus unknown candidates is suggested since ADR 0008 (#22).
+  { id: "P03", state: "match_review" },
   { id: "A02-remove-identity", state: "pending" },
 ];
 
@@ -266,7 +267,9 @@ for (const [index, scenario] of scenarios.entries()) {
       );
     }
     if (c.id === "P03") {
-      expect(matched.pendingReason).toBe("unclear_continuity");
+      // The one same candidate is suggested; unshown unknown ones still block rejection.
+      expect(matched.pendingReason).toBeNull();
+      expect(matched.recommendation?.kind).toBe("match");
       const rejected = await page.request.post(
         `/api/reports/${saved.id}/match`,
         {

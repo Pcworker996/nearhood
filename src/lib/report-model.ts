@@ -44,7 +44,7 @@ export function revision(version: string | null) {
 }
 export const EXTRACTION_VERSION = "report-extraction-v7";
 export const EXTRACTION_REVISION = revision(EXTRACTION_VERSION)!;
-export const MATCHING_VERSION = "report-matching-v5";
+export const MATCHING_VERSION = "report-matching-v6";
 export const MATCHING_REVISION = revision(MATCHING_VERSION)!;
 export const MATCHING_INPUT_BYTES = 65536;
 
@@ -110,8 +110,14 @@ export type CandidateAssessment = {
   evidenceIds: string[];
   reason: string;
 };
+// A separate assessment with a conflicting chronology contradicts itself, so
+// software reads it as unknown (ADR 0008).
+export const effectiveGrade = (a: CandidateAssessment) =>
+  a.continuity === "separate" && a.chronology === "conflict"
+    ? "unknown"
+    : a.continuity;
 export const isPlausible = (a: CandidateAssessment) =>
-  a.continuity !== "separate" || a.chronology === "conflict";
+  effectiveGrade(a) !== "separate";
 type Coverage = {
   poolTruncated?: boolean;
   omittedEvidence?: Record<string, number>;
@@ -630,25 +636,23 @@ export async function compareReport(
     throw new RejectedOutputError(error, value);
   }
   const plausible = assessments.filter(isPlausible);
+  const same = assessments.filter((a) => effectiveGrade(a) === "same");
   let matching: MatchRecommendation;
-  if (
-    (incomplete && plausible.length === 0) ||
-    plausible.length > 1 ||
-    plausible.some((a) => a.continuity !== "same")
-  )
+  // One same candidate is suggested; unknown ones stay offered as alternatives.
+  if (same.length === 1)
+    matching = {
+      kind: "match",
+      candidateId: same[0].candidateId,
+      evidenceIds: same[0].evidenceIds,
+      reason: same[0].reason,
+    };
+  else if (plausible.length > 0 || incomplete)
     matching = {
       kind: "uncertain",
       evidenceIds: plausible.flatMap((a) => a.evidenceIds),
       question: incomplete
         ? COVERAGE_LIMIT_MESSAGE
         : "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure.",
-    };
-  else if (plausible[0])
-    matching = {
-      kind: "match",
-      candidateId: plausible[0].candidateId,
-      evidenceIds: plausible[0].evidenceIds,
-      reason: plausible[0].reason,
     };
   else matching = { kind: "no_match" };
   return { matching, assessments, run };

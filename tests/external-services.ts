@@ -12,6 +12,8 @@ const scenarios = new Map<
     hold?: number;
     category?: string;
     matchingReplay?: string;
+    // Per-candidate grades; candidates not listed are graded separate.
+    grades?: Record<string, { continuity: string; chronology?: string }>;
   }
 >();
 const calls = new Map<string, { extraction: number; matching: number }>();
@@ -47,6 +49,7 @@ const server = createServer(async (req, res) => {
       hold: body.hold,
       category: body.category,
       matchingReplay: body.matchingReplay,
+      grades: body.grades,
     });
     return json({ ok: true });
   }
@@ -208,6 +211,18 @@ const server = createServer(async (req, res) => {
     const assessments = (input.candidates ?? []).map(
       (candidate: { id: string; evidence: { observationId: string }[] }) => {
         const named = candidate.id === scenario.candidateId;
+        const graded = scenario.grades
+          ? (scenario.grades[candidate.id] ?? { continuity: "separate" })
+          : null;
+        if (graded)
+          return {
+            candidateId: candidate.id,
+            continuity: graded.continuity,
+            chronology: graded.chronology ?? "consistent",
+            scope: "same",
+            evidenceIds: [candidate.evidence[0].observationId],
+            reason: "The supplied original evidence describes this occurrence.",
+          };
         return {
           candidateId: candidate.id,
           continuity:
