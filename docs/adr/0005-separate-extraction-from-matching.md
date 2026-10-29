@@ -9,6 +9,8 @@ Nearhood needs to distinguish what a contributor reports from which evolving occ
 
 Sources: the product owner's October 21 decisions in [spec #1](https://github.com/Pcworker996/nebius-hack/issues/1), [plan #2](https://github.com/Pcworker996/nebius-hack/issues/2), and [the revised matching contract](../proposals/report-matching-strategy.md). Implementation belongs to [#4](https://github.com/Pcworker996/nebius-hack/issues/4) and [#5](https://github.com/Pcworker996/nebius-hack/issues/5).
 
+**October 29 revision:** [ADR 0008](0008-uncertain-matches-publish-with-connections.md) narrows the coverage rule below. Reports left out of one Happening's evidence are disclosed and no longer block publication. A truncated pool of Happenings is still not evidence of no match: such a Report is never published as new automatically.
+
 ## Relationship to ADR 0004
 
 This partially supersedes [ADR 0004](0004-confirm-matches-before-membership.md): the pre-comparison five-candidate cutoff and combined extraction/matching call are replaced. Compare a larger bounded pool, initially evaluating 20, before selecting the best suggestion and at most four alternatives for review. ADR 0004's immutable Reports, deterministic retrieval, validated evidence, contributor confirmation, attribution and atomic publication remain in force.

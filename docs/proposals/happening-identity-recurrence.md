@@ -73,7 +73,7 @@ For each candidate, matching answers: *Is this Report about this Happening's sit
 
 The label names stay the same, so the schema, validator, stored assessments and decision code don't change. Only the definitions change.
 
-**What counts as a different cause (Undecided, Q2).** "Path blocked; I didn't see what blocks it" (U03) is the same situation under H1: the cause is unknown, not shown to be different. "Path blocked by a new fallen tree" after "branch removed" (N04) is separate. Whether a *stated* different cause without a stated ending is separate (for example "the road is closed again, this time for a parade") needs a decision.
+**What counts as a different cause (Decided 2026-10-29, Q2).** "Path blocked; I didn't see what blocks it" (U03) is the same situation under H1: the cause is unknown, not shown to be different. "Path blocked by a new fallen tree" after "branch removed" (N04) is separate. A *stated* different cause without a stated ending ("the road is closed again, this time for a parade") is also separate.
 
 ### H2. Activities keep instance identity (Agreed)
 
@@ -165,13 +165,13 @@ With these labels, the v4 run's U04 errors become correct answers, and U01–U03
 
 | ID | Question | Impact | Evidence to decide |
 | --- | --- | --- | --- |
-| Q1 | Should a long-dormant Happening still absorb a recurrence? For example, after N days with no Reports, or N days after Reported resolved, start a new Happening. A per-category window (lamp versus bridge) could reuse #10's freshness windows. | U02 and R3 labels; whether retrieval or prompt needs a time rule | Product judgement; how long real conditions typically recur |
-| Q2 | Is a stated different cause, without a stated ending, a different situation? | U03, R2, and the prompt wording | Product judgement; examples from the demo scenarios |
-| Q3 | Should the matching reason say explicitly when it attaches across a resolution report ("dark again after a reported resolution")? | Inspectability of the review card | Review of v6 outputs |
-| Q4 | Do the v6 R3/R5 inputs stay in scope now that they don't decide identity? | v6 scope | Cost of the change against the grounding and ordering benefit |
+| Q1 | ~~Should a long-dormant Happening still absorb a recurrence?~~ | **Decided 2026-10-29:** yes, no time limit; the account shows the gap and the contributor still confirms the match. Recorded with v6 U1. | — |
+| Q2 | ~~Is a stated different cause, without a stated ending, a different situation?~~ | **Decided 2026-10-29:** yes. A stated different cause is evidence of a different situation (`separate`), consistent with ADR 0007's "explicitly new … cause". | — |
+| Q3 | ~~Should the matching reason say when it attaches across a resolution report?~~ | **Decided 2026-10-29:** yes; the reason must state it (e.g. "dark again after a reported repair on 15 Oct"). | — |
+| Q4 | ~~Do the v6 R3/R5 inputs stay in scope?~~ | **Decided 2026-10-29:** yes, both: submission time and the starting Happening. | — |
 
 ## Decision record
 
-**Outcome / date:** Direction agreed 2026-10-28: attach unless evidence shows a different situation (H1); activities keep instance identity (H2). Details pending.
+**Outcome / date:** Direction agreed 2026-10-28: attach unless evidence shows a different situation (H1); activities keep instance identity (H2). Q1 to Q4 decided 2026-10-29 (see table).
 **Agreed scope and rationale:** See Problem and evidence.
 **Issue / ADR / implementation reference:** [ADR 0007](../adr/0007-happening-identity-follows-the-situation.md) and CONTEXT.md (Happening, Recurrence) drafted 2026-10-28. Pending: spec #1 wording, #9 note, v6 prompt, fixture relabelling.

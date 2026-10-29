@@ -13,6 +13,8 @@ Source: the product owner's October 19 revision in [ticket #4](https://github.co
 
 **October 28 revision:** [ADR 0007](0007-happening-identity-follows-the-situation.md) changes what counts as the same Happening: unknown history (elapsed time, unknown repair, a resolution report or Reported resolved) no longer counts as uncertainty, so such Reports are suggested as matches for confirmation. "Uncertainty" below now means the Happening itself can't be identified. The confirmation boundary is unchanged.
 
+**October 29 revision:** [ADR 0008](0008-uncertain-matches-publish-with-connections.md) changes what uncertainty does. The focused question no longer blocks: the contributor can also say the Report describes a different situation, or that they can't tell, and publish it as its own Happening with a displayed connection to the possible matches. Every possible match is offered, not five. "Uncertainty leaves the Report unassigned" below now holds only until the contributor answers. The confirmation boundary for joining an existing Happening is unchanged.
+
 ## Decision and responsibilities
 
 - Save the immutable Report before processing. Keep submission and observation times distinct, and retain the contributor's original words, location, and provenance.

@@ -26,7 +26,7 @@ Source: discussion with the product owner, Maoyuan Wang, on 2026-10-28, recorded
 - **The main matching safety target changes.** It becomes "never merge different situations" (expected `separate`, actual `same`), alongside "never create a duplicate Happening without review" (expected `same`, actual `separate`).
 - **Fewer clarification questions** for unknown-history Reports. More Reports are suggested as matches, and contributors confirm them.
 - **The Shared Account must represent gaps and reopening.** A synthesis that implies continuity across a gap is a defect.
-- **A long-dormant Happening could absorb an unrelated recurrence.** Whether a time limit applies is open (proposal Q1). Contributor review and #6 rematching are the safeguards until then.
+- **A long-dormant Happening could absorb an unrelated recurrence.** Decided 2026-10-29: no time limit (proposal Q1). A stated different cause is a different situation (proposal Q2). Contributor review and #6 rematching are the safeguards until then.
 - Spec #1's "Unclear continuity stays unassigned and prompts a focused question" no longer applies to unknown history. It still applies when the Happening itself can't be identified.
 
 ## Alternatives

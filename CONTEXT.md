@@ -34,6 +34,10 @@ _Avoid_: Label
 **Matching**:
 Determining whether a report refers to an existing happening or a new happening.
 
+**Possible connection**:
+A displayed suggestion that two happenings may describe the same situation, made of attributed statements tied to reports: automatic matching found a report may describe both, a contributor couldn't tell, or a contributor said their report describes a different situation. It is shown whether or not it is accurate, never changes membership or the shared account's claims, and is not resolved by a later statement.
+_Avoid_: Duplicate flag, link
+
 **Report stack**:
 The collection of attributed reports associated with a happening that readers can inspect. It includes differing perspectives, biased accounts, and conflicting observations.
 

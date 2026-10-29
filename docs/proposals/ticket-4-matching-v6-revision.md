@@ -1,6 +1,6 @@
 # Proposal: Revise matching as `report-matching-v6` after the 2026-10-27 live run
 
-**Status:** Draft, not accepted or implemented.
+**Status:** Contract agreed 2026-10-29; see [Consolidated v6 contract](#consolidated-v6-contract-2026-10-29). Not implemented.
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-27.
 **Related issues:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4) (matching stage). Evidence: [live matching record](../reviews/2026-10-27-issue-4-live-matching.md) and its [artifacts](../reviews/artifacts/2026-10-27-issue-4-matching/). Companion: [complete matching output](ticket-4-complete-matching-output.md), which owns the exact-count schema fix.
 **Decision requested:** Answer U1 to U4, and agree to R1 to R5 below, before `report-matching-v6` is implemented and evaluated.
@@ -8,6 +8,25 @@
 > **Renumbered (2026-10-28):** this revision was drafted as v5. The exact-count schema fix from the companion proposal shipped alone as `report-matching-v5`, so this revision is `report-matching-v6` and its baseline is v5. References to the 2026-10-27 v4 run remain historical.
 
 > **Superseded in part (2026-10-28):** the [Happening identity proposal](happening-identity-recurrence.md) changes what `same` means. R1's continuity rules and "link" concept, the S03 label reasoning, and the U-family expectations are replaced by its H1/H2 rules. R2, R3, R5, the chronology definitions and the verification order still apply.
+
+## Consolidated v6 contract (2026-10-29)
+
+**Implement from this section.** The sections after it are the original proposal and rationale; where they differ, this section wins. Decisions are from discussion with Maoyuan Wang on 2026-10-28 and 2026-10-29.
+
+| Area | Contract | Source |
+| --- | --- | --- |
+| Question per candidate | "Is this Report about this Happening's situation?" | [H1](happening-identity-recurrence.md#h1-identity-rule-for-disruptions-and-safety-concerns-agreed-direction-wording-proposed), ADR 0007 |
+| `same` | Same problem at the same place or object, with no evidence of a different situation. Unknown repair history, elapsed time of any length, an intervening resolution report or Reported resolved do not prevent `same`. | H1; identity Q1 and U1: no time limit |
+| `separate` | Evidence of a different situation: a different object or problem; an explicitly new object, cause or event at the same place, **including a stated different cause without a stated ending**; or the Report says it is different or unrelated. | H1; identity Q2 |
+| `unknown` | It can't be told which Happening the Report is about, or whether it is about this problem at all. | H1 |
+| Chronology | R1's definitions of `consistent`, `change`, `conflict`, `unknown`. Disagreement about the same situation is `same` + `conflict`. Spreading (T04) and later removal (D04) are `change`. | R1; U2 |
+| Reason | Written before the labels (R2 order). About 200 characters, hard cap 320. Must refer to the new Report. When it attaches across a resolution report, it says so (e.g. "dark again after a reported repair on 15 Oct"). | R2; U3; identity Q3 |
+| Inputs | Add the new Report's `submittedAt` (R3) and the starting Happening when set (R5), matching-only. | R3, R5; identity Q4 |
+| Fixtures | R4, with S03 and S03b labelled `same` under H1/U1. | R4; U1 |
+| Held-out cases | 24 new cases written by a fresh agent session given only the guardrails, ADRs and case format; the product owner reviews the labels before any run. | U4 |
+| Measurement order | R2-only run first, then the full v6, compared on the existing cases and the held-out cases. | Verification below |
+
+**Not in v6:** per-candidate model calls ([Q5](possible-duplicate-links.md#delivery-and-open-decisions)); reasons citing the Report's Observation keys (Proposed in the [possible-duplicate connections proposal](possible-duplicate-links.md)). The decision-rule changes (effective grade, one `same` plus `unknown`) ship as slice 2 of that proposal.
 
 Labels: **Proposed** is a contract to accept or change. **Illustrative** is wording or a value that can change without changing behavior. **Undecided** blocks the work that depends on it.
 
@@ -182,13 +201,13 @@ The smallest useful slice is R4 label review plus the R2-only run: no prompt cha
 
 | ID | Question | Impact | Evidence to decide |
 | --- | --- | --- | --- |
-| U1 | How long a gap between the candidate's evidence and `submittedAt` still counts as a link, when there is no repair evidence? | S03b label; R1 wording | Product judgement against the guardrails; reviewer decision |
-| U2 | Are T04 (scope spreads) and D04 (earlier blockage, later removed) `change` or `consistent`? | Chronology definitions in R1 and the answer key | Reviewer decision using R1 definitions |
-| U3 | Is a reason target of about 200 characters enough for inspectable explanations? | R2 guidance | Grounding review of the R2-only run |
-| U4 | Who authors the 24 held-out cases, and when? | Qualification cannot happen without them | Assign an author who has not seen these results |
+| U1 | ~~How long a gap still counts as a link, when there is no repair evidence?~~ | **Decided 2026-10-29:** no time limit. A long silence alone never separates (ADR 0007); the account shows the gap. S03b is labelled `same`. Same decision as [identity Q1](happening-identity-recurrence.md). | — |
+| U2 | ~~Are T04 and D04 `change` or `consistent`?~~ | **Decided 2026-10-29:** both `change`; `consistent` means agreement without development. | — |
+| U3 | ~~Reason length?~~ | **Decided 2026-10-29:** ask for about 200 characters; keep the 320 cap. Confirm with the grounding review of the R2-only run. | — |
+| U4 | ~~Who authors the 24 held-out cases?~~ | **Decided 2026-10-29:** a fresh agent session given only the guardrails, ADRs and case format (no review files or results); the product owner reviews labels before any run. | — |
 
 ## Decision record
 
-**Outcome / date:** Pending.
+**Outcome / date:** Open questions U1 to U4 decided 2026-10-29 (see table); R1 to R5 still Draft. Needed by slice 1 of the [possible-duplicate connections proposal](possible-duplicate-links.md).
 **Agreed scope and rationale:** …
 **Issue / ADR / implementation reference:** …
