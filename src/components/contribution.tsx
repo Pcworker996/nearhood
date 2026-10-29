@@ -2,11 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import type {
-  Coordinates,
-  MatchCandidate,
-  MatchChoice,
-  SavedReport,
+import {
+  REVIEW_SET_SIZE,
+  type Coordinates,
+  type MatchCandidate,
+  type MatchChoice,
+  type SavedReport,
 } from "@/lib/happenings";
 import { ReportCard } from "./report-card";
 
@@ -283,12 +284,21 @@ export default function Contribution({
     recommendation?.kind === "uncertain"
       ? recommendation.evidenceIds
       : undefined;
+  // The first five possible matches show; the rest are behind "Show more".
+  const clarificationCandidates =
+    saved && recommendation?.kind === "uncertain"
+      ? showMoreCandidates
+        ? saved.candidates
+        : saved.candidates.slice(0, REVIEW_SET_SIZE)
+      : [];
   const candidateIdsShown =
-    saved && (recommendation?.kind === "uncertain" || showMoreCandidates)
-      ? saved.candidates.map((candidate) => candidate.id)
-      : suggestedCandidateId
-        ? [suggestedCandidateId]
-        : [];
+    recommendation?.kind === "uncertain"
+      ? clarificationCandidates.map((candidate) => candidate.id)
+      : saved && showMoreCandidates
+        ? saved.candidates.map((candidate) => candidate.id)
+        : suggestedCandidateId
+          ? [suggestedCandidateId]
+          : [];
   if (!draft)
     return (
       <main className="detail-content">
@@ -427,14 +437,12 @@ export default function Contribution({
                 >
                   <h2>Could you clarify?</h2>
                   <p>{saved.recommendation.question}</p>
-                  {saved.pendingReason !== "incomplete_coverage" && (
-                    <p className="muted">
-                      Choose a nearby Happening if one describes the same
-                      situation, or choose none. Leave the Report unassigned
-                      if you are unsure.
-                    </p>
-                  )}
-                  {saved.candidates.map((candidate) => (
+                  <p className="muted">
+                    Choose a nearby Happening if one describes the same
+                    situation. Otherwise your Report is published on its own,
+                    and any Happening it may relate to shows the connection.
+                  </p>
+                  {clarificationCandidates.map((candidate) => (
                     <MatchCandidateCard
                       key={candidate.id}
                       candidate={candidate}
@@ -449,13 +457,27 @@ export default function Contribution({
                       disabled={busy}
                     />
                   ))}
-                  {/* Incomplete coverage follows from stored evidence, so the
-                      server always refuses a new Happening here. */}
+                  {saved.candidates.length > REVIEW_SET_SIZE && (
+                    <button
+                      className="text-button"
+                      type="button"
+                      onClick={() => setShowMoreCandidates((shown) => !shown)}
+                    >
+                      {showMoreCandidates
+                        ? "Show fewer"
+                        : `Show ${saved.candidates.length - REVIEW_SET_SIZE} more`}
+                    </button>
+                  )}
+                  {/* Ungraded Happenings could match, so "different" is never
+                      offered when the pool was truncated (ADR 0008). */}
                   {saved.pendingReason !== "incomplete_coverage" && (
                     <button
                       className="secondary-button"
                       type="button"
-                      disabled={busy}
+                      disabled={
+                        busy ||
+                        candidateIdsShown.length < saved.candidates.length
+                      }
                       onClick={() =>
                         void chooseMatch({
                           choice: "create_new",
@@ -463,9 +485,19 @@ export default function Contribution({
                         })
                       }
                     >
-                      None of these describe what I reported
+                      My Report describes a different situation from these
                     </button>
                   )}
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    disabled={busy}
+                    onClick={() =>
+                      void chooseMatch({ choice: "unsure", candidateIdsShown })
+                    }
+                  >
+                    I can&apos;t tell. Publish my Report on its own for now
+                  </button>
                   <button
                     className="text-button"
                     type="button"

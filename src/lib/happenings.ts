@@ -95,6 +95,8 @@ export type MatchRecommendation =
     }
   | { kind: "no_match" }
   | { kind: "uncertain"; evidenceIds: string[]; question: string };
+// Suggestions shown before "Show more" (ADR 0008).
+export const REVIEW_SET_SIZE = 5;
 export type MatchChoice =
   | { choice: "match"; candidateId: string; candidateIdsShown: string[] }
   | { choice: "create_new"; candidateIdsShown: string[] }

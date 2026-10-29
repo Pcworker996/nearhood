@@ -128,7 +128,7 @@ type Coverage = {
 export const coverageIncomplete = (coverage: Coverage) =>
   !!coverage.poolTruncated;
 export const COVERAGE_LIMIT_MESSAGE =
-  "There are too many nearby Happenings or Reports to check automatically. Choose a shown Happening if one describes what you reported, or leave this Report unassigned.";
+  "Some nearby Happenings could not be checked. Choose a shown Happening if one describes what you reported, or publish your Report on its own.";
 export type ModelRun = {
   model: string;
   version: string;
@@ -669,7 +669,7 @@ export async function compareReport(
       evidenceIds: plausible.flatMap((a) => a.evidenceIds),
       question: incomplete
         ? COVERAGE_LIMIT_MESSAGE
-        : "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure.",
+        : "Which of these nearby situations describes what you reported?",
     };
   else matching = { kind: "no_match" };
   return { matching, assessments, run };

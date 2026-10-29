@@ -211,12 +211,14 @@ test("an uncertain match asks a focused question and records the contributor's a
   ).toBeVisible();
   await expect(
     page.getByText(
-      "Which of these nearby situations describes what you reported? Leave it unassigned if you are unsure.",
+      "Which of these nearby situations describes what you reported?",
       { exact: true },
     ),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "None of these describe what I reported" })
+    .getByRole("button", {
+      name: "My Report describes a different situation from these",
+    })
     .click();
   await expect(
     page.getByText("Report saved · account published", { exact: true }),

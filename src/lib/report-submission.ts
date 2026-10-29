@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { database } from "./database";
-import type { MatchCandidate, SavedReport } from "./happenings";
+import {
+  REVIEW_SET_SIZE,
+  type MatchCandidate,
+  type SavedReport,
+} from "./happenings";
 import {
   EXTRACTION_REVISION,
   EXTRACTION_VERSION,
@@ -128,8 +132,7 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
   CASE WHEN p.state='processing' AND p.lease_until < now() THEN 'pending' ELSE p.state END AS state
   FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id`;
 
-// Suggestions shown before "Show more" (ADR 0008).
-export const REVIEW_SET_SIZE = 5;
+export { REVIEW_SET_SIZE };
 
 const gradeRank = (a: CandidateAssessment) =>
   ({ same: 0, unknown: 1, separate: 2 })[effectiveGrade(a)];

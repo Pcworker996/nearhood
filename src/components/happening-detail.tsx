@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ClaimEvidence, HappeningDetail } from "@/lib/happenings";
+import type {
+  ClaimEvidence,
+  Connection,
+  HappeningDetail,
+} from "@/lib/happenings";
 import { FigmaIcon } from "./figma-icon";
 import { dateLabel, ReportCard } from "./report-card";
 
@@ -204,6 +208,13 @@ export default function HappeningDetailView({
             </div>
           </aside>
         )}
+        {(section === "account" || section === "uncertainty") &&
+          detail.connections.map((connection) => (
+            <PossibleConnection
+              key={connection.happeningId}
+              connection={connection}
+            />
+          ))}
         <p className="fixture-note">
           {detail.demo ? "Fictional Northbank demo data" : "Community reports"}
           {detail.account?.origin === "seed_fixture" &&
@@ -251,5 +262,38 @@ export default function HappeningDetailView({
         {error && <p role="alert">{error}</p>}
       </dialog>
     </div>
+  );
+}
+
+// Every statement is shown, oldest first; none settles the connection (ADR 0008).
+function PossibleConnection({ connection }: { connection: Connection }) {
+  const headingId = `connection-${connection.happeningId}`;
+  return (
+    <section className="uncertainty-box" aria-labelledby={headingId}>
+      <div>
+        <h2 id={headingId}>Possible connection with {connection.title}</h2>
+        <ul>
+          {connection.statements.map((statement) => (
+            <li key={`${statement.source}-${statement.kind}-${statement.reportId}`}>
+              {statement.source === "automatic_matching"
+                ? "Automatic matching found a Report may describe both"
+                : statement.kind === "unsure"
+                  ? `${statement.displayName} couldn't tell whether their Report is about the same situation`
+                  : `${statement.displayName} said their Report is about a different situation`}{" "}
+              ({dateLabel(statement.createdAt)}).
+              {statement.reason && ` ${statement.reason}`}
+              {statement.partialEvidence &&
+                " Checked on only some of the Reports."}
+            </li>
+          ))}
+        </ul>
+        <p>
+          Not confirmed.{" "}
+          <a href={`/?happening=${encodeURIComponent(connection.happeningId)}`}>
+            View {connection.title}
+          </a>
+        </p>
+      </div>
+    </section>
   );
 }

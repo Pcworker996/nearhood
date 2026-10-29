@@ -328,3 +328,68 @@ test("a connection to a Happening checked on only some of its Reports says so", 
 
   expect(automatic).toMatchObject({ partialEvidence: true });
 });
+
+test("the clarification page offers can't tell and different, and can't tell publishes", async ({
+  page,
+}, testInfo) => {
+  await signIn(page);
+  const place = { lat: projectLatitude(testInfo, 88), lng: 150 };
+  const possible = await publishedHappening(page, place);
+  const report = await submit(
+    page,
+    `Fencing is up along the remote path. ${randomUUID()}`,
+    place,
+    { [possible]: { continuity: "unknown" } },
+  );
+  await processFully(page, report.id);
+
+  await page.goto(`/?contribute=1&report=${report.id}`);
+  const clarification = page.getByRole("region", { name: "Matching clarification" });
+  await expect(
+    clarification.getByRole("button", {
+      name: "My Report describes a different situation from these",
+    }),
+  ).toBeVisible();
+  await clarification
+    .getByRole("button", { name: "I can't tell. Publish my Report on its own for now" })
+    .click();
+
+  await expect(page.getByText("Report saved · account published", { exact: true })).toBeVisible();
+  const decided = await (await page.request.get(`/api/reports/${report.id}`)).json();
+  expect(decided.happeningId).toBe(report.id);
+});
+
+test("a Happening page lists a possible connection with each statement and its Report", async ({
+  page,
+}, testInfo) => {
+  await signIn(page);
+  const place = { lat: projectLatitude(testInfo, 89), lng: 150 };
+  const possible = await publishedHappening(page, place);
+  const report = await submit(
+    page,
+    `Fencing is up along the remote path. ${randomUUID()}`,
+    place,
+    { [possible]: { continuity: "unknown" } },
+  );
+  await processFully(page, report.id);
+  await page.request.post(`/api/reports/${report.id}/match`, {
+    data: { choice: "unsure", candidateIdsShown: [possible] },
+  });
+  const created = await (await page.request.get(`/api/happenings/${report.id}`)).json();
+
+  await page.goto(`/?happening=${possible}`);
+  const block = page.getByRole("region", { name: `Possible connection with ${created.title}` });
+
+  await expect(block).toBeVisible();
+  await expect(
+    block.getByText("Test Neighbor couldn't tell whether their Report is about the same situation", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await expect(block.getByText("Automatic matching found a Report may describe both", { exact: false })).toBeVisible();
+  await expect(block.getByText("Not confirmed.", { exact: false })).toBeVisible();
+  await expect(block.getByRole("link", { name: `View ${created.title}` })).toHaveAttribute(
+    "href",
+    `/?happening=${report.id}`,
+  );
+});
