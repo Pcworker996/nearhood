@@ -38,8 +38,8 @@ type SubmittedReport = ReportContext &
   Pick<SavedReport, "id" | "candidateId" | "submittedAt">;
 
 // Serializes publications that read and change nearby Happenings.
-const PUBLICATION_LOCK = 70420261022;
-const SINGLE_CONTRIBUTOR =
+export const PUBLICATION_LOCK = 70420261022;
+export const SINGLE_CONTRIBUTOR =
   "One contributor's account; not independently verified.";
 
 const candidateSearch = (report: SubmittedReport) => ({

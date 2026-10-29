@@ -201,6 +201,7 @@ export async function connectionsFor(happeningId: string): Promise<Connection[]>
     JOIN nearhood.connection_statements s ON s.connection_id=hc.id
     LEFT JOIN nearhood.contributors c ON c.id=s.contributor_id
     WHERE $1 IN (hc.happening_low, hc.happening_high) AND hc.superseded_at IS NULL
+      AND other.redirect_to IS NULL
       AND EXISTS (SELECT 1 FROM nearhood.connection_statements suggested
         WHERE suggested.connection_id=hc.id AND suggested.kind IN ('possibly_same','unsure'))
     ORDER BY other.id, s.created_at, s.source, s.id`,

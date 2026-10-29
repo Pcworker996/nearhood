@@ -393,3 +393,140 @@ test("a Happening page lists a possible connection with each statement and its R
     `/?happening=${report.id}`,
   );
 });
+
+async function unsureConnection(
+  page: import("@playwright/test").Page,
+  place: { lat: number; lng: number },
+) {
+  const existing = await publishedHappening(page, place);
+  const report = await submit(
+    page,
+    `Fencing is up along the remote path. ${randomUUID()}`,
+    place,
+    { [existing]: { continuity: "unknown" } },
+  );
+  await processFully(page, report.id);
+  await page.request.post(`/api/reports/${report.id}/match`, {
+    data: { choice: "unsure", candidateIdsShown: [existing] },
+  });
+  return { existing, reportId: report.id };
+}
+
+test("moving my only Report into a connected Happening redirects the emptied one", async ({
+  page,
+}, testInfo) => {
+  await signIn(page);
+  const place = { lat: projectLatitude(testInfo, -2), lng: 150 };
+  const { existing, reportId } = await unsureConnection(page, place);
+  const before = await (await page.request.get(`/api/happenings/${existing}`)).json();
+
+  const moved = await page.request.post(`/api/reports/${reportId}/move`, {
+    data: { toHappeningId: existing },
+  });
+
+  expect(moved.status()).toBe(200);
+  expect((await moved.json()).happeningId).toBe(existing);
+  const target = await (await page.request.get(`/api/happenings/${existing}`)).json();
+  expect(target.reports.map((r: { id: string }) => r.id)).toContain(reportId);
+  expect(target.account.version).toBe(before.account.version + 1);
+  expect(target.account.origin).toBe("membership_change");
+  expect(target.connections).toEqual([]);
+  const emptied = await (await page.request.get(`/api/happenings/${reportId}`)).json();
+  expect(emptied).toEqual({ redirectTo: existing });
+});
+
+test("moving my Report back restores the emptied Happening with its connection", async ({
+  page,
+}, testInfo) => {
+  await signIn(page);
+  const place = { lat: projectLatitude(testInfo, -4), lng: 150 };
+  const { existing, reportId } = await unsureConnection(page, place);
+  const statementsBefore = said((await connections(page, existing))[0]);
+  await page.request.post(`/api/reports/${reportId}/move`, {
+    data: { toHappeningId: existing },
+  });
+
+  const back = await page.request.post(`/api/reports/${reportId}/move`, {
+    data: { toHappeningId: reportId },
+  });
+
+  expect(back.status()).toBe(200);
+  const restored = await (await page.request.get(`/api/happenings/${reportId}`)).json();
+  expect(restored.reports.map((r: { id: string }) => r.id)).toEqual([reportId]);
+  expect(restored.account.claims.length).toBeGreaterThan(0);
+  const target = await (await page.request.get(`/api/happenings/${existing}`)).json();
+  expect(target.reports.map((r: { id: string }) => r.id)).not.toContain(reportId);
+  expect(said(target.connections[0])).toEqual(statementsBefore);
+});
+
+test("a Report moves only by its contributor and only to a connected Happening", async ({
+  page,
+  browser,
+}, testInfo) => {
+  await signIn(page);
+  const place = { lat: projectLatitude(testInfo, -6), lng: 150 };
+  const { existing, reportId } = await unsureConnection(page, place);
+  const unconnected = await publishedHappening(page, {
+    lat: projectLatitude(testInfo, -8),
+    lng: 150,
+  });
+  const other = await (await browser.newContext()).newPage();
+  await signIn(other);
+
+  const byOther = await other.request.post(`/api/reports/${reportId}/move`, {
+    data: { toHappeningId: existing },
+  });
+  const toUnconnected = await page.request.post(`/api/reports/${reportId}/move`, {
+    data: { toHappeningId: unconnected },
+  });
+
+  expect(byOther.status()).toBe(404);
+  expect(toUnconnected.status()).toBe(409);
+  const detail = await (await page.request.get(`/api/happenings/${reportId}`)).json();
+  expect(detail.reports.map((r: { id: string }) => r.id)).toEqual([reportId]);
+});
+
+test("moving my Report out of a shared Happening leaves the other Reports' claims behind", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(60000);
+  await signIn(page);
+  const place = { lat: projectLatitude(testInfo, -10), lng: 150 };
+  const { existing, reportId } = await unsureConnection(page, place);
+  await joinHappening(page, reportId, place);
+  const sharedBefore = await (await page.request.get(`/api/happenings/${reportId}`)).json();
+  const targetBefore = await (await page.request.get(`/api/happenings/${existing}`)).json();
+
+  await page.request.post(`/api/reports/${reportId}/move`, {
+    data: { toHappeningId: existing },
+  });
+
+  const shared = await (await page.request.get(`/api/happenings/${reportId}`)).json();
+  const target = await (await page.request.get(`/api/happenings/${existing}`)).json();
+  expect(shared.reports).toHaveLength(sharedBefore.reports.length - 1);
+  expect(shared.account.origin).toBe("membership_change");
+  expect(shared.account.claims).toHaveLength(sharedBefore.account.claims.length - 1);
+  expect(target.account.claims).toHaveLength(targetBefore.account.claims.length + 1);
+  expect(shared.connections.map((c: { happeningId: string }) => c.happeningId)).toEqual([existing]);
+});
+
+test("a contributor moves their Report from its page, and the old link opens where it went", async ({
+  page,
+}, testInfo) => {
+  await signIn(page);
+  const place = { lat: projectLatitude(testInfo, -14), lng: 150 };
+  const { existing, reportId } = await unsureConnection(page, place);
+  const target = await (await page.request.get(`/api/happenings/${existing}`)).json();
+
+  await page.goto(`/?contribute=1&report=${reportId}`);
+  await page.getByRole("button", { name: `Move my Report to ${target.title}` }).click();
+  await expect
+    .poll(async () => (await (await page.request.get(`/api/reports/${reportId}`)).json()).happeningId)
+    .toBe(existing);
+
+  await page.goto(`/?happening=${reportId}`);
+  await expect(page.getByRole("heading", { level: 1, name: target.title })).toBeVisible();
+  await expect(
+    page.getByText("The Happening you opened was moved into this one.", { exact: true }),
+  ).toBeVisible();
+});

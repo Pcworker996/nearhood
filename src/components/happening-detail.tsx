@@ -12,10 +12,12 @@ import { dateLabel, ReportCard } from "./report-card";
 type Section = "account" | "evidence" | "timeline" | "uncertainty";
 export default function HappeningDetailView({
   detail,
+  movedNote = false,
   onBack,
   onContribute,
 }: {
   detail: HappeningDetail;
+  movedNote?: boolean;
   onBack: () => void;
   onContribute: () => void;
 }) {
@@ -72,6 +74,9 @@ export default function HappeningDetailView({
           {detail.contributorCount === 1 ? "contributor" : "contributors"}
         </p>
         <h1>{detail.title}</h1>
+        {movedNote && (
+          <p role="status">The Happening you opened was moved into this one.</p>
+        )}
         <button className="primary-button" onClick={onContribute}>
           Add an update
         </button>

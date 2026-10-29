@@ -46,6 +46,7 @@ export default function NearhoodBrowser({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [detail, setDetail] = useState<HappeningDetail | null>(null);
+  const [movedNote, setMovedNote] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [reader, setReader] = useState<Coordinates | null>(null);
   const [destination, setDestination] = useState<MapDestination | null>(null);
@@ -106,7 +107,19 @@ export default function NearhoodBrowser({
               ? "This Happening was not found."
               : "The account is temporarily unavailable.",
           );
-        setDetail(await response.json());
+        const body = await response.json();
+        // An emptied Happening redirects to where its last Report moved.
+        if (body.redirectTo) {
+          setMovedNote(true);
+          setDetailId(body.redirectTo);
+          window.history.replaceState(
+            {},
+            "",
+            `?happening=${encodeURIComponent(body.redirectTo)}`,
+          );
+          return;
+        }
+        setDetail(body);
       })
       .catch((error) => {
         if (error.name !== "AbortError") setDetailError(error.message);
@@ -119,6 +132,7 @@ export default function NearhoodBrowser({
     lng: (bounds.west + bounds.east) / 2,
   };
   function openDetail(id: string) {
+    setMovedNote(false);
     setDetailId(id);
     window.history.pushState({}, "", `?happening=${encodeURIComponent(id)}`);
   }
@@ -183,6 +197,7 @@ export default function NearhoodBrowser({
       <HappeningDetailView
         key={detail.id}
         detail={detail}
+        movedNote={movedNote}
         onBack={back}
         onContribute={contribute}
       />

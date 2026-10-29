@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import {
   REVIEW_SET_SIZE,
+  type Connection,
   type Coordinates,
   type MatchCandidate,
   type MatchChoice,
@@ -58,6 +59,16 @@ export default function Contribution({
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [submissionStarted, setSubmissionStarted] = useState(false);
   const [showMoreCandidates, setShowMoreCandidates] = useState(false);
+  // Happenings the published Report's Happening may be the same as (ADR 0008).
+  const [connected, setConnected] = useState<Connection[]>([]);
+  const publishedIn = saved?.state === "published" ? saved.happeningId : null;
+  useEffect(() => {
+    setConnected([]);
+    if (!publishedIn) return;
+    api(`/api/happenings/${encodeURIComponent(publishedIn)}`)
+      .then((detail) => setConnected(detail.connections ?? []))
+      .catch(() => setConnected([]));
+  }, [publishedIn]);
   // Automatic processing runs once per saved state; an unchanged response
   // (for example a checkpoint this deployment cannot lease) waits for Retry.
   const autoProcessed = useRef("");
@@ -177,6 +188,28 @@ export default function Contribution({
         e instanceof Error
           ? e.message
           : "Processing interrupted. Reload to inspect your saved Report.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function moveReport(toHappeningId: string) {
+    if (!saved) return;
+    setBusy(true);
+    setError("");
+    try {
+      setSaved(
+        await api(`/api/reports/${saved.id}/move`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ toHappeningId }),
+        }),
+      );
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Your Report was not moved. It remains where it was.",
       );
     } finally {
       setBusy(false);
@@ -525,6 +558,29 @@ export default function Contribution({
               >
                 Retry account update
               </button>
+            )}
+            {connected.length > 0 && (
+              <section
+                className="match-review"
+                aria-label="Possibly connected Happenings"
+              >
+                <h2>Possibly the same situation</h2>
+                <p className="muted">
+                  If your Report describes one of these, you can move it there.
+                  Only your own Report moves.
+                </p>
+                {connected.map((connection) => (
+                  <button
+                    key={connection.happeningId}
+                    className="secondary-button"
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void moveReport(connection.happeningId)}
+                  >
+                    Move my Report to {connection.title}
+                  </button>
+                ))}
+              </section>
             )}
             {(saved.happeningId ||
               (saved.matchingOutcome === "create_new" &&

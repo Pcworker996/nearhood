@@ -28,7 +28,7 @@ export function database() {
 
 const happeningSelect = `SELECT h.id, h.title, h.category, h.location_name AS "locationName", h.status, h.demo,
   extensions.ST_Y(h.location::extensions.geometry) AS lat, extensions.ST_X(h.location::extensions.geometry) AS lng,
-  h.starts_at AS "startsAt", h.ends_at AS "endsAt",
+  h.starts_at AS "startsAt", h.ends_at AS "endsAt", h.redirect_to AS "redirectTo",
   (SELECT count(DISTINCT r.contributor_id)::int FROM nearhood.observation_memberships m
    JOIN nearhood.observations o ON o.id=m.observation_id JOIN nearhood.reports r ON r.id=o.report_id WHERE m.happening_id=h.id) AS "contributorCount"
   FROM nearhood.happenings h`;
@@ -94,7 +94,7 @@ async function pendingReports(
 
 export async function listHappenings(bounds: Bounds): Promise<Happening[]> {
   const { rows } = await database().query<Happening>(
-    `${happeningSelect} WHERE
+    `${happeningSelect} WHERE h.redirect_to IS NULL AND
     extensions.ST_Y(h.location::extensions.geometry) BETWEEN $2 AND $4 AND
     (CASE WHEN $1::double precision <= $3::double precision THEN extensions.ST_Intersects(h.location::extensions.geometry, extensions.ST_MakeEnvelope($1::double precision,$2::double precision,$3::double precision,$4::double precision,4326))
      ELSE extensions.ST_X(h.location::extensions.geometry) >= $1 OR extensions.ST_X(h.location::extensions.geometry) <= $3 END)
@@ -118,12 +118,15 @@ export async function listHappenings(bounds: Bounds): Promise<Happening[]> {
 
 export async function happeningDetail(
   id: string,
-): Promise<HappeningDetail | null> {
-  const { rows } = await database().query<Happening>(
+): Promise<HappeningDetail | { redirectTo: string } | null> {
+  const { rows } = await database().query<Happening & { redirectTo: string | null }>(
     `${happeningSelect} WHERE h.id=$1`,
     [id],
   );
   if (!rows[0]) return (await pendingReports(undefined, id))[0] ?? null;
+  // An emptied Happening points to where its last Report moved (ADR 0008).
+  if (rows[0].redirectTo) return { redirectTo: rows[0].redirectTo };
+  const { redirectTo: _redirect, ...happening } = rows[0];
   const [account, reports, observations, connections] = await Promise.all([
     currentAccount(id),
     database().query<Report>(
@@ -145,7 +148,7 @@ export async function happeningDetail(
     connectionsFor(id),
   ]);
   return {
-    ...rows[0],
+    ...happening,
     account,
     reports: reports.rows,
     observations: observations.rows,
@@ -157,7 +160,8 @@ export async function claimEvidence(
   id: string,
   claimId: string,
 ): Promise<ClaimEvidence | null> {
-  const detail = await happeningDetail(id);
+  const found = await happeningDetail(id);
+  const detail = found && "reports" in found ? found : null;
   const claim = detail?.account?.claims.find((c) => c.id === claimId);
   if (!detail || !claim) return null;
   const { rows } = await database().query<{ observation_id: string }>(
