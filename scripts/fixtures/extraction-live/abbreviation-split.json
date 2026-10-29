@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "The gate on St. Mary St. is shut.",
+    "observedAt": null,
+    "locationName": "St. Mary St.",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "disruption"
+    ]
+  }
+}

@@ -128,7 +128,8 @@ export default function HappeningDetailView({
           <section>
             <h2>Current account</h2>
             <p className="muted">
-              Select a claim to inspect the evidence behind it.
+              Claims are derived interpretations, not the contributors’ words.
+              Select a claim to inspect the original Reports behind it.
             </p>
             {detail.account?.claims.map((claim) => (
               <button

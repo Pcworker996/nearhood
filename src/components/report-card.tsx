@@ -40,8 +40,12 @@ export function ReportCard({
         <div className="interpretation">
           <span className="eyebrow">Derived Observation</span>
           <p>
-            {observation.subject}: {observation.describedState}
+            {observation.subject}:{" "}
+            {observation.describedState ?? "No condition described"}
           </p>
+          {observation.uncertainty && (
+            <p>Uncertainty: {observation.uncertainty}</p>
+          )}
           {!!observation.sourceSupport?.length && (
             <details>
               <summary>Supporting passages</summary>

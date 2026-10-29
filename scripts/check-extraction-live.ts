@@ -2,6 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractReportInfo, type ReportContext } from "../src/lib/report-model";
+import { scoreCategory } from "./live-category";
 
 try {
   process.loadEnvFile(".env.local");
@@ -19,11 +20,16 @@ type LiveExpectation = {
   scopes?: string[];
   unreported?: string[];
   qualified?: string[];
+  // Acceptable categories, scored by scoreCategory.
+  category?: string[];
 };
 
 const directories = ["./fixtures/extraction/", "./fixtures/extraction-live/"];
-const fixtures: { file: string; report: ReportContext; live: LiveExpectation }[] =
-  [];
+const fixtures: {
+  file: string;
+  report: ReportContext;
+  live: LiveExpectation;
+}[] = [];
 for (const directory of directories) {
   const path = fileURLToPath(new URL(directory, import.meta.url));
   for (const file of (await readdir(path)).sort()) {
@@ -35,12 +41,20 @@ for (const directory of directories) {
 }
 
 let failed = 0;
+let categoryMisses = 0;
+let hazardsAsActivity = 0;
 for (const { file, report, live } of fixtures) {
   console.log(`# ${file}\n${report.originalText}`);
   try {
     const output = await extractReportInfo(report);
     console.log(JSON.stringify(output, null, 2));
-    const { observations, occurrence } = output.extraction;
+    const { observations, occurrence, category } = output.extraction;
+    const { miss: categoryMiss, hazardAsActivity } = scoreCategory(
+      category,
+      live.category,
+    );
+    if (categoryMiss) categoryMisses++;
+    if (hazardAsActivity) hazardsAsActivity++;
     const about = (term: string) =>
       observations.filter((o) =>
         [o.subject, o.spatialScope].some((field) =>
@@ -48,6 +62,8 @@ for (const { file, report, live } of fixtures) {
         ),
       );
     const problems = [
+      hazardAsActivity &&
+        `hazard labelled activity, expected ${live.category!.join(" or ")}`,
       occurrence !== live.occurrence &&
         `occurrence ${occurrence}, expected ${live.occurrence}`,
       ...(live.scopes ?? [])
@@ -72,6 +88,16 @@ for (const { file, report, live } of fixtures) {
           .map(() => `"${term}" lost its qualification (uncertainty is null)`);
       }),
     ].filter((problem): problem is string => Boolean(problem));
+    if (categoryMiss && !hazardAsActivity)
+      console.log(
+        `CATEGORY: ${category}, expected ${live.category!.join(" or ")}`,
+      );
+    // Not a failure: a reviewer decides whether the scope was referred back to
+    // ("it", "both") or attributed to the wrong passage.
+    for (const o of observations.filter((o) => o.scopeOutsideCitation))
+      console.log(
+        `REVIEW: "${o.key}" scope "${o.spatialScope}" is not named in its cited passages`,
+      );
     if (problems.length) failed++;
     console.log(problems.length ? `FAIL: ${problems.join("; ")}\n` : "PASS\n");
   } catch (error) {
@@ -82,4 +108,8 @@ for (const { file, report, live } of fixtures) {
   }
 }
 console.log(`${fixtures.length - failed}/${fixtures.length} passed`);
+const scored = fixtures.filter((f) => f.live.category).length;
+console.log(
+  `category: ${scored - categoryMisses}/${scored} acceptable, ${hazardsAsActivity} hazard(s) labelled activity`,
+);
 if (failed) process.exitCode = 1;

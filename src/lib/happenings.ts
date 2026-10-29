@@ -49,7 +49,8 @@ export type Observation = {
   id: string;
   reportId: string;
   subject: string;
-  describedState: string;
+  describedState: string | null;
+  uncertainty?: string | null;
   spatialScope: string | null;
   observedAt: string | null;
 };
@@ -73,7 +74,7 @@ export type MatchEvidence = {
   lat: number;
   lng: number;
   subject: string;
-  describedState: string;
+  describedState: string | null;
   spatialScope: string | null;
 };
 export type MatchCandidate = Coordinates & {
@@ -94,6 +95,9 @@ export type MatchRecommendation =
     }
   | { kind: "no_match" }
   | { kind: "uncertain"; evidenceIds: string[]; question: string };
+export type MatchChoice =
+  | { choice: "match"; candidateId: string; candidateIdsShown: string[] }
+  | { choice: "create_new"; candidateIdsShown: string[] };
 export type SavedReport = Report & {
   processingStage: "extraction" | "matching";
   extractionReady: boolean;

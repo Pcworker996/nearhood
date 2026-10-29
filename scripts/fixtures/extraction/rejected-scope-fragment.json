@@ -1,0 +1,30 @@
+{
+  "report": {
+    "originalText": "The north entrance has orange barriers.",
+    "observedAt": null,
+    "locationName": "Alder and 3rd",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "north",
+        "subject": "North entrance",
+        "sourceRef": "submitted_report",
+        "sourceIds": [
+          "s0"
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "blocked by orange barriers",
+        "spatialScope": "e",
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  },
+  "error": "Unsupported scope/time wording"
+}

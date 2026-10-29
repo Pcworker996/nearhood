@@ -10,7 +10,14 @@
   },
   "live": {
     "occurrence": "single",
-    "scopes": ["west gate"],
-    "unreported": ["east gate"]
+    "scopes": [
+      "west gate"
+    ],
+    "unreported": [
+      "east gate"
+    ],
+    "category": [
+      "disruption"
+    ]
   }
 }

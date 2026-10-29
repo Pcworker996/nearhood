@@ -165,7 +165,7 @@ const developmentExamples = [
     candidateHint: null,
     candidates: [],
     sameOccurrence: false,
-    matchingKind: "no_match",
+    matchingKind: "not_compared",
     minimumObservations: 2,
   },
   ...[
@@ -270,7 +270,9 @@ for (const model of models) {
       observedResult = result;
       if (result.extraction.sameOccurrence !== sameOccurrence)
         throw Error("Occurrence boundary was incorrect.");
-      if (result.matching.kind !== matchingKind)
+      // Separate or unclear occurrences are judged on extraction only: the staged
+      // workflow does not compare them, and the baseline's answer is not scored.
+      if (sameOccurrence && result.matching?.kind !== matchingKind)
         throw Error("Semantic match result was incorrect.");
       if (result.extraction.observations.length < minimumObservations)
         throw Error("Distinct scoped Observations were collapsed.");

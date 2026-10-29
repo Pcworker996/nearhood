@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "Exposed wires hang from the lamp post at kid height.",
+    "observedAt": null,
+    "locationName": "Alder and 3rd",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "safety"
+    ]
+  }
+}

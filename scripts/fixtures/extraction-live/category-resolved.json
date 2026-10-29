@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "The flooding is gone, path is clear.",
+    "observedAt": null,
+    "locationName": "Riverside path",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "disruption"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "Ice on the bridge steps, someone slipped.",
+    "observedAt": null,
+    "locationName": "Eastbank footbridge",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "safety"
+    ]
+  }
+}

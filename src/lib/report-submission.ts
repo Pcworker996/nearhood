@@ -2,9 +2,12 @@ import { randomUUID } from "node:crypto";
 import { database } from "./database";
 import type { MatchCandidate, SavedReport } from "./happenings";
 import {
+  EXTRACTION_REVISION,
   EXTRACTION_VERSION,
+  MATCHING_REVISION,
   extractionInput,
   isPlausible,
+  revision,
   type CandidateAssessment,
 } from "./report-model";
 
@@ -120,9 +123,13 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
   p.decision_candidate_ids AS "decisionCandidateIds",
   p.processing_stage AS "processingStage",
   CASE WHEN p.state='processing' AND p.lease_until < now() THEN p.processing_stage || '_interrupted' ELSE p.pending_reason END AS "pendingReason",
-  p.extraction_version AS "extractionVersion", p.extraction_input AS "extractionInput", p.assessments,
+  p.extraction_version AS "extractionVersion", p.extraction_input AS "extractionInput",
+  p.matching_version AS "matchingVersion", p.assessments,
   CASE WHEN p.state='processing' AND p.lease_until < now() THEN 'pending' ELSE p.state END AS state
   FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id`;
+
+// The best suggestion plus at most four alternatives (ADR 0005).
+export const REVIEW_SET_SIZE = 5;
 
 export function reviewSet(
   packet: MatchCandidate[],
@@ -135,7 +142,7 @@ export function reviewSet(
     order.length
       ? order.flatMap((a) => packet.filter((c) => c.id === a.candidateId))
       : packet
-  ).slice(0, 5);
+  ).slice(0, REVIEW_SET_SIZE);
 }
 
 export async function savedReport(id: string, contributorId: string) {
@@ -143,6 +150,7 @@ export async function savedReport(id: string, contributorId: string) {
     SavedReport & {
       extractionVersion: string | null;
       extractionInput: string | null;
+      matchingVersion: string | null;
       assessments: CandidateAssessment[];
     }
   >(`${savedSelect} WHERE r.id=$1 AND r.contributor_id=$2`, [
@@ -153,6 +161,7 @@ export async function savedReport(id: string, contributorId: string) {
   const {
     extractionVersion,
     extractionInput: input,
+    matchingVersion,
     assessments,
     ...report
   } = rows[0];
@@ -160,9 +169,16 @@ export async function savedReport(id: string, contributorId: string) {
   const extractionReady =
     extractionVersion === EXTRACTION_VERSION &&
     input === extractionInput(report);
+  // A newer deployment's checkpoint cannot be leased here (acquireLease), so
+  // offering "process" would only repeat a request that changes nothing.
+  const newerCheckpoint =
+    (revision(extractionVersion) ?? 0) > EXTRACTION_REVISION ||
+    (revision(matchingVersion) ?? 0) > MATCHING_REVISION;
   if (
-    !extractionReady &&
-    ["match_review", "clarification"].includes(report.state)
+    (!extractionReady &&
+      ["match_review", "clarification"].includes(report.state)) ||
+    (newerCheckpoint &&
+      ["saved", "match_review", "clarification"].includes(report.state))
   ) {
     report.state = "pending";
     report.pendingReason = "refresh_required";

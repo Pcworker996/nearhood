@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "Police tape around the park, not sure why.",
+    "observedAt": null,
+    "locationName": "Eastbank park",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "disruption"
+    ]
+  }
+}

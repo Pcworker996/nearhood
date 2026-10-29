@@ -10,6 +10,11 @@
   },
   "live": {
     "occurrence": "single",
-    "qualified": ["lamp"]
+    "qualified": [
+      "lamp"
+    ],
+    "category": [
+      "disruption"
+    ]
   }
 }

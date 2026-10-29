@@ -9,7 +9,10 @@
     "sourceUrl": null
   },
   "live": {
-    "occurrence": "single"
+    "occurrence": "single",
+    "category": [
+      "disruption"
+    ]
   },
   "model": {
     "category": "disruption",
@@ -18,7 +21,9 @@
         "key": "lamp",
         "subject": "Streetlamp",
         "sourceRef": "submitted_report",
-        "sourceIds": ["s0"],
+        "sourceIds": [
+          "s0"
+        ],
         "occurrenceGroup": 0,
         "describedCondition": "dark",
         "spatialScope": null,
@@ -46,15 +51,9 @@
         "occurrenceGroup": 0,
         "describedCondition": "dark",
         "spatialScope": null,
+        "scopeOutsideCitation": false,
         "timeWording": "2026-10-19T02:00:00Z",
-        "uncertainty": null,
-        "excerpt": "The streetlamp was dark."
-      }
-    ],
-    "claims": [
-      {
-        "statement": "The streetlamp was dark.",
-        "observationKeys": ["lamp"]
+        "uncertainty": null
       }
     ]
   }

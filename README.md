@@ -1,5 +1,7 @@
 # Nearhood
 
+**Developer documentation:** [index and code entry points](docs/README.md). This README's walkthrough covers browsing slice #3; [Report submission](docs/implementation/report-submission.md) documents contribution, matching, and model setup separately.
+
 Nearhood turns local Reports into evolving, evidence-linked Happenings. This first implementation slice (#3) provides public browsing and claim-specific evidence inspection with a real HTTP API and persistent PostgreSQL/PostGIS data.
 
 The Northbank bridge, streetlamp, picnic, riverside path, crossing signal and garden cleanup are **fictional demo fixtures** over Detroit coordinates. The added path reports demonstrate location and time scope; the signal reports show differing observations at different times; the garden cleanup is a plan, not evidence that it occurred. Their stored accounts are authored fixtures, not live model output. Contribution, authentication, model processing, resolution/freshness automation, discovery, directions/calendar and private updates belong to later tickets; their controls are not represented as functioning actions here.
@@ -81,3 +83,11 @@ Application hosting choice for this slice: Vercel's Next.js deployment, backed b
 Provider references: [Next.js Route Handlers](https://nextjs.org/docs/app/getting-started/route-handlers), [Supabase PostGIS](https://supabase.com/docs/guides/database/extensions/postgis), [MapTiler with Leaflet](https://docs.maptiler.com/leaflet/), [Playwright web server](https://playwright.dev/docs/test-webserver).
 
 The exact eligible Nemotron model, worker hosting and contribution processing remain later-ticket setup choices. No live-model behavior is claimed for #3.
+
+## Engineering notes
+
+- [Architecture decision records](docs/adr/README.md): lasting choices, rationale, and implementation status.
+- [Engineering journal](docs/journal/README.md): daily progress, learning, small wins, and the next action.
+- [Software quality guide](docs/guides/software-quality.md): how goals, design, testing, and release evidence fit together.
+
+Requirements and task status remain in [GitHub Issues](https://github.com/Pcworker996/nebius-hack/issues); domain terms remain in [CONTEXT.md](CONTEXT.md).

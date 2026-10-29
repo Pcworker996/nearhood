@@ -10,7 +10,14 @@
   },
   "live": {
     "occurrence": "single",
-    "scopes": ["left lane"],
-    "unreported": ["right lane"]
+    "scopes": [
+      "left lane"
+    ],
+    "unreported": [
+      "right lane"
+    ],
+    "category": [
+      "disruption"
+    ]
   }
 }

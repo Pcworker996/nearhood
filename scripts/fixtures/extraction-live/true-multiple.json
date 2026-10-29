@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "A tree is down on Elm Street. Also, unrelated, the library wifi is broken.",
+    "observedAt": null,
+    "locationName": "Elm Street",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "multiple",
+    "category": [
+      "disruption"
+    ]
+  }
+}

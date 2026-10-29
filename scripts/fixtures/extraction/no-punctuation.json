@@ -1,0 +1,54 @@
+{
+  "report": {
+    "originalText": "lamp out by the pond again",
+    "observedAt": null,
+    "locationName": "Eastbank park",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "lamp",
+        "subject": "Lamp by the pond",
+        "sourceRef": "submitted_report",
+        "sourceIds": [
+          "s0"
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "out",
+        "spatialScope": "by the pond",
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  },
+  "expected": {
+    "category": "disruption",
+    "occurrence": "single",
+    "sameOccurrence": true,
+    "observations": [
+      {
+        "key": "lamp",
+        "subject": "Lamp by the pond",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 0,
+            "end": 26,
+            "text": "lamp out by the pond again"
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "out",
+        "spatialScope": "by the pond",
+        "scopeOutsideCitation": false,
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  }
+}

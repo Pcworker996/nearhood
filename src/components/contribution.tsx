@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   Coordinates,
   MatchCandidate,
+  MatchChoice,
   SavedReport,
 } from "@/lib/happenings";
 import { ReportCard } from "./report-card";
@@ -56,6 +57,9 @@ export default function Contribution({
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [submissionStarted, setSubmissionStarted] = useState(false);
   const [showMoreCandidates, setShowMoreCandidates] = useState(false);
+  // Automatic processing runs once per saved state; an unchanged response
+  // (for example a checkpoint this deployment cannot lease) waits for Retry.
+  const autoProcessed = useRef("");
   useEffect(() => {
     let restored: Draft | null = null;
     try {
@@ -134,10 +138,14 @@ export default function Contribution({
     return () => clearInterval(timer);
   }, [saved?.id, saved?.state]);
   useEffect(() => {
-    if (saved?.nextAction === "process" && signedIn && !busy && !error)
-      void process(saved.id);
+    if (saved?.nextAction !== "process" || !signedIn || busy || error) return;
+    const key = `${saved.id}:${saved.state}:${saved.processingStage}`;
+    if (autoProcessed.current === key) return;
+    autoProcessed.current = key;
+    void process(saved.id);
   }, [
     saved?.id,
+    saved?.state,
     saved?.nextAction,
     saved?.processingStage,
     signedIn,
@@ -173,15 +181,7 @@ export default function Contribution({
       setBusy(false);
     }
   }
-  async function chooseMatch(
-    choice:
-      | {
-          choice: "match";
-          candidateId: string;
-          candidateIdsShown: string[];
-        }
-      | { choice: "create_new"; candidateIdsShown: string[] },
-  ) {
+  async function chooseMatch(choice: MatchChoice) {
     if (!saved) return;
     setBusy(true);
     setError("");
@@ -427,11 +427,13 @@ export default function Contribution({
                 >
                   <h2>Could you clarify?</h2>
                   <p>{saved.recommendation.question}</p>
-                  <p className="muted">
-                    Choose a nearby Happening if one describes the same
-                    situation, or choose none. Leave the Report unassigned if
-                    you are unsure.
-                  </p>
+                  {saved.pendingReason !== "incomplete_coverage" && (
+                    <p className="muted">
+                      Choose a nearby Happening if one describes the same
+                      situation, or choose none. Leave the Report unassigned
+                      if you are unsure.
+                    </p>
+                  )}
                   {saved.candidates.map((candidate) => (
                     <MatchCandidateCard
                       key={candidate.id}
@@ -447,19 +449,23 @@ export default function Contribution({
                       disabled={busy}
                     />
                   ))}
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    disabled={busy}
-                    onClick={() =>
-                      void chooseMatch({
-                        choice: "create_new",
-                        candidateIdsShown,
-                      })
-                    }
-                  >
-                    None of these describe what I reported
-                  </button>
+                  {/* Incomplete coverage follows from stored evidence, so the
+                      server always refuses a new Happening here. */}
+                  {saved.pendingReason !== "incomplete_coverage" && (
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        void chooseMatch({
+                          choice: "create_new",
+                          candidateIdsShown,
+                        })
+                      }
+                    >
+                      None of these describe what I reported
+                    </button>
+                  )}
                   <button
                     className="text-button"
                     type="button"
@@ -537,6 +543,10 @@ export default function Contribution({
                   value={draft.originalText}
                   onChange={(e) => update({ originalText: e.target.value })}
                 />
+                <small>
+                  Describe one situation per Report. Submit unrelated things,
+                  like a blocked path and a broken lamp elsewhere, separately.
+                </small>
               </label>
               <label>
                 Public display name

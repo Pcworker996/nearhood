@@ -10,7 +10,14 @@
   },
   "live": {
     "occurrence": "single",
-    "scopes": ["north entrance"],
-    "unreported": ["south"]
+    "scopes": [
+      "north entrance"
+    ],
+    "unreported": [
+      "south"
+    ],
+    "category": [
+      "disruption"
+    ]
   }
 }

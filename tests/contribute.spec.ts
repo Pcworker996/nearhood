@@ -44,6 +44,9 @@ test("contributors are not asked to classify a Report as new", async ({
     0,
   );
   await expect(
+    page.getByText("Describe one situation per Report.", { exact: false }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("button", { name: "Submit Report", exact: true }),
   ).toBeVisible();
 });
@@ -353,7 +356,7 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
   );
 });
 
-test("model claims cannot strip uncertainty around abbreviations or line breaks", async ({
+test("hedged Reports publish no condition and keep the qualification beside the original words", async ({
   page,
 }, testInfo) => {
   await signIn(page);
@@ -382,16 +385,16 @@ test("model claims cannot strip uncertainty around abbreviations or line breaks"
     const detail = await (
       await page.request.get(`/api/happenings/${report.id}`)
     ).json();
-    expect(detail.account.claims).toHaveLength(1);
-    expect(detail.account.claims[0].statement).toBe(text);
     expect(detail.reports[0].originalText).toBe(text);
-    const evidence = await (
-      await page.request.get(
-        `/api/happenings/${report.id}/claims/${detail.account.claims[0].id}`,
-      )
-    ).json();
-    for (const pair of evidence.evidence)
-      expect(pair.observation.describedState).toBe(text);
+    expect(detail.account.claims).toHaveLength(0);
+    expect(detail.account.uncertainty).toContain(
+      "No condition was described in this Report.",
+    );
+    const hedge = detail.observations.find(
+      (o: { uncertainty: string | null }) => o.uncertainty,
+    );
+    expect(hedge.describedState).toBeNull();
+    expect(hedge.uncertainty).toContain("I cannot confirm");
   }
 });
 
@@ -457,8 +460,11 @@ test("a long Report can publish multiple scoped Observations without model echoi
     await page.request.get(`/api/happenings/${report.id}`)
   ).json();
   expect(detail.observations).toHaveLength(2);
-  expect(detail.account.claims).toHaveLength(1);
-  expect(detail.account.claims[0].statement).toBe(text);
+  expect(detail.account.claims).toHaveLength(2);
+  for (const claim of detail.account.claims) {
+    expect(claim.statement).not.toBe(text);
+    expect(claim.statement).toContain("blocked with a barrier");
+  }
   expect(
     detail.observations
       .map((o: { spatialScope: string }) => o.spatialScope)
@@ -545,32 +551,53 @@ test("a source-based Report produces distinct claim evidence with unknown observ
   const publicContext = await browser.newContext();
   const reader = await publicContext.newPage();
   await reader.goto(`/?happening=${id}`);
-  await reader.getByRole("button", { name: text, exact: true }).click();
+  await reader
+    .getByRole("button", {
+      name: detail.account.claims[0].statement,
+      exact: true,
+    })
+    .click();
   const evidence = reader.getByRole("dialog");
   await expect(
     evidence.getByText("Derived Observation", { exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
   await expect(
     evidence.getByText("Observation time unknown", { exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
   await expect(
     evidence.getByRole("link", { name: "Open source link" }),
-  ).toHaveCount(2);
-  const supports = await (
-    await reader.request.get(
-      `/api/happenings/${id}/claims/${detail.account.claims[0].id}`,
-    )
-  ).json();
-  expect(supports.evidence).toHaveLength(2);
-  expect(supports.evidence[0].observation.describedState).toBe(text);
+  ).toHaveCount(1);
+  await expect(evidence.getByText(text, { exact: true })).toBeVisible();
+  // One derived claim per scoped Observation, each traced to the original Report.
+  expect(detail.account.claims).toHaveLength(2);
+  const supports = await Promise.all(
+    detail.account.claims.map(async (claim: { id: string }) =>
+      (
+        await reader.request.get(`/api/happenings/${id}/claims/${claim.id}`)
+      ).json(),
+    ),
+  );
+  for (const support of supports) {
+    expect(support.evidence).toHaveLength(1);
+    expect(support.evidence[0].report.originalText).toBe(text);
+    expect(support.evidence[0].observation.describedState).not.toBe(text);
+  }
   expect(
-    supports.evidence
+    supports
       .map(
-        (e: { observation: { spatialScope: string } }) =>
-          e.observation.spatialScope,
+        (s: { evidence: { observation: { spatialScope: string } }[] }) =>
+          s.evidence[0].observation.spatialScope,
       )
       .sort(),
   ).toEqual(["north path", "south path"]);
+  expect(
+    supports
+      .map(
+        (s: { evidence: { observation: { describedState: string } }[] }) =>
+          s.evidence[0].observation.describedState,
+      )
+      .sort(),
+  ).toEqual(["a barrier", "blocked"]);
   expect((await reader.request.get(`/api/reports/${id}`)).status()).toBe(401);
   await publicContext.close();
 });

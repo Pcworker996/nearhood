@@ -1,0 +1,110 @@
+{
+  "reviewer": "Codex",
+  "independent": false,
+  "scope": "Agent inspection of all automated failure cases and selected passing cases. Not exhaustive human grounding review. All attempt-level manualReview values remain pending.",
+  "observations": [
+    {
+      "cases": [
+        "T02",
+        "D03"
+      ],
+      "trials": [
+        1,
+        2,
+        3
+      ],
+      "finding": "Model abstains on supplied same-occurrence wording. T02 also treats a later partial improvement as conflict. Retain failed gold assertions; independent review required."
+    },
+    {
+      "cases": [
+        "U04"
+      ],
+      "trials": [
+        1,
+        2,
+        3
+      ],
+      "finding": "The same lamp and repeated darkness do not establish continuous occurrence when repair history remains unknown. Same assessment is unsupported under the reviewed design expectation."
+    },
+    {
+      "cases": [
+        "S03"
+      ],
+      "trials": [
+        1,
+        2,
+        3
+      ],
+      "finding": "Unknown observation time drives abstention despite still/same wording. Review the strength of the incoming continuity claim before treating this provisional label as definitive ground truth."
+    },
+    {
+      "cases": [
+        "T04",
+        "D04"
+      ],
+      "trials": [
+        1,
+        2,
+        3
+      ],
+      "finding": "Same-occurrence reasoning is substantively consistent with supplied evidence, but chronology uses consistent instead of expected change. Taxonomy needs review; original scores are not relabelled."
+    },
+    {
+      "cases": [
+        "P03"
+      ],
+      "trials": [
+        1,
+        2,
+        3
+      ],
+      "finding": "Correct bridge assessment and ranking. All 19 distractor reasons describe unrelated equipment, yet continuity is unknown. Uncertainty in distractors blocks the otherwise correct matching recommendation."
+    },
+    {
+      "cases": [
+        "A02-remove-identity"
+      ],
+      "trials": [
+        1
+      ],
+      "finding": "Only one of two required assessments returned. Provider finish_reason is stop. Production validator correctly rejects the whole response."
+    },
+    {
+      "cases": [
+        "A04"
+      ],
+      "trials": [
+        1
+      ],
+      "finding": "Automated pass has reason asserting the same location and time, although candidate observation is 10:00 and incoming observation is 12:00. Same occurrence can be supported without that unsupported time claim."
+    },
+    {
+      "cases": [
+        "A02-remove-identity"
+      ],
+      "trials": [
+        2,
+        3
+      ],
+      "finding": "Appropriate uncertainty, but reasons assert same coordinates and time. Coordinates match; incoming observation is 11:00 and candidate evidence is 10:00, so same time is unsupported."
+    },
+    {
+      "cases": [
+        "P01-remove-identity"
+      ],
+      "trials": [
+        3
+      ],
+      "finding": "Appropriate uncertainty, but reasons assert same district and time. Incoming observation is 10:30, candidate evidence is 10:00. Do not count the automated pass as a completed semantic-grounding pass."
+    },
+    {
+      "cases": [
+        "E01",
+        "E04",
+        "P02",
+        "T01-paraphrase"
+      ],
+      "finding": "Inspected representative passing target reasons cite relevant original evidence and preserve identity or partial scope. No exhaustive human review is implied."
+    }
+  ]
+}

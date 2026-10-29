@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "Broken glass across the bike lane.",
+    "observedAt": null,
+    "locationName": "Riverside bike lane",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "safety"
+    ]
+  }
+}

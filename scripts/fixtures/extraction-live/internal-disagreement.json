@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "Signs say the underpass is closed but people are walking through.",
+    "observedAt": null,
+    "locationName": "Eastbank underpass",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "disruption"
+    ]
+  }
+}

@@ -1,0 +1,707 @@
+{
+  "boundary": "real browser authentication, application APIs and disposable PostgreSQL; controlled auth/extraction, recorded matching responses; no new live inference",
+  "journeys": [
+    {
+      "source": "A02-remove-identity",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "35331c28-55f5-4eba-82c8-e375c6f74514",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "35331c28-55f5-4eba-82c8-e375c6f74514",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "35331c28-55f5-4eba-82c8-e375c6f74514",
+          "state": "pending",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "matching_failed",
+          "nextAction": "retry"
+        },
+        {
+          "id": "35331c28-55f5-4eba-82c8-e375c6f74514",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "D03",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "cbea691f-6472-4a5f-bb5a-8ecb79646fe5",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "cbea691f-6472-4a5f-bb5a-8ecb79646fe5",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "cbea691f-6472-4a5f-bb5a-8ecb79646fe5",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "N01",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "fd19067f-6ee7-4b2c-8202-6ba345205dc7",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "fd19067f-6ee7-4b2c-8202-6ba345205dc7",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "fd19067f-6ee7-4b2c-8202-6ba345205dc7",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "fd19067f-6ee7-4b2c-8202-6ba345205dc7",
+          "pendingReason": null,
+          "nextAction": "none"
+        }
+      ]
+    },
+    {
+      "source": "P03",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "1bd5e78c-6929-450a-850a-f96fbb4487d3",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "1bd5e78c-6929-450a-850a-f96fbb4487d3",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "1bd5e78c-6929-450a-850a-f96fbb4487d3",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        },
+        {
+          "id": "1bd5e78c-6929-450a-850a-f96fbb4487d3",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "S03",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "0808a88d-a616-4c61-8ab4-cea9e40f0a5e",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "0808a88d-a616-4c61-8ab4-cea9e40f0a5e",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "0808a88d-a616-4c61-8ab4-cea9e40f0a5e",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "T01",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "51f24eeb-035f-48e8-a418-45c549743010",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "51f24eeb-035f-48e8-a418-45c549743010",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "51f24eeb-035f-48e8-a418-45c549743010",
+          "state": "match_review",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "review"
+        },
+        {
+          "id": "51f24eeb-035f-48e8-a418-45c549743010",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "d7eca9ce-4562-492f-b6f2-50f44106a382",
+          "pendingReason": null,
+          "nextAction": "none"
+        }
+      ]
+    },
+    {
+      "source": "T02",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "2aeec88a-aec0-4253-a119-1243cd8f6fcc",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "2aeec88a-aec0-4253-a119-1243cd8f6fcc",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "2aeec88a-aec0-4253-a119-1243cd8f6fcc",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        },
+        {
+          "id": "2aeec88a-aec0-4253-a119-1243cd8f6fcc",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "9ad8232e-1b64-41ca-a0c6-5aae84ce1a3e",
+          "pendingReason": "unclear_continuity",
+          "nextAction": "none"
+        }
+      ]
+    },
+    {
+      "source": "U04",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "3e4e1049-049e-4c1b-b154-37a5d53f8e1b",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "3e4e1049-049e-4c1b-b154-37a5d53f8e1b",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "3e4e1049-049e-4c1b-b154-37a5d53f8e1b",
+          "state": "match_review",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "controlled provider failure and empty search",
+      "project": "desktop-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "07b7c93e-b345-40fc-a39c-b09cf00760e1",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "07b7c93e-b345-40fc-a39c-b09cf00760e1",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "07b7c93e-b345-40fc-a39c-b09cf00760e1",
+          "state": "pending",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "matching_failed",
+          "nextAction": "retry"
+        },
+        {
+          "id": "07b7c93e-b345-40fc-a39c-b09cf00760e1",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "07b7c93e-b345-40fc-a39c-b09cf00760e1",
+          "pendingReason": null,
+          "nextAction": "none"
+        }
+      ]
+    },
+    {
+      "source": "A02-remove-identity",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "031bf23b-2bc2-4068-89ed-d9b7ca0ce082",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "031bf23b-2bc2-4068-89ed-d9b7ca0ce082",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "031bf23b-2bc2-4068-89ed-d9b7ca0ce082",
+          "state": "pending",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "matching_failed",
+          "nextAction": "retry"
+        },
+        {
+          "id": "031bf23b-2bc2-4068-89ed-d9b7ca0ce082",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "D03",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "28b91c93-f6b9-4881-877e-fe49a0c336f8",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "28b91c93-f6b9-4881-877e-fe49a0c336f8",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "28b91c93-f6b9-4881-877e-fe49a0c336f8",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "N01",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "8871cebd-6ed5-40e8-853d-d7244d359f9c",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "8871cebd-6ed5-40e8-853d-d7244d359f9c",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "8871cebd-6ed5-40e8-853d-d7244d359f9c",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "8871cebd-6ed5-40e8-853d-d7244d359f9c",
+          "pendingReason": null,
+          "nextAction": "none"
+        }
+      ]
+    },
+    {
+      "source": "P03",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "73cde350-2976-4474-a4e9-4fb1f06cf3b5",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "73cde350-2976-4474-a4e9-4fb1f06cf3b5",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "73cde350-2976-4474-a4e9-4fb1f06cf3b5",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        },
+        {
+          "id": "73cde350-2976-4474-a4e9-4fb1f06cf3b5",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "S03",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "22e8e0cb-289b-40ae-a02d-7de133ba1632",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "22e8e0cb-289b-40ae-a02d-7de133ba1632",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "22e8e0cb-289b-40ae-a02d-7de133ba1632",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "T01",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "81ea1a20-b890-46f4-95f5-d85f9cb852a7",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "81ea1a20-b890-46f4-95f5-d85f9cb852a7",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "81ea1a20-b890-46f4-95f5-d85f9cb852a7",
+          "state": "match_review",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "review"
+        },
+        {
+          "id": "81ea1a20-b890-46f4-95f5-d85f9cb852a7",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "b8454174-8636-4d1a-8fd5-a77f8b187ab2",
+          "pendingReason": null,
+          "nextAction": "none"
+        }
+      ]
+    },
+    {
+      "source": "T02",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "b3a6a935-2c6a-457f-8267-a8d31a5721ed",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "b3a6a935-2c6a-457f-8267-a8d31a5721ed",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "b3a6a935-2c6a-457f-8267-a8d31a5721ed",
+          "state": "clarification",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "unclear_continuity",
+          "nextAction": "review"
+        },
+        {
+          "id": "b3a6a935-2c6a-457f-8267-a8d31a5721ed",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "3b0ec830-bee1-4dcf-b182-a236bc00fd44",
+          "pendingReason": "unclear_continuity",
+          "nextAction": "none"
+        }
+      ]
+    },
+    {
+      "source": "U04",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "700d0b99-1ba8-4ff3-ac31-52eeee57853a",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "700d0b99-1ba8-4ff3-ac31-52eeee57853a",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "700d0b99-1ba8-4ff3-ac31-52eeee57853a",
+          "state": "match_review",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "review"
+        }
+      ]
+    },
+    {
+      "source": "controlled provider failure and empty search",
+      "project": "mobile-chromium",
+      "externalServices": "recorded matching or controlled fixture; no new live inference",
+      "states": [
+        {
+          "id": "838c753c-b2e8-4f7e-8d68-eea6ee4bde7c",
+          "state": "saved",
+          "processingStage": "extraction",
+          "extractionReady": false,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "838c753c-b2e8-4f7e-8d68-eea6ee4bde7c",
+          "state": "saved",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": null,
+          "nextAction": "process"
+        },
+        {
+          "id": "838c753c-b2e8-4f7e-8d68-eea6ee4bde7c",
+          "state": "pending",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": null,
+          "pendingReason": "matching_failed",
+          "nextAction": "retry"
+        },
+        {
+          "id": "838c753c-b2e8-4f7e-8d68-eea6ee4bde7c",
+          "state": "published",
+          "processingStage": "matching",
+          "extractionReady": true,
+          "happeningId": "838c753c-b2e8-4f7e-8d68-eea6ee4bde7c",
+          "pendingReason": null,
+          "nextAction": "none"
+        }
+      ]
+    }
+  ]
+}

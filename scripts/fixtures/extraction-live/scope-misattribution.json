@@ -1,0 +1,21 @@
+{
+  "report": {
+    "originalText": "The north entrance is blocked. The south entrance is open.",
+    "observedAt": null,
+    "locationName": "Eastbank footbridge",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "scopes": [
+      "north entrance",
+      "south entrance"
+    ],
+    "category": [
+      "disruption"
+    ]
+  }
+}

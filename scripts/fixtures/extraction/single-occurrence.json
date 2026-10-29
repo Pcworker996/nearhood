@@ -10,8 +10,15 @@
   },
   "live": {
     "occurrence": "single",
-    "scopes": ["north entrance"],
-    "unreported": ["south"]
+    "scopes": [
+      "north entrance"
+    ],
+    "unreported": [
+      "south"
+    ],
+    "category": [
+      "disruption"
+    ]
   },
   "model": {
     "category": "disruption",
@@ -20,7 +27,9 @@
         "key": "north",
         "subject": "North entrance",
         "sourceRef": "submitted_report",
-        "sourceIds": ["s0"],
+        "sourceIds": [
+          "s0"
+        ],
         "occurrenceGroup": 0,
         "describedCondition": "blocked by orange barriers",
         "spatialScope": "NORTH ENTRANCE",
@@ -48,15 +57,9 @@
         "occurrenceGroup": 0,
         "describedCondition": "blocked by orange barriers",
         "spatialScope": "north entrance",
+        "scopeOutsideCitation": false,
         "timeWording": null,
-        "uncertainty": null,
-        "excerpt": "The north entrance has orange barriers. This does not mean the south entrance is closed."
-      }
-    ],
-    "claims": [
-      {
-        "statement": "The north entrance has orange barriers. This does not mean the south entrance is closed.",
-        "observationKeys": ["north"]
+        "uncertainty": null
       }
     ]
   }

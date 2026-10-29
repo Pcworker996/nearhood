@@ -1,0 +1,20 @@
+{
+  "report": {
+    "originalText": "Only the south half of the lot is fenced now.",
+    "observedAt": null,
+    "locationName": "Eastbank lot",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "scopes": [
+      "south half"
+    ],
+    "category": [
+      "disruption"
+    ]
+  }
+}

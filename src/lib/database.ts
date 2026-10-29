@@ -134,7 +134,7 @@ export async function happeningDetail(
       [id],
     ),
     database().query<Observation>(
-      `SELECT o.id, o.report_id AS "reportId", o.subject, o.described_state AS "describedState",
+      `SELECT o.id, o.report_id AS "reportId", o.subject, o.described_state AS "describedState", o.uncertainty,
       o.source_support AS "sourceSupport", o.spatial_scope AS "spatialScope", o.observed_at AS "observedAt" FROM nearhood.observations o
       JOIN nearhood.observation_memberships m ON m.observation_id=o.id WHERE m.happening_id=$1
       ORDER BY o.observed_at DESC NULLS LAST, o.id`,

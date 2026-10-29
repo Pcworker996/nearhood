@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "Might be a gas smell near 5th, couldn't tell.",
+    "observedAt": null,
+    "locationName": "5th and Alder",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "safety"
+    ]
+  }
+}

@@ -15,7 +15,9 @@
         "key": "bridge",
         "subject": "Bridge",
         "sourceRef": "submitted_report",
-        "sourceIds": ["s0"],
+        "sourceIds": [
+          "s0"
+        ],
         "occurrenceGroup": null,
         "describedCondition": null,
         "spatialScope": null,
@@ -43,15 +45,9 @@
         "occurrenceGroup": null,
         "describedCondition": null,
         "spatialScope": null,
+        "scopeOutsideCitation": false,
         "timeWording": null,
-        "uncertainty": "the report does not describe one situation clearly",
-        "excerpt": "Something is wrong near the bridge."
-      }
-    ],
-    "claims": [
-      {
-        "statement": "Something is wrong near the bridge.",
-        "observationKeys": ["bridge"]
+        "uncertainty": "the report does not describe one situation clearly"
       }
     ]
   }

@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then.",
+    "observedAt": null,
+    "locationName": "Alder and 3rd",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "disruption"
+    ]
+  }
+}

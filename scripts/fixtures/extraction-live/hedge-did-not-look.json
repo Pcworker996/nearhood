@@ -10,6 +10,11 @@
   },
   "live": {
     "occurrence": "single",
-    "unreported": ["playground"]
+    "unreported": [
+      "playground"
+    ],
+    "category": [
+      "disruption"
+    ]
   }
 }

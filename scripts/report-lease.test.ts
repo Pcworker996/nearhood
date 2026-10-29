@@ -2,8 +2,14 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test, { after, before } from "node:test";
 import { database } from "../src/lib/database";
-import { EXTRACTION_VERSION, LEASE_SECONDS } from "../src/lib/report-model";
+import {
+  EXTRACTION_VERSION,
+  LEASE_SECONDS,
+  MATCHING_VERSION,
+  extractionInput,
+} from "../src/lib/report-model";
 import { acquireLease } from "../src/lib/report-processing";
+import { savedReport } from "../src/lib/report-submission";
 
 type Stage = "extraction" | "matching";
 type Row = {
@@ -11,6 +17,7 @@ type Row = {
   lease?: "expired" | "unexpired";
   version: string | null;
   input: string | null;
+  matching?: string | null;
 };
 
 const contributorId = `lease-test-${randomUUID()}`;
@@ -19,6 +26,7 @@ const compatible = { version: EXTRACTION_VERSION, input };
 const older = [
   { version: null, input: null },
   { version: "report-extraction-v5", input },
+  { version: "report-extraction-v6", input },
   { version: EXTRACTION_VERSION, input: "edited-report-input" },
   { version: "unversioned", input },
 ];
@@ -98,7 +106,25 @@ const cases: {
       refresh,
       expected: null,
     })),
+    {
+      line: "reviewed with a newer matching checkpoint",
+      row: { ...row, ...compatible, matching: "report-matching-v99" },
+      refresh: true,
+      expected: null,
+    },
   ]),
+  {
+    line: "pending with a newer matching checkpoint",
+    row: { state: "pending", ...compatible, matching: "report-matching-v99" },
+    refresh: false,
+    expected: null,
+  },
+  {
+    line: "reviewed with the current matching checkpoint",
+    row: { state: "match_review", ...compatible, matching: MATCHING_VERSION },
+    refresh: true,
+    expected: "matching",
+  },
 ];
 
 async function insert(row: Row) {
@@ -111,12 +137,12 @@ async function insert(row: Row) {
   );
   await database().query(
     `INSERT INTO nearhood.report_processing(report_id,request_key,request_body,contributor_id,location_name,
-      state,attempt,lease_until,processing_stage,pending_reason,extraction_version,extraction_input)
+      state,attempt,lease_until,processing_stage,pending_reason,extraction_version,extraction_input,matching_version)
     VALUES ($1,$2,'{}'::jsonb,$3,'Lease test',$4,
       CASE WHEN $5::text IS NULL THEN NULL ELSE gen_random_uuid() END,
       CASE $5::text WHEN 'expired' THEN now()-interval '1 second' WHEN 'unexpired' THEN now()+interval '1 minute' END,
       CASE WHEN $6::text IS NULL THEN 'extraction' ELSE 'matching' END,
-      CASE WHEN $4='pending' THEN 'extraction_failed' END,$6,$7)`,
+      CASE WHEN $4='pending' THEN 'extraction_failed' END,$6,$7,$8)`,
     [
       id,
       randomUUID(),
@@ -125,6 +151,7 @@ async function insert(row: Row) {
       row.lease ?? null,
       row.version,
       row.input,
+      row.matching ?? null,
     ],
   );
   return id;
@@ -239,3 +266,42 @@ test("a request that read the Report before its review was saved leaves the revi
     blocker.release();
   }
 });
+
+// The inserted Report's context, so its checkpoint can be compatible.
+const savedInput = extractionInput({
+  originalText: "A lease test Report.",
+  observedAt: null,
+  locationName: "Lease test",
+  lat: 0,
+  lng: 0,
+  provenance: "firsthand",
+  sourceUrl: null,
+});
+
+for (const { line, row } of [
+  {
+    line: "a saved Report with a newer extraction checkpoint",
+    row: {
+      state: "saved",
+      version: "report-extraction-v99",
+      input: savedInput,
+    },
+  },
+  {
+    line: "a review from a newer matching version",
+    row: {
+      state: "match_review",
+      version: EXTRACTION_VERSION,
+      input: savedInput,
+      matching: "report-matching-v99",
+    },
+  },
+])
+  test(`${line} asks for a retry instead of automatic processing`, async () => {
+    const id = await insert(row);
+    const report = await savedReport(id, contributorId);
+    assert.equal(report.state, "pending");
+    assert.equal(report.pendingReason, "refresh_required");
+    assert.equal(report.nextAction, "retry");
+    assert.deepEqual(report.candidates, []);
+  });

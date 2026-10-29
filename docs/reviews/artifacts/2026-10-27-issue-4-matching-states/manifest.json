@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-27",
+  "boundary": "Product-boundary replay; real app APIs and disposable local PostgreSQL/PostGIS, controlled external services",
+  "node": "22.19.0",
+  "browserProjects": [
+    "mobile-chromium",
+    "desktop-chromium"
+  ],
+  "focusedPassed": 18,
+  "recordedMatchingCases": 8,
+  "controlledRecoveryCase": 1,
+  "newLiveModelCalls": 0,
+  "schemaChanges": false,
+  "sourceSHA256": {
+    "src/lib/report-processing.ts": "a66b1991a3df488eb3b6b65efd2ffa2279dc246147c1965484f8b2ea0a5e632f",
+    "src/lib/report-model.ts": "f7d783368a4078882fdc6ee3333659e529abe7166bb67ef155009f20399b7300",
+    "src/lib/report-submission.ts": "f43573ba42c9de055529dd5e5ff48666c43d18303cc4cfbb6799da30daf95729",
+    "src/lib/database.ts": "f869a356d53f68d2899b360fe57c5333a0914a8435576703763c3db5a6f1a39a",
+    "tests/report-matching-state.spec.ts": "3ef21bb3efb3b5ed5f016cd308d0adfaa61b5c95dfefab43fa07e2fa3e5d2f0a",
+    "tests/external-services.ts": "8d84996c6ecc9830e6d0c51929383767a7eb181b2a554c4280da6a19bffd3063"
+  },
+  "recordedResponsesSHA256": "df55a157719442afb1dfdf217f3eb65e407468151deb34e540ac06eb9641217f",
+  "snapshotSHA256": "26df2738607803a92ae7ce70a1a8766a93824074f24526ce971c60dcec3c76bf",
+  "fullVerification": {
+    "typecheck": "pass",
+    "modelChecker": "pass",
+    "extraction": "pass",
+    "reviewSet": "pass",
+    "lease": "pass",
+    "browserReportedPassed": 112,
+    "browserTestsPassingNormally": 110,
+    "existingExpectedMarkerFailures": 2,
+    "unexpectedFailures": 0,
+    "stateTestsPassingNormally": 18,
+    "disposableDatabaseRemoved": true
+  },
+  "browserLogSHA256": "f607281646485859523f9519579d0193078a029f82acd19bf297f61f76e3f8aa"
+}

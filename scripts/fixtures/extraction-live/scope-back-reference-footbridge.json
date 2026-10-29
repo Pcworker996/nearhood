@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "At 11:30 both footbridge entrances were clear of barriers. My observation disagrees with the report saying both were blocked then.",
+    "observedAt": null,
+    "locationName": "Eastbank footbridge",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "disruption"
+    ]
+  }
+}

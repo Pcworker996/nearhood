@@ -1,0 +1,54 @@
+{
+  "report": {
+    "originalText": "At 10 pm, the streetlamp at Alder and 3rd is lit. This conflicts with the report that it was dark then.",
+    "observedAt": null,
+    "locationName": "Alder and 3rd",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "conflict",
+        "subject": "Streetlamp state disagreement",
+        "sourceRef": "submitted_report",
+        "sourceIds": [
+          "s1"
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": null,
+        "spatialScope": "alder and 3rd",
+        "timeWording": null,
+        "uncertainty": "disagrees with an earlier report that it was dark"
+      }
+    ]
+  },
+  "expected": {
+    "category": "disruption",
+    "occurrence": "single",
+    "sameOccurrence": true,
+    "observations": [
+      {
+        "key": "conflict",
+        "subject": "Streetlamp state disagreement",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 50,
+            "end": 103,
+            "text": "This conflicts with the report that it was dark then."
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": null,
+        "spatialScope": "Alder and 3rd",
+        "scopeOutsideCitation": true,
+        "timeWording": null,
+        "uncertainty": "disagrees with an earlier report that it was dark"
+      }
+    ]
+  }
+}

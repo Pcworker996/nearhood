@@ -1,0 +1,1171 @@
+{
+  "method": "Projection from gold recommendation and actual validated recommendation. Invalid response maps to retryable pending. No user confirmation. Only selected cases are replayed through real storage in report-matching-state.spec.ts.",
+  "matrix": {
+    "match_review": {
+      "match_review": 81,
+      "clarification": 12
+    },
+    "published": {
+      "published": 24
+    },
+    "clarification": {
+      "clarification": 23,
+      "match_review": 3,
+      "pending": 1
+    }
+  },
+  "trials": [
+    {
+      "caseId": "S01",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S01",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S01",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S02",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S02",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S02",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S03",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S03",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S03",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S04",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S04",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S04",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T01",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T01",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T01",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T02",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T02",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T02",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T03",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T03",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T03",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T04",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T04",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T04",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D01",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D01",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D01",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D02",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D02",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D02",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D03",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D03",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D03",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D04",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D04",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "D04",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N01",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N01",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N01",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N03",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N03",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N03",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N04",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N04",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N04",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U01",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U01",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U01",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U02",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U02",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U02",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U03",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U03",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U03",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U04",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "match_review",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U04",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "match_review",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U04",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "match_review",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A03",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A03",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A03",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A04",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A04",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A04",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E01",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E01",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E01",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E02",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E02",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E02",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E03",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E03",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E03",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E04",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E04",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E04",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P02",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P02",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P02",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P03",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P03",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P03",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "clarification",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P04",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P04",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P04",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T01-paraphrase",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T01-paraphrase",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "T01-paraphrase",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N01-paraphrase",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N01-paraphrase",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N01-paraphrase",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-reverse",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-reverse",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-reverse",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P02-reverse",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P02-reverse",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P02-reverse",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02-rename",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02-rename",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02-rename",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E04-rename",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E04-rename",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E04-rename",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S01-category",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S01-category",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "S01-category",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02-category",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02-category",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02-category",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-distance",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-distance",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-distance",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01-distance",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01-distance",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01-distance",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-title",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-title",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A01-title",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02-title",
+      "trial": 3,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02-title",
+      "trial": 1,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "N02-title",
+      "trial": 2,
+      "expectedAfterMatching": "published",
+      "projectedAfterMatching": "published",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E01-duplicate-source",
+      "trial": 1,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E01-duplicate-source",
+      "trial": 3,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "E01-duplicate-source",
+      "trial": 2,
+      "expectedAfterMatching": "match_review",
+      "projectedAfterMatching": "match_review",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U01-duplicate-source",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U01-duplicate-source",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "U01-duplicate-source",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02-remove-identity",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02-remove-identity",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "A02-remove-identity",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "pending",
+      "agrees": false,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01-remove-identity",
+      "trial": 3,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01-remove-identity",
+      "trial": 2,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    },
+    {
+      "caseId": "P01-remove-identity",
+      "trial": 1,
+      "expectedAfterMatching": "clarification",
+      "projectedAfterMatching": "clarification",
+      "agrees": true,
+      "kind": "offline projection, not a per-trial database replay"
+    }
+  ]
+}

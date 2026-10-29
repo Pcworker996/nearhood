@@ -10,7 +10,12 @@
   },
   "live": {
     "occurrence": "multiple",
-    "scopes": ["park path"]
+    "scopes": [
+      "park path"
+    ],
+    "category": [
+      "disruption"
+    ]
   },
   "model": {
     "category": "disruption",
@@ -19,7 +24,9 @@
         "key": "path",
         "subject": "Park path",
         "sourceRef": "submitted_report",
-        "sourceIds": ["s0"],
+        "sourceIds": [
+          "s0"
+        ],
         "occurrenceGroup": 0,
         "describedCondition": "blocked by a tree",
         "spatialScope": "park path",
@@ -30,7 +37,9 @@
         "key": "lamp",
         "subject": "Streetlamp",
         "sourceRef": "submitted_report",
-        "sourceIds": ["s1"],
+        "sourceIds": [
+          "s1"
+        ],
         "occurrenceGroup": 1,
         "describedCondition": "broken",
         "spatialScope": null,
@@ -58,9 +67,9 @@
         "occurrenceGroup": 0,
         "describedCondition": "blocked by a tree",
         "spatialScope": "park path",
+        "scopeOutsideCitation": false,
         "timeWording": null,
-        "uncertainty": null,
-        "excerpt": "A tree blocks the park path. Across town, a separate streetlamp is broken."
+        "uncertainty": null
       },
       {
         "key": "lamp",
@@ -76,15 +85,9 @@
         "occurrenceGroup": 1,
         "describedCondition": "broken",
         "spatialScope": null,
+        "scopeOutsideCitation": false,
         "timeWording": null,
-        "uncertainty": null,
-        "excerpt": "A tree blocks the park path. Across town, a separate streetlamp is broken."
-      }
-    ],
-    "claims": [
-      {
-        "statement": "A tree blocks the park path. Across town, a separate streetlamp is broken.",
-        "observationKeys": ["path", "lamp"]
+        "uncertainty": null
       }
     ]
   }

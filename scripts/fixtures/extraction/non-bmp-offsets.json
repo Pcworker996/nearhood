@@ -1,0 +1,54 @@
+{
+  "report": {
+    "originalText": "Lamp out 🚧. Road shut!",
+    "observedAt": null,
+    "locationName": "Alder and 3rd",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "road",
+        "subject": "Road",
+        "sourceRef": "submitted_report",
+        "sourceIds": [
+          "s1"
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "shut",
+        "spatialScope": "road",
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  },
+  "expected": {
+    "category": "disruption",
+    "occurrence": "single",
+    "sameOccurrence": true,
+    "observations": [
+      {
+        "key": "road",
+        "subject": "Road",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 13,
+            "end": 23,
+            "text": "Road shut!"
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "shut",
+        "spatialScope": "Road",
+        "scopeOutsideCitation": false,
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  }
+}

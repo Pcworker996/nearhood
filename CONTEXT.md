@@ -24,7 +24,7 @@ The time the reported situation was observed, which may differ from when the rep
 The time a contributor submits a report or report update. It does not establish when the described situation was observed.
 
 **Happening**:
-An evolving real-world occurrence of an activity or condition that observations refer to. Multiple reports may describe it, and its shared account changes as evidence arrives. Separate occurrences are distinguished by evidence about continuity of the condition; sharing a category or cause does not by itself establish that reports refer to the same happening.
+An evolving real-world situation that observations refer to. For a disruption or safety concern, it is one problem at one place or object, followed over time: it may stop, may be reported resolved, and may recur. For an activity, it is one scheduled instance. Multiple reports may describe it, and its shared account changes as evidence arrives. Reports about the same problem at the same place belong to the same happening unless evidence shows a different situation, such as a different problem, an explicitly new object or event, or a different activity instance. Unknown history between observations does not by itself separate happenings, and sharing a category or place does not by itself establish that reports refer to the same happening.
 _Avoid_: Label
 
 **Category**:
@@ -48,6 +48,9 @@ The part of a place or situation that an observation describes, such as one lane
 
 **Resolution report**:
 A report that a previously reported disruption or safety concern may have ended. It is new information about the happening, but does not by itself establish that the happening is resolved.
+
+**Recurrence**:
+A later report of a disruption or safety concern after it stopped, may have stopped, or was reported resolved. It belongs to the same happening unless evidence shows a different situation. Whether the condition was repaired in between can remain unknown; the shared account preserves that gap and does not claim the condition was continuous across it.
 
 **Reported resolved**:
 A provisional status indicating that sufficient evidence supports the end of the original disruption or safety concern, including its full reported extent. It expresses the supported community account rather than a definitive finding of resolution.

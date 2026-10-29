@@ -6,7 +6,13 @@ const codes = new Map<string, { id: string; challenge: string }>();
 const tokens = new Map<string, string>();
 const scenarios = new Map<
   string,
-  { mode: string; candidateId?: string; hold?: number }
+  {
+    mode: string;
+    candidateId?: string;
+    hold?: number;
+    category?: string;
+    matchingReplay?: string;
+  }
 >();
 const calls = new Map<string, { extraction: number; matching: number }>();
 const held = new Map<string, () => void>();
@@ -39,6 +45,8 @@ const server = createServer(async (req, res) => {
       mode: body.mode,
       candidateId: body.candidateId,
       hold: body.hold,
+      category: body.category,
+      matchingReplay: body.matchingReplay,
     });
     return json({ ok: true });
   }
@@ -141,9 +149,34 @@ const server = createServer(async (req, res) => {
       return json({ error: "Controlled stage outage" }, 503);
     if (extracting && input.candidates)
       return json({ error: "Extraction must not receive candidates" }, 400);
+    const required =
+      body.response_format.json_schema.schema.properties?.assessments;
+    if (
+      !extracting &&
+      (required?.minItems !== input.candidates?.length ||
+        required?.maxItems !== input.candidates?.length)
+    )
+      return json(
+        { error: "Matching schema must require one assessment per candidate" },
+        400,
+      );
     const passages = text
       .match(/[^.!?]+[.!?]+|[^.!?]+$/g)!
       .map((s: string) => s.trim());
+    // A passage's words after "is"/"has" stand in for the derived condition;
+    // hedged passages describe no condition and keep the qualification.
+    const hedged = (passage: string) =>
+      /\b(?:did not check|didn't check|not checked|cannot confirm|cannot verify)\b/i.test(
+        passage,
+      );
+    const condition = (passage: string) => {
+      const [, ...rest] = passage.split(/\bis\b|\bhas\b/);
+      const words = rest
+        .join(" ")
+        .replace(/[.!?]+$/, "")
+        .trim();
+      return hedged(passage) || !words ? null : words.slice(0, 160);
+    };
     const observations = passages
       .slice(0, 12)
       .map((passage: string, i: number) => ({
@@ -160,12 +193,13 @@ const server = createServer(async (req, res) => {
                 Math.min(i, (input.sourcePassages?.length ?? 1) - 1)
               ]?.id ?? "s0"),
         ],
-        occurrenceGroup: mode === "multiple" ? i : 0,
-        describedCondition: null,
+        occurrenceGroup:
+          mode === "multiple" ? i : mode === "unclear" && i === 0 ? null : 0,
+        describedCondition: condition(passage),
         spatialScope:
           passage.match(/(?:north|south|east) (?:path|entrance)/)?.[0] ?? null,
         timeWording: null,
-        uncertainty: null,
+        uncertainty: hedged(passage) ? passage.slice(0, 240) : null,
         ...(mode === "unsupported"
           ? { statement: "The neighborhood is safe" }
           : {}),
@@ -199,20 +233,26 @@ const server = createServer(async (req, res) => {
         Number(b.candidateId === scenario.candidateId) -
         Number(a.candidateId === scenario.candidateId),
     );
+    // Like the live model under constrained decoding: it closes the array
+    // after one assessment unless the request schema demands more.
+    if (mode === "stops-early")
+      assessments.splice(Math.max(1, required?.minItems ?? 0));
     return json({
       choices: [
         {
           finish_reason: "stop",
           message: {
-            content: JSON.stringify(
-              extracting
-                ? {
-                    category: "disruption",
-
-                    observations,
-                  }
-                : { assessments },
-            ),
+            content:
+              !extracting && scenario.matchingReplay !== undefined
+                ? scenario.matchingReplay
+                : JSON.stringify(
+                    extracting
+                      ? {
+                          category: scenario.category ?? "disruption",
+                          observations,
+                        }
+                      : { assessments },
+                  ),
           },
         },
       ],

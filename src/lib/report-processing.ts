@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { database } from "./database";
 import type {
-  MatchCandidate,
+  MatchChoice,
   MatchRecommendation,
   SavedReport,
 } from "./happenings";
@@ -10,11 +10,16 @@ import { nearbyCandidates, type CandidateSearch } from "./report-matching";
 import {
   extractReportInfo,
   compareReport,
+  coverageIncomplete,
   isPlausible,
+  COVERAGE_LIMIT_MESSAGE,
+  EvidenceBudgetError,
   EXTRACTION_REVISION,
   EXTRACTION_VERSION,
   LEASE_SECONDS,
+  MATCHING_REVISION,
   MATCHING_VERSION,
+  RejectedOutputError,
   extractionInput,
   type Extraction,
   type CandidateAssessment,
@@ -22,12 +27,24 @@ import {
 } from "./report-model";
 import { reviewSet, savedReport, SubmissionError } from "./report-submission";
 
-type MatchChoice =
-  | { choice: "match"; candidateId: string; candidateIdsShown: string[] }
-  | { choice: "create_new"; candidateIdsShown: string[] };
-
 type Stage = SavedReport["processingStage"];
 type SubmittedReport = ReportContext & Pick<SavedReport, "id" | "candidateId">;
+
+// Serializes publications that read and change nearby Happenings.
+const PUBLICATION_LOCK = 70420261022;
+const SINGLE_CONTRIBUTOR =
+  "One contributor's account; not independently verified.";
+
+const candidateSearch = (report: SubmittedReport) => ({
+  lat: report.lat,
+  lng: report.lng,
+  observedAt: report.observedAt,
+  candidateHint: report.candidateId,
+});
+const occurrenceReason = (extraction: Extraction) =>
+  extraction.occurrence === "multiple"
+    ? "separate_occurrences"
+    : "unclear_occurrence";
 
 // Every lease decision reads the locked row; callers cannot supply a stage.
 export async function acquireLease(input: {
@@ -46,6 +63,7 @@ export async function acquireLease(input: {
       state IN ('saved','pending') OR (state='processing' AND lease_until < now()) OR
       (state IN ('match_review','clarification') AND ($4::boolean OR NOT ${compatible}))
     ) AND NOT COALESCE(substring(extraction_version FROM '-v([0-9]+)$')::numeric > $7, false)
+      AND NOT COALESCE(substring(matching_version FROM '-v([0-9]+)$')::numeric > $9, false)
     RETURNING processing_stage`,
     [
       input.id,
@@ -56,6 +74,7 @@ export async function acquireLease(input: {
       input.extractionInput,
       EXTRACTION_REVISION,
       LEASE_SECONDS,
+      MATCHING_REVISION,
     ],
   );
   return rows[0]?.processing_stage ?? null;
@@ -83,7 +102,8 @@ export async function processReport(
         `UPDATE nearhood.report_processing SET state=$3, processing_stage='matching',
           extraction=$4::jsonb, extraction_version=$5, extraction_input=$6, extraction_model=$7,
           stage_runs=jsonb_build_object('extraction',$8::jsonb), pending_reason=$9,
-          candidate_ids=ARRAY[]::text[], candidate_packet='[]'::jsonb, recommendation=NULL,
+          candidate_ids=ARRAY[]::text[], candidate_packet='[]'::jsonb,
+          offered_candidate_ids=ARRAY[]::text[], recommendation=NULL,
           assessments='[]'::jsonb, coverage='{}'::jsonb, snapshot_fingerprint=NULL, matching_version=NULL,
           matching_outcome=NULL, decision_source=NULL, decision_actor=NULL, decision_at=NULL,
           decision_candidate_ids=ARRAY[]::text[], attempt=NULL, lease_until=NULL
@@ -97,11 +117,7 @@ export async function processReport(
           extractionInput(report),
           run.model,
           JSON.stringify(run),
-          extraction.sameOccurrence
-            ? null
-            : extraction.occurrence === "multiple"
-              ? "separate_occurrences"
-              : "unclear_occurrence",
+          extraction.sameOccurrence ? null : occurrenceReason(extraction),
         ],
       );
     } else {
@@ -119,26 +135,15 @@ export async function processReport(
         await database().query(
           `UPDATE nearhood.report_processing SET state='clarification',
           pending_reason=$3, attempt=NULL, lease_until=NULL WHERE report_id=$1 AND attempt=$2 AND lease_until>now()`,
-          [
-            id,
-            attempt,
-            extracted.extraction.occurrence === "multiple"
-              ? "separate_occurrences"
-              : "unclear_occurrence",
-          ],
+          [id, attempt, occurrenceReason(extracted.extraction)],
         );
         return savedReport(id, contributorId);
       }
-      const search = await nearbyCandidates({
-        lat: report.lat,
-        lng: report.lng,
-        observedAt: report.observedAt,
-        candidateHint: report.candidateId,
-      });
+      const search = await nearbyCandidates(candidateSearch(report));
       const snapshot = await database().query(
         `UPDATE nearhood.report_processing SET candidate_ids=$3::text[],
         candidate_packet=$4::jsonb, coverage=$5::jsonb, snapshot_fingerprint=$6,
-        recommendation=NULL, assessments='[]'::jsonb, matching_version=NULL,
+        offered_candidate_ids=ARRAY[]::text[], recommendation=NULL, assessments='[]'::jsonb, matching_version=NULL,
         matching_outcome=NULL, decision_source=NULL, decision_actor=NULL, decision_at=NULL
         WHERE report_id=$1 AND attempt=$2 AND state='processing' AND lease_until>now() RETURNING report_id`,
         [
@@ -167,7 +172,7 @@ export async function processReport(
         `UPDATE nearhood.report_processing SET state=$3, candidate_ids=$4::text[], candidate_packet=$5::jsonb,
           recommendation=$6::jsonb, assessments=$7::jsonb, coverage=$8::jsonb, snapshot_fingerprint=$9,
           matching_version=$10, stage_runs=stage_runs || jsonb_build_object('matching',$11::jsonb),
-          pending_reason=$12, model_id=$13,
+          pending_reason=$12, model_id=$13, offered_candidate_ids=$14::text[],
           matching_outcome=CASE WHEN $3='processing' THEN 'create_new' ELSE NULL END,
           decision_source=CASE WHEN $3='processing' THEN 'model_no_match' ELSE NULL END,
           decision_at=CASE WHEN $3='processing' THEN now() ELSE NULL END, decision_actor=NULL,
@@ -188,12 +193,12 @@ export async function processReport(
           MATCHING_VERSION,
           JSON.stringify(result.run),
           result.matching.kind === "uncertain"
-            ? search.coverage.poolTruncated ||
-              Object.keys(search.coverage.omittedEvidence).length > 0
+            ? coverageIncomplete(search.coverage)
               ? "incomplete_coverage"
               : "unclear_continuity"
             : null,
           result.run.model,
+          reviewSet(search.candidates, result.assessments).map((c) => c.id),
         ],
       );
       if (recorded.rowCount && result.matching.kind === "no_match") {
@@ -208,9 +213,15 @@ export async function processReport(
       }
     }
   } catch (error) {
-    const oversized =
-      error instanceof Error &&
-      error.message === "Matching evidence exceeds input budget";
+    const oversized = error instanceof EvidenceBudgetError;
+    const rejected = error instanceof RejectedOutputError ? error : null;
+    // Model output can repeat contributor words, so production logs only its shape.
+    console.error(
+      `Report ${id} ${stage} failed: ${error instanceof Error ? error.message : String(error)}${rejected ? ` (${rejected.shape})` : ""}`,
+      rejected && process.env.NODE_ENV !== "production"
+        ? JSON.stringify(rejected.output)
+        : "",
+    );
     await database().query(
       `UPDATE nearhood.report_processing SET state=$3, pending_reason=$4,
       coverage=coverage || jsonb_build_object('inputBudgetExceeded',$5::boolean),
@@ -240,16 +251,8 @@ async function publishForAttempt(input: {
   const client = await database().connect();
   try {
     await client.query("BEGIN");
-    await client.query("SELECT pg_advisory_xact_lock(70420261022)");
-    const fresh = await nearbyCandidates(
-      {
-        lat: input.report.lat,
-        lng: input.report.lng,
-        observedAt: input.report.observedAt,
-        candidateHint: input.report.candidateId,
-      },
-      client,
-    );
+    await client.query("SELECT pg_advisory_xact_lock($1)", [PUBLICATION_LOCK]);
+    const fresh = await nearbyCandidates(candidateSearch(input.report), client);
     if (fresh.fingerprint !== input.search.fingerprint)
       throw Error("Candidate evidence changed before publication");
 
@@ -291,11 +294,11 @@ export async function confirmReportMatch(
   const client = await database().connect();
   try {
     await client.query("BEGIN");
-    await client.query("SELECT pg_advisory_xact_lock(70420261022)");
+    await client.query("SELECT pg_advisory_xact_lock($1)", [PUBLICATION_LOCK]);
     const { rows } = await client.query<{
       state: string;
       candidate_ids: string[];
-      candidate_packet: MatchCandidate[];
+      offered_candidate_ids: string[];
       extraction: Extraction | null;
       model_id: string | null;
       matching_outcome: "matched" | "create_new" | null;
@@ -307,12 +310,9 @@ export async function confirmReportMatch(
       matching_version: string | null;
       snapshot_fingerprint: string | null;
       assessments: CandidateAssessment[];
-      coverage: {
-        poolTruncated?: boolean;
-        omittedEvidence?: Record<string, number>;
-      };
+      coverage: CandidateSearch["coverage"];
     }>(
-      `SELECT state, candidate_ids, candidate_packet, extraction, model_id,
+      `SELECT state, candidate_ids, offered_candidate_ids, extraction, model_id,
         matching_outcome, decision_source, happening_id,
         recommendation, extraction_version, extraction_input, matching_version,
         snapshot_fingerprint, assessments, coverage
@@ -345,15 +345,7 @@ export async function confirmReportMatch(
       )
     )
       throw new SubmissionError("Matching suggestions are not ready yet.", 409);
-    const fresh = await nearbyCandidates(
-      {
-        lat: report.lat,
-        lng: report.lng,
-        observedAt: report.observedAt,
-        candidateHint: report.candidateId,
-      },
-      client,
-    );
+    const fresh = await nearbyCandidates(candidateSearch(report), client);
     if (
       !processing.extraction ||
       !processing.model_id ||
@@ -387,13 +379,10 @@ export async function confirmReportMatch(
         "This Report cannot be assigned until its described occurrence is clear.",
         409,
       );
-    const shown = reviewSet(
-      processing.candidate_packet,
-      processing.assessments,
-    );
+    const offered = processing.offered_candidate_ids;
     if (
       choice.choice === "match" &&
-      (!shown.some((c) => c.id === choice.candidateId) ||
+      (!offered.includes(choice.candidateId) ||
         !choice.candidateIdsShown.includes(choice.candidateId))
     )
       throw new SubmissionError(
@@ -405,25 +394,24 @@ export async function confirmReportMatch(
       new Set(choice.candidateIdsShown).size !==
         choice.candidateIdsShown.length ||
       choice.candidateIdsShown.some(
-        (candidateId) => !shown.some((c) => c.id === candidateId),
+        (candidateId) => !offered.includes(candidateId),
       )
     )
       throw new SubmissionError(
         "Refresh the nearby suggestions before deciding.",
       );
 
+    if (choice.choice === "create_new" && coverageIncomplete(processing.coverage))
+      throw new SubmissionError(COVERAGE_LIMIT_MESSAGE, 409);
     if (
       choice.choice === "create_new" &&
-      (processing.coverage.poolTruncated ||
-        Object.keys(processing.coverage.omittedEvidence ?? {}).length > 0 ||
-        processing.assessments.some(
-          (a) =>
-            isPlausible(a) &&
-            !choice.candidateIdsShown.includes(a.candidateId),
-        ))
+      processing.assessments.some(
+        (a) =>
+          isPlausible(a) && !choice.candidateIdsShown.includes(a.candidateId),
+      )
     )
       throw new SubmissionError(
-        "Other nearby evidence is still uncertain. Leave this Report unassigned or refresh the suggestions.",
+        "Another nearby Happening may describe this Report. Choose a shown Happening or leave this Report unassigned.",
         409,
       );
 
@@ -537,13 +525,14 @@ async function publishEvidence(
     observationIds.set(observation.key, observationId);
     await client.query(
       `INSERT INTO nearhood.observations
-        (id,report_id,subject,described_state,spatial_scope,observed_at,source_support)
-      VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb)`,
+        (id,report_id,subject,described_state,uncertainty,spatial_scope,observed_at,source_support)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)`,
       [
         observationId,
         report.id,
         observation.subject,
-        observation.excerpt,
+        observation.describedCondition,
+        observation.uncertainty,
         observation.spatialScope,
         report.observedAt,
         JSON.stringify(observation.sourceSupport),
@@ -573,19 +562,27 @@ async function publishEvidence(
     previousAccount = account.rows[0] ?? null;
   }
 
+  const contributors = await client.query<{ count: number }>(
+    `SELECT COUNT(DISTINCT r.contributor_id)::int AS count
+    FROM nearhood.observation_memberships m
+    JOIN nearhood.observations o ON o.id=m.observation_id
+    JOIN nearhood.reports r ON r.id=o.report_id WHERE m.happening_id=$1`,
+    [happeningId],
+  );
+  const claims = extraction.observations.filter((o) => o.describedCondition);
   const accountId = randomUUID();
   const version = (previousAccount?.version ?? 0) + 1;
-  const uncertainty = new Set(
-    (
+  // The caveat holds until a different contributor's Report joins.
+  const uncertainty = new Set([
+    ...(contributors.rows[0].count === 1 ? [SINGLE_CONTRIBUTOR] : []),
+    ...(
       previousAccount?.uncertainty ?? [
-        "One contributor's account; not independently verified.",
         "Unobserved conditions and extent remain unknown.",
       ]
-    ).filter(
-      (item) =>
-        item !== "One contributor's account; not independently verified.",
-    ),
-  );
+    ).filter((item) => item !== SINGLE_CONTRIBUTOR),
+  ]);
+  if (input.createHappening && !claims.length)
+    uncertainty.add("No condition was described in this Report.");
   if (previousAccount)
     uncertainty.add(
       "This account remains provisional; Reports do not independently verify one another.",
@@ -644,20 +641,22 @@ async function publishEvidence(
     }
   }
 
-  for (const claim of extraction.claims) {
+  // Software derives one claim per described condition; the original Report
+  // stays linked through the supporting Observation.
+  for (const observation of claims) {
     const claimId = randomUUID();
     await client.query(
       "INSERT INTO nearhood.claims(id,account_id,statement,position) VALUES ($1,$2,$3,$4)",
-      [claimId, accountId, claim.statement, nextPosition++],
+      [
+        claimId,
+        accountId,
+        `${observation.subject}${observation.spatialScope ? ` (${observation.spatialScope})` : ""}: ${observation.describedCondition}`,
+        nextPosition++,
+      ],
     );
-    for (const key of claim.observationKeys) {
-      const observationId = observationIds.get(key);
-      if (!observationId)
-        throw Error("Model returned an unknown Observation key");
-      await client.query(
-        "INSERT INTO nearhood.claim_supports(claim_id,observation_id) VALUES ($1,$2)",
-        [claimId, observationId],
-      );
-    }
+    await client.query(
+      "INSERT INTO nearhood.claim_supports(claim_id,observation_id) VALUES ($1,$2)",
+      [claimId, observationIds.get(observation.key)],
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { leaseSeconds, modelTimeoutMs } from "./tests/server-timing";
+import { leaseSeconds, modelTimeoutMs, serverLog } from "./tests/server-timing";
 
 export default defineConfig({
   testDir: "./tests",
@@ -26,7 +26,8 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     {
-      command: "npm run db:setup -- --seed && npm run dev -- --port 3100",
+      // The server log is copied to a file so tests can check what processing failures record.
+      command: `npm run db:setup -- --seed && mkdir -p .local && npm run dev -- --port 3100 2>&1 | tee ${serverLog} 1>&2`,
       env: {
         APP_ORIGIN: "http://127.0.0.1:3100",
         SUPABASE_URL: "http://127.0.0.1:3101",

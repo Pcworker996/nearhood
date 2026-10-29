@@ -10,7 +10,13 @@
   },
   "live": {
     "occurrence": "single",
-    "scopes": ["north entrance", "south entrance"]
+    "scopes": [
+      "north entrance",
+      "south entrance"
+    ],
+    "category": [
+      "disruption"
+    ]
   },
   "model": {
     "category": "disruption",
@@ -19,7 +25,9 @@
         "key": "north",
         "subject": "North entrance",
         "sourceRef": "submitted_report",
-        "sourceIds": ["s0"],
+        "sourceIds": [
+          "s0"
+        ],
         "occurrenceGroup": 0,
         "describedCondition": "blocked by orange barriers",
         "spatialScope": "north entrance",
@@ -30,7 +38,9 @@
         "key": "south",
         "subject": "South entrance",
         "sourceRef": "submitted_report",
-        "sourceIds": ["s1"],
+        "sourceIds": [
+          "s1"
+        ],
         "occurrenceGroup": 0,
         "describedCondition": "open",
         "spatialScope": "South entrance",
@@ -58,9 +68,9 @@
         "occurrenceGroup": 0,
         "describedCondition": "blocked by orange barriers",
         "spatialScope": "north entrance",
+        "scopeOutsideCitation": false,
         "timeWording": null,
-        "uncertainty": null,
-        "excerpt": "The north entrance has orange barriers. The south entrance is open."
+        "uncertainty": null
       },
       {
         "key": "south",
@@ -76,15 +86,9 @@
         "occurrenceGroup": 0,
         "describedCondition": "open",
         "spatialScope": "south entrance",
+        "scopeOutsideCitation": false,
         "timeWording": null,
-        "uncertainty": "whether it stays open is unknown",
-        "excerpt": "The north entrance has orange barriers. The south entrance is open."
-      }
-    ],
-    "claims": [
-      {
-        "statement": "The north entrance has orange barriers. The south entrance is open.",
-        "observationKeys": ["north", "south"]
+        "uncertainty": "whether it stays open is unknown"
       }
     ]
   }

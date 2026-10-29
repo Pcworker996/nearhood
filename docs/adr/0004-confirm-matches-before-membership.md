@@ -11,6 +11,8 @@ Source: the product owner's October 19 revision in [ticket #4](https://github.co
 
 **October 21 revision:** [ADR 0005](0005-separate-extraction-from-matching.md) partially supersedes this record's five-candidate pre-comparison cutoff and combined-call architecture. It also resolves the hackathon boundary for separate-occurrence Reports: save them unassigned and explain why; guided answers are deferred. Contributor confirmation remains required and now explicitly covers later “Add an update” Reports. The sections below retain the October 19 decision and implementation history, not the new target contract.
 
+**October 28 revision:** [ADR 0007](0007-happening-identity-follows-the-situation.md) changes what counts as the same Happening: unknown history (elapsed time, unknown repair, a resolution report or Reported resolved) no longer counts as uncertainty, so such Reports are suggested as matches for confirmation. "Uncertainty" below now means the Happening itself can't be identified. The confirmation boundary is unchanged.
+
 ## Decision and responsibilities
 
 - Save the immutable Report before processing. Keep submission and observation times distinct, and retain the contributor's original words, location, and provenance.

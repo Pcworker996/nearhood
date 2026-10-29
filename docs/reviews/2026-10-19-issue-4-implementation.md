@@ -1,4 +1,4 @@
-# Ticket #4 implementation checkpoint
+=# Ticket #4 implementation checkpoint
 
 Source: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4). Review comparison: `git diff ee04cd6b23418db8a12511c625ea0f395acb4f94...eb39bd8`. Local implementation commits: `9357db4`, `77afcb6`, `eb39bd8`.
 
@@ -33,4 +33,4 @@ Spec total: **3 implementation findings fixed; 0 remaining concrete bugs found; 
 - Direct local catalog checks show RLS enabled on all evidence/processing tables and the migration ledger. Supabase's full advisor cannot run on this standalone PostgreSQL installation without Supabase roles/internal schemas.
 - `npm run model:check` correctly stops because `NEBIUS_API_KEY` is absent. No live runtime check, exact model selection or real Google login is claimed. No production migration or deployment was performed.
 
-Setup, endpoint behavior, lifecycle and remaining decisions are in [the implementation document](../implementation-issue-4.md). Existing uncommitted README, ADR, journal and quality-guide changes were left untouched.
+Setup, endpoint behavior, lifecycle and remaining decisions are in [the implementation document](../implementation/report-submission.md). Existing uncommitted README, ADR, journal and quality-guide changes were left untouched.

@@ -1,0 +1,54 @@
+{
+  "report": {
+    "originalText": "The gate on St. Mary St. is shut.",
+    "observedAt": null,
+    "locationName": "St. Mary St.",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "model": {
+    "category": "disruption",
+    "observations": [
+      {
+        "key": "gate",
+        "subject": "Gate",
+        "sourceRef": "submitted_report",
+        "sourceIds": [
+          "s1"
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "shut",
+        "spatialScope": "gate",
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  },
+  "expected": {
+    "category": "disruption",
+    "occurrence": "single",
+    "sameOccurrence": true,
+    "observations": [
+      {
+        "key": "gate",
+        "subject": "Gate",
+        "sourceRef": "submitted_report",
+        "sourceSupport": [
+          {
+            "start": 16,
+            "end": 33,
+            "text": "Mary St. is shut."
+          }
+        ],
+        "occurrenceGroup": 0,
+        "describedCondition": "shut",
+        "spatialScope": "gate",
+        "scopeOutsideCitation": true,
+        "timeWording": null,
+        "uncertainty": null
+      }
+    ]
+  }
+}

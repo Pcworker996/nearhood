@@ -1,0 +1,17 @@
+{
+  "report": {
+    "originalText": "Farmers market on the plaza Saturday 9 to 1.",
+    "observedAt": null,
+    "locationName": "Eastbank plaza",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "firsthand",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "category": [
+      "activity"
+    ]
+  }
+}

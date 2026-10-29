@@ -1,6 +1,6 @@
 import { contributorIdentity, rejectCrossOrigin } from "@/lib/auth";
 import { confirmReportMatch } from "@/lib/report-processing";
-import { SubmissionError } from "@/lib/report-submission";
+import { REVIEW_SET_SIZE, SubmissionError } from "@/lib/report-submission";
 import { submissionFailure } from "@/lib/submission-http";
 
 export async function POST(
@@ -54,7 +54,7 @@ function parseCandidateIds(value: unknown) {
   if (
     !Array.isArray(value) ||
     value.length < 1 ||
-    value.length > 5 ||
+    value.length > REVIEW_SET_SIZE ||
     value.some(
       (candidateId) =>
         typeof candidateId !== "string" ||

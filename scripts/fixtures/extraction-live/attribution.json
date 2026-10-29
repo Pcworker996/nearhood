@@ -1,0 +1,20 @@
+{
+  "report": {
+    "originalText": "The council says the path reopens Monday.",
+    "observedAt": null,
+    "locationName": "Riverside path",
+    "lat": 42.3328,
+    "lng": -83.0457,
+    "provenance": "source_based",
+    "sourceUrl": null
+  },
+  "live": {
+    "occurrence": "single",
+    "qualified": [
+      "path"
+    ],
+    "category": [
+      "disruption"
+    ]
+  }
+}
