@@ -58,3 +58,26 @@ export async function publishedHappening(
   expect(published.state).toBe("published");
   return published.happeningId as string;
 }
+
+// Adds a confirmed Report to an existing Happening.
+export async function joinHappening(
+  page: Page,
+  happeningId: string,
+  place: { lat: number; lng: number },
+) {
+  const report = await submit(
+    page,
+    `The remote path barrier is still up. ${randomUUID()}`,
+    place,
+    { [happeningId]: { continuity: "same" } },
+  );
+  const review = await processFully(page, report.id);
+  const joined = await page.request.post(`/api/reports/${report.id}/match`, {
+    data: {
+      choice: "match",
+      candidateId: happeningId,
+      candidateIdsShown: review.candidates.map((c: { id: string }) => c.id),
+    },
+  });
+  expect(joined.status()).toBe(200);
+}

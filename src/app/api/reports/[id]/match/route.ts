@@ -1,6 +1,7 @@
 import { contributorIdentity, rejectCrossOrigin } from "@/lib/auth";
 import { confirmReportMatch } from "@/lib/report-processing";
-import { REVIEW_SET_SIZE, SubmissionError } from "@/lib/report-submission";
+import { MATCHING_SCOPE } from "@/lib/report-matching";
+import { SubmissionError } from "@/lib/report-submission";
 import { submissionFailure } from "@/lib/submission-http";
 
 export async function POST(
@@ -22,10 +23,10 @@ export async function POST(
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body))
       throw new SubmissionError("Choose a matching decision.");
-    if (body.choice === "create_new")
+    if (body.choice === "create_new" || body.choice === "unsure")
       return Response.json(
         await confirmReportMatch((await context.params).id, identity.id, {
-          choice: "create_new",
+          choice: body.choice,
           candidateIdsShown: parseCandidateIds(body.candidateIdsShown),
         }),
         { headers: { "Cache-Control": "private, no-store" } },
@@ -53,8 +54,7 @@ export async function POST(
 function parseCandidateIds(value: unknown) {
   if (
     !Array.isArray(value) ||
-    value.length < 1 ||
-    value.length > REVIEW_SET_SIZE ||
+    value.length > MATCHING_SCOPE.maxCandidates ||
     value.some(
       (candidateId) =>
         typeof candidateId !== "string" ||

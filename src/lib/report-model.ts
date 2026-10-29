@@ -122,10 +122,11 @@ type Coverage = {
   poolTruncated?: boolean;
   omittedEvidence?: Record<string, number>;
 };
-// Truncation follows from stored evidence, so refreshing cannot clear it.
+// Only ungraded Happenings can hide a match; Reports left out of one
+// Happening's evidence are disclosed instead (ADR 0008). Truncation follows
+// from stored evidence, so refreshing cannot clear it.
 export const coverageIncomplete = (coverage: Coverage) =>
-  !!coverage.poolTruncated ||
-  Object.keys(coverage.omittedEvidence ?? {}).length > 0;
+  !!coverage.poolTruncated;
 export const COVERAGE_LIMIT_MESSAGE =
   "There are too many nearby Happenings or Reports to check automatically. Choose a shown Happening if one describes what you reported, or leave this Report unassigned.";
 export type ModelRun = {

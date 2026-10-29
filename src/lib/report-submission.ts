@@ -128,7 +128,7 @@ const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.origina
   CASE WHEN p.state='processing' AND p.lease_until < now() THEN 'pending' ELSE p.state END AS state
   FROM nearhood.reports r JOIN nearhood.contributors c ON c.id=r.contributor_id JOIN nearhood.report_processing p ON p.report_id=r.id`;
 
-// The best suggestion plus at most four alternatives (ADR 0005).
+// Suggestions shown before "Show more" (ADR 0008).
 export const REVIEW_SET_SIZE = 5;
 
 const gradeRank = (a: CandidateAssessment) =>
@@ -138,14 +138,12 @@ export function reviewSet(
   packet: MatchCandidate[],
   assessments: CandidateAssessment[],
 ) {
-  const order = assessments
-    .slice()
-    .sort((a, b) => gradeRank(a) - gradeRank(b));
-  return (
-    order.length
-      ? order.flatMap((a) => packet.filter((c) => c.id === a.candidateId))
-      : packet
-  ).slice(0, REVIEW_SET_SIZE);
+  // Every possible match is offered; candidates graded separate are not.
+  if (!assessments.length) return packet.slice(0, REVIEW_SET_SIZE);
+  return assessments
+    .filter((a) => effectiveGrade(a) !== "separate")
+    .sort((a, b) => gradeRank(a) - gradeRank(b))
+    .flatMap((a) => packet.filter((c) => c.id === a.candidateId));
 }
 
 export async function savedReport(id: string, contributorId: string) {

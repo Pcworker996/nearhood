@@ -69,7 +69,7 @@ async function save(
   ).json();
 }
 
-test("an overflowing candidate pool cannot turn no-match judgments into a new Happening", async ({
+test("an overflowing candidate pool never publishes automatically, but can't tell still publishes", async ({
   page,
 }, testInfo) => {
   test.setTimeout(60000);
@@ -103,6 +103,18 @@ test("an overflowing candidate pool cannot turn no-match judgments into a new Ha
   expect(result.recommendation.question).not.toMatch(/refresh/i);
   expect(result.candidateIds).toHaveLength(20);
   expect(result.happeningId).toBeNull();
+  // Nothing graded is a possible match, so nothing is offered. Ungraded
+  // Happenings could match: "different" is refused, "can't tell" publishes.
+  expect(result.candidates).toEqual([]);
+  const different = await page.request.post(`/api/reports/${report.id}/match`, {
+    data: { choice: "create_new", candidateIdsShown: [] },
+  });
+  expect(different.ok()).toBe(false);
+  const unsure = await page.request.post(`/api/reports/${report.id}/match`, {
+    data: { choice: "unsure", candidateIdsShown: [] },
+  });
+  expect(unsure.status()).toBe(200);
+  expect((await unsure.json()).happeningId).toBe(report.id);
 });
 
 test("an oversized evidence packet stays unassigned without losing the saved extraction", async ({
@@ -374,11 +386,14 @@ test("rejecting five displayed suggestions cannot discard an unshown plausible m
   ).json();
   expect(review.state).toBe("clarification");
   expect(review.candidateIds.length).toBeGreaterThan(5);
-  expect(review.candidates).toHaveLength(5);
+  // Every possible match is offered; five show before "Show more".
+  expect(review.candidates).toHaveLength(review.candidateIds.length);
   const rejected = await page.request.post(`/api/reports/${report.id}/match`, {
     data: {
       choice: "create_new",
-      candidateIdsShown: review.candidates.map((c: { id: string }) => c.id),
+      candidateIdsShown: review.candidates
+        .slice(0, 5)
+        .map((c: { id: string }) => c.id),
     },
   });
   expect(rejected.status()).toBe(409);
@@ -485,7 +500,7 @@ test("one Report split into several Observations is compared whole and leaves ne
   expect(result.happeningId).toBe(second.id);
 });
 
-test("omitted candidate Reports leave the Report unassigned without suggesting a refresh", async ({
+test("Reports left out of a Happening's evidence no longer stop a new Happening", async ({
   page,
 }, testInfo) => {
   test.setTimeout(60000);
@@ -505,31 +520,12 @@ test("omitted candidate Reports leave the Report unassigned without suggesting a
     lng: 25,
   });
   await page.request.post(`/api/reports/${report.id}/process`);
-  const review = await (
+  const published = await (
     await page.request.post(`/api/reports/${report.id}/process`)
   ).json();
-  expect(review.state).toBe("clarification");
-  expect(review.pendingReason).toBe("incomplete_coverage");
-  expect(review.happeningId).toBeNull();
-  expect(review.recommendation.question).not.toMatch(/refresh/i);
-  expect(
-    review.candidates.find((c: { id: string }) => c.id === first).evidence
-      .length,
-  ).toBe(3);
-  const refused = await page.request.post(`/api/reports/${report.id}/match`, {
-    data: { choice: "create_new", candidateIdsShown: [first] },
-  });
-  expect(refused.status()).toBe(409);
-  expect((await refused.json()).error).not.toMatch(/refresh/i);
-  await page.goto(`/?contribute=1&report=${report.id}`);
-  await expect(
-    page.getByText("too many nearby Happenings or Reports", { exact: false }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", {
-      name: "None of these describe what I reported",
-    }),
-  ).toHaveCount(0);
+  // The far-ramp Happening was graded separate on its three shown Reports (ADR 0008).
+  expect(published.state).toBe("published");
+  expect(published.happeningId).toBe(report.id);
 });
 
 test("a part the Report did not check publishes without a condition and only described parts become claims", async ({
@@ -811,7 +807,8 @@ test("a conflicting separate assessment stays unassigned until that Happening is
         },
       })
     ).status(),
-  ).toBe(409);
+    // A Happening graded separate is not offered, so citing it is refused.
+  ).toBe(400);
   expect(
     (await page.request.get(`/api/happenings/${report.id}`)).status(),
   ).toBe(404);
@@ -826,7 +823,9 @@ test("a conflicting separate assessment stays unassigned until that Happening is
   const after = await (
     await page.request.get(`/api/happenings/${conflicting.happeningId}`)
   ).json();
-  expect(after.account).toEqual(before.account);
+  // The new connection adds an uncertainty item; claims stay as they were.
+  expect(after.account.origin).toBe("connection_update");
+  expect(after.account.claims).toEqual(before.account.claims);
   expect(after.reports).toHaveLength(before.reports.length);
   expect(after.observations).toHaveLength(before.observations.length);
 });

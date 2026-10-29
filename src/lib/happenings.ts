@@ -18,7 +18,7 @@ export type SharedAccount = {
   id: string;
   version: number;
   publishedAt: string;
-  origin: "seed_fixture" | "model_derived";
+  origin: "seed_fixture" | "model_derived" | "connection_update";
   uncertainty: string[];
   claims: Claim[];
 };
@@ -97,7 +97,8 @@ export type MatchRecommendation =
   | { kind: "uncertain"; evidenceIds: string[]; question: string };
 export type MatchChoice =
   | { choice: "match"; candidateId: string; candidateIdsShown: string[] }
-  | { choice: "create_new"; candidateIdsShown: string[] };
+  | { choice: "create_new"; candidateIdsShown: string[] }
+  | { choice: "unsure"; candidateIdsShown: string[] };
 export type SavedReport = Report & {
   processingStage: "extraction" | "matching";
   extractionReady: boolean;
@@ -113,9 +114,24 @@ export type SavedReport = Report & {
   matchingOutcome: "matched" | "create_new" | null;
   decisionCandidateIds: string[];
 };
+export type Connection = {
+  happeningId: string;
+  title: string;
+  statements: {
+    source: "automatic_matching" | "contributor";
+    kind: "possibly_same" | "unsure" | "different";
+    reportId: string;
+    displayName: string | null;
+    createdAt: string;
+    reason: string | null;
+    evidenceIds: string[];
+    partialEvidence: boolean;
+  }[];
+};
 export type HappeningDetail = Happening & {
   reports: Report[];
   observations: Observation[];
+  connections: Connection[];
 };
 export type ClaimEvidence = {
   claim: Claim;

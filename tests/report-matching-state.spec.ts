@@ -275,9 +275,10 @@ for (const [index, scenario] of scenarios.entries()) {
         {
           data: {
             choice: "create_new",
-            candidateIdsShown: matched.candidates.map(
-              (candidate) => candidate.id,
-            ),
+            // Only the first five; the rest are behind "Show more".
+            candidateIdsShown: matched.candidates
+              .slice(0, 5)
+              .map((candidate) => candidate.id),
           },
         },
       );

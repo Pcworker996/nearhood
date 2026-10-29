@@ -8,6 +8,7 @@ import type {
   Report,
   SharedAccount,
 } from "./happenings";
+import { connectionsFor } from "./happening-connections";
 import { poolConfig } from "./postgres-config";
 
 const globalDatabase = globalThis as typeof globalThis & {
@@ -87,6 +88,7 @@ async function pendingReports(
     account: null,
     reports: [report],
     observations: [],
+    connections: [],
   }));
 }
 
@@ -122,7 +124,7 @@ export async function happeningDetail(
     [id],
   );
   if (!rows[0]) return (await pendingReports(undefined, id))[0] ?? null;
-  const [account, reports, observations] = await Promise.all([
+  const [account, reports, observations, connections] = await Promise.all([
     currentAccount(id),
     database().query<Report>(
       `SELECT DISTINCT r.id, r.contributor_id AS "contributorId", c.display_name AS "displayName", r.original_text AS "originalText",
@@ -140,12 +142,14 @@ export async function happeningDetail(
       ORDER BY o.observed_at DESC NULLS LAST, o.id`,
       [id],
     ),
+    connectionsFor(id),
   ]);
   return {
     ...rows[0],
     account,
     reports: reports.rows,
     observations: observations.rows,
+    connections,
   };
 }
 

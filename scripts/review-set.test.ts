@@ -33,7 +33,7 @@ const packet = ["a", "b", "c", "d", "e", "f", "g"].map(
 );
 const ids = (candidates: MatchCandidate[]) => candidates.map((c) => c.id);
 
-test("the review set follows the assessment order, puts separate candidates last and shows five", () => {
+test("every possible match is offered, same before unknown, and separate candidates are not", () => {
   const assessments = [
     assessment("c", "separate"),
     assessment("a", "same"),
@@ -53,12 +53,10 @@ test("the review set follows the assessment order, puts separate candidates last
   assert.deepEqual(ids(reviewSet(packet, [...assessments].slice(0, 4))), [
     "a",
     "e",
-    "c",
-    "b",
   ]);
 });
 
-test("a conflicting separate assessment stays ahead of other separate candidates", () => {
+test("a conflicting separate assessment is offered as a possible match", () => {
   const assessments = [
     assessment("c", "separate"),
     assessment("a", "separate", "conflict"),
@@ -68,13 +66,7 @@ test("a conflicting separate assessment stays ahead of other separate candidates
     assessment("g", "separate"),
     assessment("f", "separate"),
   ];
-  assert.deepEqual(ids(reviewSet(packet, assessments)), [
-    "a",
-    "c",
-    "e",
-    "b",
-    "d",
-  ]);
+  assert.deepEqual(ids(reviewSet(packet, assessments)), ["a"]);
 });
 
 test("without assessments the review set is the first five saved candidates", () => {

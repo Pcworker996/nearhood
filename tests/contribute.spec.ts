@@ -76,8 +76,8 @@ test("a semantic match is recommended with evidence but attached only after conf
   const reviewed = await (await processSaved(page, report.id)).json();
   expect(reviewed.state).toBe("match_review");
   expect(reviewed.candidateIds).toContain("picnic");
-  expect(reviewed.candidates).toHaveLength(5);
-  expect(reviewed.candidates[0].id).toBe("picnic");
+  // Only possible matches are offered; the others were graded separate.
+  expect(reviewed.candidates.map((c: { id: string }) => c.id)).toEqual(["picnic"]);
   expect(
     reviewed.candidates.find(
       (candidate: { id: string }) => candidate.id === "picnic",
@@ -225,7 +225,8 @@ test("an uncertain match asks a focused question and records the contributor's a
     await page.request.get(`/api/reports/${report.id}`)
   ).json();
   expect(decided.matchingOutcome).toBe("create_new");
-  expect(decided.decisionCandidateIds).toHaveLength(5);
+  // Only the one possible match was offered and shown.
+  expect(decided.decisionCandidateIds).toEqual([candidates[0]]);
   expect(decided.candidateIds).toEqual(
     expect.arrayContaining(decided.decisionCandidateIds),
   );

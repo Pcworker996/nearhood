@@ -6,6 +6,7 @@ import type {
   MatchRecommendation,
   SavedReport,
 } from "./happenings";
+import { recordConnections } from "./happening-connections";
 import { nearbyCandidates, type CandidateSearch } from "./report-matching";
 import {
   extractReportInfo,
@@ -25,7 +26,12 @@ import {
   type CandidateAssessment,
   type ReportContext,
 } from "./report-model";
-import { reviewSet, savedReport, SubmissionError } from "./report-submission";
+import {
+  REVIEW_SET_SIZE,
+  reviewSet,
+  savedReport,
+  SubmissionError,
+} from "./report-submission";
 
 type Stage = SavedReport["processingStage"];
 type SubmittedReport = ReportContext &
@@ -329,9 +335,12 @@ export async function confirmReportMatch(
         (choice.choice === "match" &&
           processing.matching_outcome === "matched" &&
           processing.happening_id === choice.candidateId) ||
-        (choice.choice === "create_new" &&
+        (choice.choice !== "match" &&
           processing.matching_outcome === "create_new" &&
-          processing.decision_source === "contributor_rejected_candidates");
+          processing.decision_source ===
+            (choice.choice === "create_new"
+              ? "contributor_rejected_candidates"
+              : "contributor_unsure"));
       if (!sameChoice)
         throw new SubmissionError(
           "This Report already has a different published matching decision.",
@@ -390,7 +399,8 @@ export async function confirmReportMatch(
         "Choose a Happening from the saved nearby suggestions.",
       );
     if (
-      choice.candidateIdsShown.length < 1 ||
+      // Nothing may be offered when every graded candidate was separate.
+      choice.candidateIdsShown.length < Math.min(1, offered.length) ||
       choice.candidateIdsShown.length > processing.candidate_ids.length ||
       new Set(choice.candidateIdsShown).size !==
         choice.candidateIdsShown.length ||
@@ -402,6 +412,16 @@ export async function confirmReportMatch(
         "Refresh the nearby suggestions before deciding.",
       );
 
+    // "Can't tell" never claims the Report differs from the possible matches.
+    if (
+      choice.choice === "unsure" &&
+      offered
+        .slice(0, REVIEW_SET_SIZE)
+        .some((candidateId) => !choice.candidateIdsShown.includes(candidateId))
+    )
+      throw new SubmissionError(
+        "Look at the first suggestions before publishing your Report on its own.",
+      );
     if (choice.choice === "create_new" && coverageIncomplete(processing.coverage))
       throw new SubmissionError(COVERAGE_LIMIT_MESSAGE, 409);
     if (
@@ -451,11 +471,22 @@ export async function confirmReportMatch(
 
     const happeningId =
       choice.choice === "match" ? choice.candidateId : report.id;
-    await publishEvidence(client, {
+    const reportObservationIds = await publishEvidence(client, {
       report,
       extraction: processing.extraction,
       happeningId,
-      createHappening: choice.choice === "create_new",
+      createHappening: choice.choice !== "match",
+    });
+    await recordConnections(client, {
+      reportId: report.id,
+      contributorId,
+      happeningId,
+      reportObservationIds,
+      assessments: processing.assessments,
+      coverage: processing.coverage,
+      matchingVersion: processing.matching_version,
+      snapshotFingerprint: processing.snapshot_fingerprint,
+      answer: choice.choice,
     });
     await client.query(
       `UPDATE nearhood.report_processing SET state='published', happening_id=$3,
@@ -467,9 +498,11 @@ export async function confirmReportMatch(
         contributorId,
         happeningId,
         choice.choice === "match" ? "matched" : "create_new",
-        choice.choice === "match"
-          ? "contributor_confirmed"
-          : "contributor_rejected_candidates",
+        {
+          match: "contributor_confirmed",
+          create_new: "contributor_rejected_candidates",
+          unsure: "contributor_unsure",
+        }[choice.choice],
         contributorId,
         choice.candidateIdsShown,
       ],
@@ -660,4 +693,5 @@ async function publishEvidence(
       [claimId, observationIds.get(observation.key)],
     );
   }
+  return [...observationIds.values()];
 }
