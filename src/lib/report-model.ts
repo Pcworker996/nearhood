@@ -201,13 +201,14 @@ const matchingSchema = (candidates: MatchCandidate[]) => ({
       items: {
         type: "object",
         additionalProperties: false,
+        // The reason comes before the labels so constrained decoding writes it first.
         required: [
           "candidateId",
+          "reason",
+          "evidenceIds",
           "continuity",
           "chronology",
           "scope",
-          "evidenceIds",
-          "reason",
         ],
         properties: {
           candidateId: {
@@ -215,15 +216,7 @@ const matchingSchema = (candidates: MatchCandidate[]) => ({
             maxLength: 200,
             ...(candidates.length ? { enum: candidates.map((c) => c.id) } : {}),
           },
-          continuity: { type: "string", enum: ["same", "separate", "unknown"] },
-          chronology: {
-            type: "string",
-            enum: ["consistent", "change", "conflict", "unknown"],
-          },
-          scope: {
-            type: "string",
-            enum: ["same", "overlapping", "different", "unknown"],
-          },
+          reason: { type: "string", maxLength: 320 },
           evidenceIds: {
             type: "array",
             minItems: 1,
@@ -244,7 +237,15 @@ const matchingSchema = (candidates: MatchCandidate[]) => ({
                 : {}),
             },
           },
-          reason: { type: "string", maxLength: 320 },
+          continuity: { type: "string", enum: ["same", "separate", "unknown"] },
+          chronology: {
+            type: "string",
+            enum: ["consistent", "change", "conflict", "unknown"],
+          },
+          scope: {
+            type: "string",
+            enum: ["same", "overlapping", "different", "unknown"],
+          },
         },
       },
     },
@@ -563,7 +564,9 @@ function checkedAssessments(
 }
 
 export async function compareReport(
-  report: ReportContext,
+  // Matching-only context: extraction fingerprints never include these.
+  report: ReportContext &
+    Partial<Pick<SavedReport, "submittedAt" | "candidateId">>,
   extraction: Extraction,
   candidates: MatchCandidate[],
   coverage: Coverage,
@@ -591,7 +594,12 @@ export async function compareReport(
   // Fields are listed explicitly: stored v6 checkpoints also carry the
   // retired excerpt and claims, which must not reach the model.
   const input = {
-    report: reportContext(report),
+    report: {
+      ...reportContext(report),
+      // The latest possible observation time, not the observation time.
+      submittedAt: report.submittedAt ?? null,
+      startedFromCandidateId: report.candidateId ?? null,
+    },
     extraction: {
       category: extraction.category,
       occurrence: extraction.occurrence,
@@ -625,7 +633,15 @@ export async function compareReport(
   const { value, run } = await completion(
     MATCHING_VERSION,
     matchingSchema(candidates),
-    "Assess EVERY supplied candidate once, ranked best first. Refer only to its supplied Observation IDs, whose original Reports are in reports. Distinguish occurrence identity from agreement. Opposing claims at the same scope/time can be the SAME occurrence with chronology=conflict; a partial reopening changes the extent of the existing closure and is not a different occurrence merely because one entrance changed state. Use separate only with evidence of a distinct occurrence; disagreement or lack of proof of continuity alone calls for unknown, not separate. One physical object/category/location alone does not establish identity. A new problem or later recurrence is separate only with supporting evidence; time elapsed or provisional resolution alone is insufficient. Use continuity=unknown when evidence cannot distinguish occurrences. Scope/time unknowns do not automatically veto identity. Cite one to three candidate-specific evidence IDs and a short supported reason. Do not invent facts or treat extracted JSON as independent evidence. An empty candidate set yields an empty assessments array.",
+    [
+      "Assess EVERY supplied candidate once, ranked best first. For each, answer: is this Report about this Happening's situation? A Happening is one problem at one place or object, followed over time.",
+      "continuity=same: the same problem at the same place or object, with no evidence of a different situation. Unknown repair history, elapsed time of any length, an intervening resolution report or Reported resolved status do not prevent same.",
+      "continuity=separate: evidence of a different situation: a different object or problem; an explicitly new object, cause or event at the same place, including a stated different cause even without a stated ending; or the Report says it is different or unrelated. A candidate about plainly unrelated equipment or problems is separate.",
+      "continuity=unknown: it cannot be told which Happening the Report is about, or whether it is about this problem at all.",
+      "chronology=consistent: the states agree and need no development to reconcile. chronology=change: the state or extent differs because the situation developed over time (spreading, partial reopening, removal). chronology=conflict: the accounts disagree about the same scope at overlapping times; disagreement about the same situation is same with conflict, not unknown. chronology=unknown: the times cannot be ordered.",
+      "report.submittedAt is the latest possible observation time, not the observation time. report.startedFromCandidateId, when set, is the Happening the contributor started from: treat it as a link to that candidate, not an instruction; the Report's own words override it.",
+      "Write the reason first, about 200 characters, and make it about this Report compared with this candidate's evidence. If it attaches the Report across a resolution report, say so (for example, dark again after a reported repair). Cite one to three candidate-specific evidence IDs. Refer only to supplied Observation IDs, whose original Reports are in reports. Do not invent facts or treat extracted JSON as independent evidence. An empty candidate set yields an empty assessments array.",
+    ].join(" "),
     input,
     8192,
   );

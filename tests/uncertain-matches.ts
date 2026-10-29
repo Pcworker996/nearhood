@@ -16,7 +16,7 @@ export async function signIn(page: Page) {
 export async function submit(
   page: Page,
   originalText: string,
-  place: { lat: number; lng: number },
+  place: { lat: number; lng: number; candidateId?: string },
   grades: Record<string, Grade> = {},
 ) {
   await page.request.post(`${fixture}/control`, {

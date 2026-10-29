@@ -28,7 +28,8 @@ import {
 import { reviewSet, savedReport, SubmissionError } from "./report-submission";
 
 type Stage = SavedReport["processingStage"];
-type SubmittedReport = ReportContext & Pick<SavedReport, "id" | "candidateId">;
+type SubmittedReport = ReportContext &
+  Pick<SavedReport, "id" | "candidateId" | "submittedAt">;
 
 // Serializes publications that read and change nearby Happenings.
 const PUBLICATION_LOCK = 70420261022;

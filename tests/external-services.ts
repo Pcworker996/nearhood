@@ -18,6 +18,8 @@ const scenarios = new Map<
 >();
 const calls = new Map<string, { extraction: number; matching: number }>();
 const held = new Map<string, () => void>();
+// The last matching request per Report text, so tests can inspect what the provider received.
+const matchingRequests = new Map<string, unknown>();
 let cancelNextSignIn = false;
 const user = (id: string) => ({
   id,
@@ -65,6 +67,8 @@ const server = createServer(async (req, res) => {
         matching: 0,
       },
     );
+  if (url.pathname === "/matching-request")
+    return json(matchingRequests.get(url.searchParams.get("text")!) ?? null);
   if (url.pathname === "/auth/v1/authorize") {
     if (cancelNextSignIn) {
       cancelNextSignIn = false;
@@ -137,6 +141,7 @@ const server = createServer(async (req, res) => {
       body.response_format.json_schema.name.startsWith("report_extraction_");
     const count = calls.get(text) ?? { extraction: 0, matching: 0 };
     count[extracting ? "extraction" : "matching"]++;
+    if (!extracting) matchingRequests.set(text, body);
     calls.set(text, count);
     const ordinal = count.extraction + count.matching;
     if (ordinal === scenario.hold)
