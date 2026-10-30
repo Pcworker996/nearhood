@@ -10,6 +10,7 @@
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "db:setup": "tsx scripts/setup-database.ts",
+    "db:reset-demo": "tsx scripts/reset-demo-data.ts",
     "model:check": "tsx scripts/check-report-model.ts",
     "matching:live": "node --import tsx scripts/check-matching-live.ts",
     "test:matching": "node --import tsx --test scripts/matching-evaluation.test.ts",

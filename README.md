@@ -75,7 +75,7 @@ Figma frames `1:2`, `6:2`, `6:122` and `6:265` supply the visual reference. Loca
 
 Application hosting choice for this slice: Vercel's Next.js deployment, backed by hosted Supabase PostgreSQL/PostGIS. This is a deployment plan; no external resources have been provisioned or deployed by the implementation.
 
-1. Configure the Supabase server database connection locally and apply the migration with `DATABASE_URL` set explicitly. Seed only a designated demo project using `--seed`.
+1. Configure the Supabase server database connection locally and apply the migration with `DATABASE_URL` set explicitly. The hosted demo uses the everyday scenarios in `db/demo-seed.sql` (off-leash dogs, a car collision, a water leak, a power outage, car break-ins, a pothole, a trunk-or-treat) rather than the test fixtures. `npm run db:reset-demo -- --yes` deletes **all** Nearhood data on that database, including contributed Reports, and loads them; back it up first.
 2. Set server-only `DATABASE_URL` and public `NEXT_PUBLIC_MAPTILER_KEY` in Vercel. Use a compatible Supabase pooler connection and the project's TLS configuration. The application uses parameterized queries without named prepared statements; it does not disable certificate verification.
 3. Deploy with `npm run build`. Restrict the MapTiler key to the deployment's domains and preserve MapTiler/OpenStreetMap attribution.
 4. Verify the hosted API, reload persistence, actual street tiles, evidence panel and responsive layout. A configured key is required at build time because it is a public browser setting.
