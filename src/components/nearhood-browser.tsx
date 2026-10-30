@@ -13,6 +13,7 @@ import type { MapDestination } from "./neighborhood-map";
 import HappeningDetailView from "./happening-detail";
 import { FigmaIcon } from "./figma-icon";
 import Contribution from "./contribution";
+import Discovery, { type DiscoveryState } from "./discovery";
 
 const NeighborhoodMap = dynamic(() => import("./neighborhood-map"), {
   ssr: false,
@@ -56,6 +57,11 @@ export default function NearhoodBrowser({
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
   const [contributing, setContributing] = useState(false);
+  const [discovering, setDiscovering] = useState(false);
+  const [discovery, setDiscovery] = useState<DiscoveryState>({
+    question: "",
+    result: null,
+  });
   const onBounds = useCallback((b: Bounds) => setBounds(b), []);
   useEffect(() => {
     const readUrl = () => {
@@ -63,6 +69,9 @@ export default function NearhoodBrowser({
       setDetailId(id);
       setContributing(
         new URLSearchParams(window.location.search).has("contribute"),
+      );
+      setDiscovering(
+        new URLSearchParams(window.location.search).has("discover"),
       );
     };
     readUrl();
@@ -140,7 +149,13 @@ export default function NearhoodBrowser({
     setDetailId(null);
     setContributing(false);
     setRetry((r) => r + 1);
-    window.history.pushState({}, "", "/");
+    // Details opened from Discovery return to its results.
+    window.history.pushState({}, "", discovering && detailId ? "/?discover=1" : "/");
+    if (!(discovering && detailId)) setDiscovering(false);
+  }
+  function discover() {
+    setDiscovering(true);
+    window.history.pushState({}, "", "/?discover=1");
   }
   function contribute() {
     setContributing(true);
@@ -190,6 +205,24 @@ export default function NearhoodBrowser({
         }
         mapTilerKey={mapTilerKey}
         onBack={back}
+      />
+    );
+  if (discovering && !detailId)
+    return (
+      <Discovery
+        bounds={bounds}
+        center={reference}
+        state={discovery}
+        onState={setDiscovery}
+        onBack={back}
+        onOpen={(card) => {
+          setSelectedId(card.happeningId);
+          setDestination({
+            coordinates: { lat: card.lat, lng: card.lng },
+            request: Date.now(),
+          });
+          openDetail(card.happeningId);
+        }}
       />
     );
   if (detailId)
@@ -413,7 +446,7 @@ export default function NearhoodBrowser({
           <FigmaIcon name="map" />
           <span>Map</span>
         </button>
-        <button disabled title="Discovery follows in ticket #13">
+        <button onClick={discover}>
           <FigmaIcon name="discover" />
           <span>Discover</span>
         </button>

@@ -134,6 +134,67 @@ export type HappeningDetail = Happening & {
   reports: Report[];
   observations: Observation[];
   connections: Connection[];
+  sourceCheck?: SourceCheck | null;
+};
+// Outside information is never evidence (ADR 0009); relation compares one
+// finding with the account version the check names.
+export type SourceFinding = {
+  url: string;
+  title: string;
+  site: string;
+  publishedDate: string | null;
+  snippet: string;
+  relation: "consistent" | "conflicts" | "unclear";
+  note: string | null;
+};
+export type SourceCheck = {
+  id: string;
+  happeningId: string;
+  accountVersion: number;
+  query: string;
+  checkedAt: string;
+  findings: SourceFinding[];
+};
+export type DiscoveryTraceStep = {
+  tool: string;
+  summary: string;
+};
+export type DiscoveryCard = Coordinates & {
+  happeningId: string;
+  title: string;
+  category: Happening["category"];
+  locationName: string;
+  status: string;
+  relevance: string;
+  claims: Claim[];
+  unknowns: string[];
+  cause:
+    | {
+        summary: string;
+        quote: string;
+        source: "report";
+        displayName: string;
+        provenance: Report["provenance"];
+      }
+    | {
+        summary: string;
+        quote: string;
+        source: "outside";
+        url: string;
+        site: string;
+      }
+    | null;
+  suggestions: string[];
+  notices: string[];
+  lastObservedAt: string | null;
+  sourceCheck: SourceCheck | null;
+};
+export type DiscoveryResult = {
+  cards: DiscoveryCard[];
+  trace: DiscoveryTraceStep[];
+  expandedArea: boolean;
+  fallback: string | null;
+  noMatchReason: string | null;
 };
 export type ClaimEvidence = {
   claim: Claim;

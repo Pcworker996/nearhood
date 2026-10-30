@@ -21,6 +21,21 @@ const held = new Map<string, () => void>();
 // The last matching request per Report text, so tests can inspect what the provider received.
 const matchingRequests = new Map<string, unknown>();
 let cancelNextSignIn = false;
+const discoveryScripts = new Map<
+  string,
+  { name: string; args: Record<string, unknown> }[]
+>();
+const tavilyResults = new Map<
+  string,
+  {
+    title: string;
+    url: string;
+    content: string;
+    published_date?: string;
+    relation: string;
+  }[]
+>();
+const tavilyRequests: { query: string }[] = [];
 const user = (id: string) => ({
   id,
   aud: "authenticated",
@@ -121,6 +136,111 @@ const server = createServer(async (req, res) => {
       : json({ message: "Invalid token", error_code: "bad_jwt" }, 401);
   }
   if (url.pathname === "/auth/v1/logout") return json({});
+  if (url.pathname === "/discovery-control") {
+    discoveryScripts.set(body.question, body.steps);
+    return json({ ok: true });
+  }
+  if (url.pathname === "/tavily-control") {
+    tavilyResults.set(body.query, body.results);
+    return json({ ok: true });
+  }
+  if (url.pathname === "/tavily-requests") return json(tavilyRequests);
+  if (url.pathname === "/tavily/search") {
+    if (req.headers.authorization !== "Bearer external-fixture-tavily-key")
+      return json({ detail: "Invalid key" }, 401);
+    tavilyRequests.push(body);
+    const results = tavilyResults.get(body.query) ?? [];
+    return json({
+      query: body.query,
+      results: results.map(({ relation: _relation, ...r }) => r),
+      images: [],
+      answer: null,
+      response_time: 0.1,
+    });
+  }
+  // Source check comparison: relations come from the controlled results.
+  if (
+    url.pathname === "/v1/chat/completions" &&
+    body.response_format?.json_schema?.name === "source_check_v1"
+  ) {
+    const input = JSON.parse(body.messages[1].content);
+    const all = [...tavilyResults.values()].flat();
+    const findings = input.results.map(
+      (r: { index: number; title: string }) => {
+        const relation =
+          all.find((c) => c.title === r.title)?.relation ?? "unclear";
+        return {
+          index: r.index,
+          relation,
+          note: relation === "unrelated" ? null : `Fixture note: ${relation}.`,
+        };
+      },
+    );
+    return json({
+      choices: [
+        {
+          finish_reason: "stop",
+          message: { content: JSON.stringify({ findings }) },
+        },
+      ],
+    });
+  }
+  // Discovery agent: plays the scripted tool calls for the question, one per
+  // turn. "$claims" and "$observation" resolve from the evidence the app
+  // returned, so scripts follow whatever the database holds.
+  if (url.pathname === "/v1/chat/completions" && body.tools) {
+    const { question } = JSON.parse(body.messages[1].content);
+    const steps = discoveryScripts.get(question);
+    if (!steps) return json({ error: "Controlled provider outage" }, 503);
+    const turn = body.messages.filter(
+      (m: { role: string }) => m.role === "assistant",
+    ).length;
+    const step = steps[Math.min(turn, steps.length - 1)];
+    const evidence = body.messages
+      .filter((m: { role: string }) => m.role === "tool")
+      .map((m: { content: string }) => JSON.parse(m.content))
+      .filter((output: { observations?: unknown }) => output.observations);
+    const resolve = (value: unknown, happeningId?: string): unknown => {
+      const opened = evidence.find((e: { id: string }) => e.id === happeningId);
+      if (value === "$claims")
+        return opened?.account?.claims.map((c: { id: string }) => c.id) ?? [];
+      if (value === "$observation") return [opened?.observations[0]?.id];
+      if (value === "$report") return opened?.reports[0]?.id;
+      if (Array.isArray(value))
+        return value.map((v) => resolve(v, happeningId));
+      if (value && typeof value === "object")
+        return Object.fromEntries(
+          Object.entries(value).map(([k, v]) => [
+            k,
+            resolve(
+              v,
+              (value as { happeningId?: string }).happeningId ?? happeningId,
+            ),
+          ]),
+        );
+      return value;
+    };
+    return json({
+      choices: [
+        {
+          finish_reason: "tool_calls",
+          message: {
+            content: "",
+            tool_calls: [
+              {
+                id: `call-${turn}`,
+                type: "function",
+                function: {
+                  name: step.name,
+                  arguments: JSON.stringify(resolve(step.args)),
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+  }
   if (url.pathname === "/v1/chat/completions") {
     const input = JSON.parse(body.messages[1].content);
     if (

@@ -37,6 +37,9 @@ export default defineConfig({
         NEBIUS_MODEL: "nvidia/test-nemotron-fixture",
         NEARHOOD_LEASE_SECONDS: String(leaseSeconds),
         NEARHOOD_MODEL_TIMEOUT_MS: String(modelTimeoutMs),
+        NEARHOOD_DISCOVERY_PER_MINUTE: "1000",
+        TAVILY_BASE_URL: "http://127.0.0.1:3101/tavily",
+        TAVILY_API_KEY: "external-fixture-tavily-key",
         DATABASE_URL:
           process.env.TEST_DATABASE_URL ??
           "postgresql://127.0.0.1:55432/nearhood_test",

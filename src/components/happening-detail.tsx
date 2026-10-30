@@ -6,6 +6,7 @@ import type {
   Connection,
   HappeningDetail,
 } from "@/lib/happenings";
+import { OutsideSources } from "./discovery";
 import { FigmaIcon } from "./figma-icon";
 import { dateLabel, ReportCard } from "./report-card";
 
@@ -213,6 +214,13 @@ export default function HappeningDetailView({
             </div>
           </aside>
         )}
+        {(section === "account" || section === "uncertainty") &&
+          detail.sourceCheck && (
+            <OutsideSources
+              check={detail.sourceCheck}
+              accountVersion={detail.account?.version}
+            />
+          )}
         {(section === "account" || section === "uncertainty") &&
           detail.connections.map((connection) => (
             <PossibleConnection

@@ -873,3 +873,121 @@ dialog > .muted {
   border: 0;
   gap: 20px;
 }
+
+/* Discovery (#13, ADR 0009) */
+.discovery-form {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+.discovery-form label {
+  font-size: 12px;
+  font-weight: 700;
+}
+.discovery-form textarea {
+  font: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  resize: vertical;
+}
+.discovery-trace {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.discovery-trace summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.discovery-trace ol {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+.discovery-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 16px;
+  margin: 14px 0;
+  box-shadow: var(--shadow);
+}
+.discovery-card h2 {
+  font-size: 18px;
+  margin: 8px 0 4px;
+}
+.discovery-card h3 {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 14px 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.discovery-card ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+}
+.discovery-card li + li {
+  margin-top: 4px;
+}
+.discovery-card .relevance,
+.discovery-card .cause {
+  font-size: 13px;
+  margin-top: 8px;
+}
+.discovery-card .notice {
+  font-size: 12px;
+  font-weight: 700;
+  color: #704e35;
+  margin-top: 10px;
+}
+.discovery-card .primary-button {
+  margin-top: 14px;
+}
+.outside-sources {
+  border: 1px dashed #9aa8a3;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 14px;
+  background: #f4f6f5;
+  font-size: 12px;
+}
+.outside-sources h3 {
+  margin-top: 0;
+}
+.outside-sources ul {
+  list-style: none;
+  padding: 0;
+}
+.outside-sources li p {
+  margin-top: 4px;
+}
+.relation {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #e6ebe9;
+}
+.relation.conflicts {
+  background: #f7dccf;
+  color: #8a3b17;
+}
+.relation.consistent {
+  background: #d9ece6;
+  color: var(--green);
+}
+.discovery-card .uncertainty-box h2 {
+  font-size: 12px;
+  margin: 0 0 5px;
+}
