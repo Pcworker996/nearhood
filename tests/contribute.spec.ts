@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 import { projectLatitude } from "./project-coordinates";
+import { placePin, roadAt } from "./place-pin";
 
 async function processSaved(page: Page, id: string) {
   let response = await page.request.post(`/api/reports/${id}/process`);
@@ -294,10 +295,7 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
     .getByLabel("What did you observe?")
     .fill("A fallen tree blocks the north path.");
   await page.getByLabel("Public display name").fill("River Neighbor");
-  await page
-    .getByLabel("Latitude", { exact: true })
-    .fill(String(projectLatitude(testInfo, 8)));
-  await page.getByLabel("Longitude", { exact: true }).fill("130");
+  await placePin(page, projectLatitude(testInfo, 8), 130);
   await page.getByLabel("Observation time").selectOption("unknown");
   await page.getByRole("button", { name: "Continue with Google" }).click();
   await expect(page.getByLabel("What did you observe?")).toHaveValue(
@@ -354,9 +352,7 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
   const lamp = await (await page.request.get("/api/happenings/lamp")).json();
   await page.getByRole("button", { name: "Add an update" }).click();
   await expect(page.getByLabel("What did you observe?")).toHaveValue("");
-  await expect(page.getByLabel("Latitude", { exact: true })).toHaveValue(
-    String(lamp.lat),
-  );
+  await expect(page.getByText(`Pin: Near ${roadAt(lamp.lat)}`)).toBeVisible();
 });
 
 test("hedged Reports publish no condition and keep the qualification beside the original words", async ({
@@ -412,10 +408,7 @@ test("processing begins after the original is saved and concurrent retries publi
   await page.getByLabel("What did you observe?").fill(text);
   await page.getByLabel("Public display name").fill("Path Walker");
   await page.getByLabel("Observation time").selectOption("now");
-  await page
-    .getByLabel("Latitude", { exact: true })
-    .fill(String(projectLatitude(testInfo, -35)));
-  await page.getByLabel("Longitude", { exact: true }).fill("110");
+  await placePin(page, projectLatitude(testInfo, -35), 110);
   const saveResponse = page.waitForResponse(
     (r) => r.url().endsWith("/api/reports") && r.request().method() === "POST",
   );
@@ -525,8 +518,7 @@ test("a source-based Report produces distinct claim evidence with unknown observ
   await page
     .getByLabel("Source link (optional)")
     .fill("https://example.test/community-notice");
-  await page.getByLabel("Latitude", { exact: true }).fill("44.25");
-  await page.getByLabel("Longitude", { exact: true }).fill("-85.25");
+  await placePin(page, 44.25, -85.25);
   await page
     .getByRole("button", { name: "Submit Report", exact: true })
     .click();
@@ -737,9 +729,9 @@ test("a selected Happening stays unchanged until the contributor confirms the ma
     await page.request.get("/api/happenings/bridge")
   ).json();
   await page.getByRole("button", { name: "Add an update" }).click();
-  await expect(page.getByLabel("Latitude", { exact: true })).toHaveValue(
-    String(before.lat),
-  );
+  await expect(
+    page.getByText(`Pin: Near ${roadAt(before.lat)}`),
+  ).toBeVisible();
   await page
     .getByLabel("What did you observe?")
     .fill("The south entrance looks different.");

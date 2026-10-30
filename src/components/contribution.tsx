@@ -97,7 +97,8 @@ export default function Contribution({
     } catch {
       /* Storage error is shown above. */
     }
-    // Drafts saved before #27 have no locationNameFrom; keep any typed name.
+    // Drafts saved before #27 have no locationNameFrom. A name typed then is
+    // shown until the pin's lookup replaces it.
     if (restored && !restored.locationNameFrom)
       restored.locationNameFrom =
         restored.locationName === PLACEHOLDER_LOCATION
@@ -182,8 +183,8 @@ export default function Contribution({
   function update(change: Partial<Draft>) {
     setDraft((d) => (d ? { ...d, ...change } : d));
   }
-  // Name the pinned place like a street map does, and suggest it as the
-  // location description until the contributor writes their own.
+  // Name the pinned place like a street map does. The location description
+  // comes only from this lookup or a chosen search result; it is not typed.
   const [placeLabel, setPlaceLabel] = useState("");
   const searchedPlace = useRef<{ key: string; name: string } | null>(null);
   const pinLat = draft?.lat;
@@ -216,12 +217,13 @@ export default function Contribution({
         .then((place) => {
           if (!place) return setPlaceLabel("No place name here");
           setPlaceLabel(`Near ${place.name}`);
+          // A search result keeps its own name while the pin stays on it,
+          // including after a reload loses searchedPlace.
           setDraft((d) =>
             d &&
             d.lat === pinLat &&
             d.lng === pinLng &&
-            (d.locationNameFrom === "placeholder" ||
-              d.locationNameFrom === "lookup")
+            d.locationNameFrom !== "search"
               ? { ...d, locationName: place.name, locationNameFrom: "lookup" }
               : d,
           );
@@ -726,13 +728,21 @@ export default function Contribution({
               <fieldset>
                 <legend>Where did you observe it?</legend>
                 <p className="muted">
-                  Search for a place, tap the map or drag the pin, or enter its
-                  coordinates. You can report anywhere.
+                  Search for a place, or tap the map or drag the pin. You can
+                  report anywhere.
                 </p>
                 <ContributionPin
                   coordinates={draft}
                   placeLabel={placeLabel}
-                  onChange={(c) => update(c)}
+                  // A moved pin drops the previous place's name until the
+                  // lookup for the new position names it.
+                  onChange={(c) =>
+                    update({
+                      ...c,
+                      locationName: PLACEHOLDER_LOCATION,
+                      locationNameFrom: "placeholder",
+                    })
+                  }
                   onPlaceChosen={(place) => {
                     searchedPlace.current = {
                       key: `${place.lat},${place.lng}`,
@@ -748,53 +758,20 @@ export default function Contribution({
                   mapTilerKey={mapTilerKey}
                   geocoder={geocoder}
                 />
-                <div className="coordinate-fields">
-                  <label>
-                    Latitude
-                    <input
-                      type="number"
-                      required
-                      min={-90}
-                      max={90}
-                      step="any"
-                      value={draft.lat}
-                      onChange={(e) => update({ lat: e.target.valueAsNumber })}
-                    />
-                  </label>
-                  <label>
-                    Longitude
-                    <input
-                      type="number"
-                      required
-                      min={-180}
-                      max={180}
-                      step="any"
-                      value={draft.lng}
-                      onChange={(e) => update({ lng: e.target.valueAsNumber })}
-                    />
-                  </label>
-                </div>
                 <label>
                   Location description
                   <input
-                    required
-                    maxLength={200}
+                    className="location-name"
+                    readOnly
                     value={draft.locationName}
-                    onChange={(e) =>
-                      update({
-                        locationName: e.target.value,
-                        locationNameFrom: "contributor",
-                      })
-                    }
                   />
                 </label>
-                {(draft.locationNameFrom === "lookup" ||
-                  draft.locationNameFrom === "search") && (
-                  <p className="muted">
-                    Suggested from the map. The nearest street can be wrong;
-                    edit it to describe where you were.
-                  </p>
-                )}
+                <p className="muted">
+                  {draft.locationNameFrom === "lookup" ||
+                  draft.locationNameFrom === "search"
+                    ? "From the map. Nearest-street names can be imprecise; search or move the pin to change it."
+                    : "Search for a place or move the pin to name this location."}
+                </p>
               </fieldset>
               <label>
                 Observation time

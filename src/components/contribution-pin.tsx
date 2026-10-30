@@ -178,7 +178,7 @@ export default function ContributionPin({
         </MapContainer>
         {!mapTilerKey && (
           <p className="muted">
-            Street tiles unavailable. Enter the exact coordinates below.
+            Street tiles unavailable. Search for a place to set the location.
           </p>
         )}
       </div>

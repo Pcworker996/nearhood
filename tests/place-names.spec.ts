@@ -13,12 +13,10 @@ async function signIn(page: Page) {
     page.getByRole("button", { name: "Submit Report", exact: true }),
   ).toBeVisible();
 }
-const roadAt = (lat: number) => `Fixture Road ${lat.toFixed(3)}, Fixture City`;
 
-test("the pin names its street, suggests it until the contributor writes their own, and moves to a searched place", async ({
+test("the location name comes only from the pin or a chosen search result, and follows every pin move", async ({
   page,
 }, testInfo) => {
-  const lat = projectLatitude(testInfo, 11);
   const library = {
     query: `Fixture Library ${testInfo.project.name}`,
     name: `Fixture Library ${testInfo.project.name}, Fixture City`,
@@ -30,13 +28,13 @@ test("the pin names its street, suggests it until the contributor writes their o
   });
   await signIn(page);
   const description = page.getByLabel("Location description");
-  await page.getByLabel("Latitude", { exact: true }).fill(String(lat));
-  await page.getByLabel("Longitude", { exact: true }).fill("140");
-  await expect(page.getByText(`Pin: Near ${roadAt(lat)}`)).toBeVisible();
-  await expect(description).toHaveValue(roadAt(lat));
-  await expect(page.getByText("Suggested from the map.")).toBeVisible();
+  // Contributors cannot type a name or coordinates.
+  await expect(description).not.toBeEditable();
+  await expect(page.getByLabel("Latitude", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Longitude", { exact: true })).toHaveCount(0);
 
-  // Reverse lookups stay at street level: no address points or POIs.
+  // The starting pin is named by a street-level lookup.
+  await expect(description).toHaveValue(/^Fixture Road -?\d+\.\d{3}, Fixture City$/);
   const requests = await (
     await page.request.get(`${fixture}/geocoding-requests`)
   ).json();
@@ -45,41 +43,30 @@ test("the pin names its street, suggests it until the contributor writes their o
     excludeTypes: "true",
   });
 
-  // Tapping the map moves the pin and replaces an untouched suggestion.
-  // Away from the zoom control (top left), attribution and the pin itself.
-  const map = page.locator(".contribution-pin .leaflet-container");
-  const box = (await map.boundingBox())!;
-  await map.click({ position: { x: box.width * 0.75, y: box.height * 0.7 } });
-  const tapped = Number(
-    await page.getByLabel("Latitude", { exact: true }).inputValue(),
-  );
-  expect(tapped).not.toBe(lat);
-  await expect(description).toHaveValue(roadAt(tapped));
-
-  // The contributor's own words survive later pin moves.
-  await description.fill("Under the rail bridge");
-  const moved = lat + 0.004;
-  await page.getByLabel("Latitude", { exact: true }).fill(String(moved));
-  await expect(page.getByText(`Pin: Near ${roadAt(moved)}`)).toBeVisible();
-  await expect(description).toHaveValue("Under the rail bridge");
-
   // Searching moves the pin and uses the chosen place's name; Enter must
   // search rather than submit the Report.
   await page.getByLabel("Search for a place").fill(library.query);
   await page.getByLabel("Search for a place").press("Enter");
   await page.getByRole("button", { name: library.name }).click();
-  await expect(page.getByLabel("Latitude", { exact: true })).toHaveValue(
-    String(library.lat),
-  );
-  await expect(page.getByLabel("Longitude", { exact: true })).toHaveValue(
-    String(library.lng),
-  );
   await expect(description).toHaveValue(library.name);
   await expect(page.getByText(`Pin: ${library.name}`)).toBeVisible();
+
+  // Moving the pin after a search replaces the searched name.
+  // Away from the zoom control (top left), attribution and the pin itself.
+  const map = page.locator(".contribution-pin .leaflet-container");
+  const box = (await map.boundingBox())!;
+  await map.click({ position: { x: box.width * 0.75, y: box.height * 0.7 } });
+  await expect(description).toHaveValue(/^Fixture Road -?\d+\.\d{3}, Fixture City$/);
+  await expect(page.getByText(/^Pin: Near Fixture Road/)).toBeVisible();
+
   await page.getByLabel("Search for a place").fill("Nowhere at all");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(page.getByText("No places found.")).toBeVisible();
 
+  await page.getByLabel("Search for a place").fill(library.query);
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await page.getByRole("button", { name: library.name }).click();
+  await expect(description).toHaveValue(library.name);
   await page
     .getByLabel("What did you observe?")
     .fill(`The library steps are closed ${randomUUID()}.`);
@@ -91,8 +78,12 @@ test("the pin names its street, suggests it until the contributor writes their o
   await expect(page).toHaveURL(/report=/);
   const id = new URL(page.url()).searchParams.get("report")!;
   const saved = await (await page.request.get(`/api/reports/${id}`)).json();
-  expect(saved.locationName).toBe(library.name);
-  expect(saved.locationNameSource).toBe("geocoder");
+  expect(saved).toMatchObject({
+    locationName: library.name,
+    locationNameSource: "geocoder",
+    lat: library.lat,
+    lng: library.lng,
+  });
 });
 
 test("server-side place lookups are refused, as the real origin-restricted key refuses them", async ({
@@ -106,16 +97,12 @@ test("server-side place lookups are refused, as the real origin-restricted key r
 
 test("an unavailable geocoder leaves the location description and submission usable", async ({
   page,
-}, testInfo) => {
+}) => {
   await page.request.post(`${fixture}/geocoding-control`, {
     data: { down: true },
   });
   try {
     await signIn(page);
-    await page
-      .getByLabel("Latitude", { exact: true })
-      .fill(String(projectLatitude(testInfo, 11)));
-    await page.getByLabel("Longitude", { exact: true }).fill("141");
     await expect(page.getByText("Pin: Place name unavailable")).toBeVisible();
     await expect(page.getByLabel("Location description")).toHaveValue(
       "Selected map pin",

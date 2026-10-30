@@ -783,10 +783,10 @@ dialog > .muted {
 .contribution-form .checkbox-label input {
   width: auto;
 }
-.coordinate-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.contribution-form input.location-name {
+  border-style: dashed;
+  background: #f4f5f2;
+  cursor: default;
 }
 .contribution-pin .leaflet-container {
   height: 230px;
