@@ -30,6 +30,8 @@ export type ReportInput = {
   lat: number;
   lng: number;
   locationName: string;
+  // How the location name was produced; older clients omit it (#27).
+  locationNameSource: "contributor" | "geocoder";
   observedAt: string | null;
   provenance: "firsthand" | "source_based";
   sourceUrl: string | null;
@@ -108,6 +110,8 @@ export function parseReportInput(value: unknown): ReportInput {
     lat: b.lat,
     lng: b.lng,
     locationName: text("locationName", 200),
+    locationNameSource:
+      b.locationNameSource === "geocoder" ? "geocoder" : "contributor",
     observedAt:
       b.observedAt === null
         ? null
@@ -121,7 +125,7 @@ export function parseReportInput(value: unknown): ReportInput {
 const savedSelect = `SELECT r.id, r.contributor_id AS "contributorId", r.original_text AS "originalText", c.display_name AS "displayName",
   r.observed_at AS "observedAt", r.submitted_at AS "submittedAt", r.provenance, r.source_url AS "sourceUrl",
   extensions.ST_Y(r.location::extensions.geometry) AS lat, extensions.ST_X(r.location::extensions.geometry) AS lng,
-  p.location_name AS "locationName", p.candidate_id AS "candidateId", p.happening_id AS "happeningId",
+  p.location_name AS "locationName", p.location_name_source AS "locationNameSource", p.candidate_id AS "candidateId", p.happening_id AS "happeningId",
   p.candidate_ids AS "candidateIds", p.candidate_packet AS candidates,
   p.recommendation, p.matching_outcome AS "matchingOutcome",
   p.decision_candidate_ids AS "decisionCandidateIds",
@@ -257,8 +261,8 @@ export async function saveReport(input: ReportInput, contributorId: string) {
         ],
       );
       await client.query(
-        `INSERT INTO nearhood.report_processing(report_id,request_key,request_body,contributor_id,candidate_id,location_name)
-        VALUES ($1,$2,$3,$4,$5,$6)`,
+        `INSERT INTO nearhood.report_processing(report_id,request_key,request_body,contributor_id,candidate_id,location_name,location_name_source)
+        VALUES ($1,$2,$3,$4,$5,$6,$7)`,
         [
           id,
           input.requestKey,
@@ -266,6 +270,7 @@ export async function saveReport(input: ReportInput, contributorId: string) {
           contributorId,
           input.candidateId,
           input.locationName,
+          input.locationNameSource,
         ],
       );
     }

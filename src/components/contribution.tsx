@@ -10,12 +10,16 @@ import {
   type MatchChoice,
   type SavedReport,
 } from "@/lib/happenings";
+import { placeAt, type Geocoder } from "@/lib/geocoding";
 import { ReportCard } from "./report-card";
 
 const ContributionPin = dynamic(() => import("./contribution-pin"), {
   ssr: false,
 });
 const DRAFT_KEY = "nearhood-report-draft-v1";
+const PLACEHOLDER_LOCATION = "Selected map pin";
+// Pin lookups may replace only a placeholder or an earlier lookup (#27).
+type LocationNameFrom = "placeholder" | "lookup" | "search" | "contributor";
 type Draft = {
   requestKey: string;
   originalText: string;
@@ -23,6 +27,7 @@ type Draft = {
   lat: number;
   lng: number;
   locationName: string;
+  locationNameFrom: LocationNameFrom;
   timeChoice: string;
   chosenTime: string;
   provenance: string;
@@ -41,11 +46,13 @@ export default function Contribution({
   coordinates,
   candidateId,
   mapTilerKey,
+  geocoder,
   onBack,
 }: {
   coordinates: Coordinates;
   candidateId: string | null;
   mapTilerKey: string;
+  geocoder: Geocoder;
   onBack: () => void;
 }) {
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -90,13 +97,20 @@ export default function Contribution({
     } catch {
       /* Storage error is shown above. */
     }
+    // Drafts saved before #27 have no locationNameFrom; keep any typed name.
+    if (restored && !restored.locationNameFrom)
+      restored.locationNameFrom =
+        restored.locationName === PLACEHOLDER_LOCATION
+          ? "placeholder"
+          : "contributor";
     setDraft(
       restored ?? {
         requestKey: crypto.randomUUID(),
         originalText: "",
         displayName: "",
         ...coordinates,
-        locationName: "Selected map pin",
+        locationName: PLACEHOLDER_LOCATION,
+        locationNameFrom: "placeholder",
         timeChoice: "",
         chosenTime: "",
         provenance: "firsthand",
@@ -168,6 +182,60 @@ export default function Contribution({
   function update(change: Partial<Draft>) {
     setDraft((d) => (d ? { ...d, ...change } : d));
   }
+  // Name the pinned place like a street map does, and suggest it as the
+  // location description until the contributor writes their own.
+  const [placeLabel, setPlaceLabel] = useState("");
+  const searchedPlace = useRef<{ key: string; name: string } | null>(null);
+  const pinLat = draft?.lat;
+  const pinLng = draft?.lng;
+  const { url: geocoderUrl, key: geocoderKey } = geocoder;
+  useEffect(() => {
+    if (
+      pinLat === undefined ||
+      pinLng === undefined ||
+      !Number.isFinite(pinLat) ||
+      !Number.isFinite(pinLng) ||
+      Math.abs(pinLat) > 90 ||
+      Math.abs(pinLng) > 180
+    ) {
+      setPlaceLabel("");
+      return;
+    }
+    if (searchedPlace.current?.key === `${pinLat},${pinLng}`) {
+      setPlaceLabel(searchedPlace.current.name);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      setPlaceLabel("Looking up place…");
+      placeAt(
+        { url: geocoderUrl, key: geocoderKey },
+        { lat: pinLat, lng: pinLng },
+        controller.signal,
+      )
+        .then((place) => {
+          if (!place) return setPlaceLabel("No place name here");
+          setPlaceLabel(`Near ${place.name}`);
+          setDraft((d) =>
+            d &&
+            d.lat === pinLat &&
+            d.lng === pinLng &&
+            (d.locationNameFrom === "placeholder" ||
+              d.locationNameFrom === "lookup")
+              ? { ...d, locationName: place.name, locationNameFrom: "lookup" }
+              : d,
+          );
+        })
+        .catch(() => {
+          if (!controller.signal.aborted)
+            setPlaceLabel("Place name unavailable");
+        });
+    }, 400);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [pinLat, pinLng, geocoderUrl, geocoderKey]);
   async function process(id: string, refresh = false) {
     setBusy(true);
     setError("");
@@ -262,6 +330,11 @@ export default function Contribution({
             lat: draft.lat,
             lng: draft.lng,
             locationName: draft.locationName,
+            locationNameSource:
+              draft.locationNameFrom === "lookup" ||
+              draft.locationNameFrom === "search"
+                ? "geocoder"
+                : "contributor",
             observedAt,
             provenance: draft.provenance,
             sourceUrl:
@@ -653,13 +726,27 @@ export default function Contribution({
               <fieldset>
                 <legend>Where did you observe it?</legend>
                 <p className="muted">
-                  Tap the map to place your pin, or enter its coordinates. You
-                  can report anywhere.
+                  Search for a place, tap the map or drag the pin, or enter its
+                  coordinates. You can report anywhere.
                 </p>
                 <ContributionPin
                   coordinates={draft}
+                  placeLabel={placeLabel}
                   onChange={(c) => update(c)}
+                  onPlaceChosen={(place) => {
+                    searchedPlace.current = {
+                      key: `${place.lat},${place.lng}`,
+                      name: place.name,
+                    };
+                    update({
+                      lat: place.lat,
+                      lng: place.lng,
+                      locationName: place.name,
+                      locationNameFrom: "search",
+                    });
+                  }}
                   mapTilerKey={mapTilerKey}
+                  geocoder={geocoder}
                 />
                 <div className="coordinate-fields">
                   <label>
@@ -693,9 +780,21 @@ export default function Contribution({
                     required
                     maxLength={200}
                     value={draft.locationName}
-                    onChange={(e) => update({ locationName: e.target.value })}
+                    onChange={(e) =>
+                      update({
+                        locationName: e.target.value,
+                        locationNameFrom: "contributor",
+                      })
+                    }
                   />
                 </label>
+                {(draft.locationNameFrom === "lookup" ||
+                  draft.locationNameFrom === "search") && (
+                  <p className="muted">
+                    Suggested from the map. The nearest street can be wrong;
+                    edit it to describe where you were.
+                  </p>
+                )}
               </fieldset>
               <label>
                 Observation time

@@ -792,6 +792,47 @@ dialog > .muted {
   height: 230px;
   border-radius: 10px;
 }
+.place-search {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.place-search > button {
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+.place-search > p,
+.place-search > ul {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.place-search ul {
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+.place-search li + li {
+  border-top: 1px solid var(--border);
+}
+.place-search li button {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.leaflet-tooltip.pin-place-label {
+  max-width: 220px;
+  white-space: normal;
+  color: var(--ink);
+  font-weight: 600;
+}
 .contribution-content > .primary-button {
   display: inline-block;
   margin: 12px 8px 12px 0;

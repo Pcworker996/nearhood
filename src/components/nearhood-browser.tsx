@@ -9,6 +9,7 @@ import type {
   HappeningDetail,
 } from "@/lib/happenings";
 import { DEMO_BOUNDS, DEMO_CENTER } from "@/lib/happenings";
+import type { Geocoder } from "@/lib/geocoding";
 import type { MapDestination } from "./neighborhood-map";
 import HappeningDetailView from "./happening-detail";
 import { FigmaIcon } from "./figma-icon";
@@ -39,8 +40,10 @@ function distanceLabel(h: Coordinates, reference: Coordinates) {
 
 export default function NearhoodBrowser({
   mapTilerKey,
+  geocoder,
 }: {
   mapTilerKey: string;
+  geocoder: Geocoder;
 }) {
   const [bounds, setBounds] = useState<Bounds>(DEMO_BOUNDS);
   const [happenings, setHappenings] = useState<Happening[]>([]);
@@ -150,7 +153,11 @@ export default function NearhoodBrowser({
     setContributing(false);
     setRetry((r) => r + 1);
     // Details opened from Discovery return to its results.
-    window.history.pushState({}, "", discovering && detailId ? "/?discover=1" : "/");
+    window.history.pushState(
+      {},
+      "",
+      discovering && detailId ? "/?discover=1" : "/",
+    );
     if (!(discovering && detailId)) setDiscovering(false);
   }
   function discover() {
@@ -204,6 +211,7 @@ export default function NearhoodBrowser({
           detail?.category === "pending" ? null : (detail?.id ?? null)
         }
         mapTilerKey={mapTilerKey}
+        geocoder={geocoder}
         onBack={back}
       />
     );

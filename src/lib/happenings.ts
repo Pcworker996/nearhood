@@ -109,6 +109,7 @@ export type SavedReport = Report & {
   state: ReportProcessingState;
   happeningId: string | null;
   locationName: string;
+  locationNameSource: "contributor" | "geocoder";
   candidateId: string | null;
   candidateIds: string[];
   candidates: MatchCandidate[];

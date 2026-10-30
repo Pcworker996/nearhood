@@ -36,6 +36,13 @@ const tavilyResults = new Map<
   }[]
 >();
 const tavilyRequests: { query: string }[] = [];
+let geocoderDown = false;
+const geocodingPlaces = new Map<
+  string,
+  { query: string; name: string; lat: number; lng: number }
+>();
+const geocodingRequests: { query: string; params: Record<string, string> }[] =
+  [];
 const user = (id: string) => ({
   id,
   aud: "authenticated",
@@ -145,6 +152,54 @@ const server = createServer(async (req, res) => {
     return json({ ok: true });
   }
   if (url.pathname === "/tavily-requests") return json(tavilyRequests);
+  // MapTiler Geocoding: reverse lookups name a road after the position;
+  // searches find only the places registered here.
+  if (url.pathname === "/geocoding-control") {
+    geocoderDown = !!body.down;
+    if (body.place) geocodingPlaces.set(body.place.query, body.place);
+    return json({ ok: true });
+  }
+  if (url.pathname === "/geocoding-requests") return json(geocodingRequests);
+  if (url.pathname.startsWith("/geocoding/")) {
+    // Like the real key: restricted to allowed origins, so only browser
+    // requests from the site are served.
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    if (
+      url.searchParams.get("key") !== "external-fixture-maptiler-key" ||
+      req.headers.origin !== "http://127.0.0.1:3100"
+    )
+      return json({ message: "Key usage restricted" }, 403);
+    if (geocoderDown) return json({ message: "Unavailable" }, 503);
+    const query = decodeURIComponent(
+      url.pathname.slice("/geocoding/".length).replace(/\.json$/, ""),
+    );
+    geocodingRequests.push({
+      query,
+      params: Object.fromEntries(
+        [...url.searchParams].filter(([k]) => k !== "key"),
+      ),
+    });
+    const reverse = /^(-?[\d.]+),(-?[\d.]+)$/.exec(query);
+    const feature = (name: string, lng: number, lat: number) => ({
+      type: "Feature",
+      place_name: name,
+      text: name.split(",")[0],
+      center: [lng, lat],
+      geometry: { type: "Point", coordinates: [lng, lat] },
+    });
+    const features = reverse
+      ? [
+          feature(
+            `Fixture Road ${Number(reverse[2]).toFixed(3)}, Fixture City`,
+            Number(reverse[1]),
+            Number(reverse[2]),
+          ),
+        ]
+      : [geocodingPlaces.get(query)]
+          .filter((p) => !!p)
+          .map((p) => feature(p.name, p.lng, p.lat));
+    return json({ type: "FeatureCollection", features });
+  }
   if (url.pathname === "/tavily/search") {
     if (req.headers.authorization !== "Bearer external-fixture-tavily-key")
       return json({ detail: "Invalid key" }, 401);
