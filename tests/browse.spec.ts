@@ -268,7 +268,7 @@ test("a second published Happening at the footbridge covers the seeded marker", 
     await page
       .getByRole("button", { name: /Nearby highlights.*happenings in view/ })
       .click();
-    // Overlapping markers at one position. https://github.com/Pcworker996/nebius-hack/issues/17
+    // Overlapping markers at one position. ../docs/issues/17.md
     test.fail();
     await page
       .getByRole("button", {

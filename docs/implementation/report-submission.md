@@ -1,6 +1,6 @@
 # Report submission — ticket #4
 
-Source: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), with the browser/real HTTP API/PostgreSQL testing boundary in ADR 0003 and the contributor-confirmed matching boundary in [ADR 0004](../adr/0004-confirm-matches-before-membership.md).
+Source: [ticket #4](../issues/4.md), with the browser/real HTTP API/PostgreSQL testing boundary in ADR 0003 and the contributor-confirmed matching boundary in [ADR 0004](../adr/0004-confirm-matches-before-membership.md).
 
 ## Accepted revision — October 21, 2026
 

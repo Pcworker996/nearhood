@@ -7,7 +7,7 @@ date: 2026-10-16
 
 Nearhood must explain what supports a local account even when observations disagree or the interpretation changes. Preserve Reports, derived Observations, Happenings, and versioned provisional Shared accounts as distinct records, with claim-specific links through Observations to original Reports. This supports inspection and reinterpretation without silently replacing a contributor's words with generated text.
 
-Sources: [spec #1](https://github.com/Pcworker996/nebius-hack/issues/1), [browsing slice #3](https://github.com/Pcworker996/nebius-hack/issues/3), [product guardrails](../product-guardrails.md), and [domain glossary](../../CONTEXT.md).
+Sources: [spec #1](../issues/1.md), [browsing slice #3](../issues/3.md), [product guardrails](../product-guardrails.md), and [domain glossary](../../CONTEXT.md).
 
 ## Consequences and responsibilities
 

@@ -5,7 +5,7 @@ date: 2026-10-30
 
 # Discovery is a bounded read-only agent; Source checks are stored apart from evidence
 
-Report processing is a fixed sequence of model stages ([ADR 0005](0005-separate-extraction-from-matching.md)), and the V1 demonstration ticket excluded external research and unnecessary agents ([#16](https://github.com/Pcworker996/nebius-hack/issues/16)). For Discovery ([#13](https://github.com/Pcworker996/nebius-hack/issues/13)) we chose an adaptive agent instead: the next useful lookup depends on what the reader asked and what the evidence already read shows, and the agent cannot change Reports, membership or Shared Accounts. It may also run a Source check on its own initiative, because outside notices are where disagreement with neighbours' Reports becomes visible.
+Report processing is a fixed sequence of model stages ([ADR 0005](0005-separate-extraction-from-matching.md)), and the V1 demonstration ticket excluded external research and unnecessary agents ([#16](../issues/16.md)). For Discovery ([#13](../issues/13.md)) we chose an adaptive agent instead: the next useful lookup depends on what the reader asked and what the evidence already read shows, and the agent cannot change Reports, membership or Shared Accounts. It may also run a Source check on its own initiative, because outside notices are where disagreement with neighbours' Reports becomes visible.
 
 Source: grilling session with the product owner, Maoyuan Wang, on 2026-10-29/30. Terms: **Discovery**, **Source check**, **Reported cause** and **Suggestion** in [CONTEXT.md](../../CONTEXT.md).
 

@@ -1,6 +1,6 @@
 # Ticket #4: saved Report state after matching
 
-October 27, 2026. The earlier [live matching evaluation](2026-10-27-issue-4-live-matching.md) scored model assessments and software-derived recommendations. It did not verify saved processing state, membership, or publication. This record adds that product-boundary verification for [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4).
+October 27, 2026. The earlier [live matching evaluation](2026-10-27-issue-4-live-matching.md) scored model assessments and software-derived recommendations. It did not verify saved processing state, membership, or publication. This record adds that product-boundary verification for [ticket #4](../issues/4.md).
 
 The focused run passed **18/18 journeys**, covering nine scenarios on mobile and desktop. The full browser run reported **112 passed**, with zero unexpected failures. That count includes the two existing expected marker-overlap failures for #17. These are real application API and PostgreSQL outcomes with recorded or controlled external responses, not new live model calls.
 

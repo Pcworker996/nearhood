@@ -1,6 +1,6 @@
 # Ticket #4 staged workflow — verification record
 
-October 22, 2026. Scope: [#4](https://github.com/Pcworker996/nebius-hack/issues/4), [ADR 0005](../adr/0005-separate-extraction-from-matching.md), and [implementation contract](../implementation/report-processing-stages.md). This records local implementation, not a claim of deployment or ticket completion.
+October 22, 2026. Scope: [#4](../issues/4.md), [ADR 0005](../adr/0005-separate-extraction-from-matching.md), and [implementation contract](../implementation/report-processing-stages.md). This records local implementation, not a claim of deployment or ticket completion.
 
 ## Implemented
 

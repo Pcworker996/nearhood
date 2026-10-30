@@ -1,6 +1,6 @@
 # Uncertain match handling: source notes
 
-Accessed **2026-10-29**. Supporting research for a draft proposal: when a new Report cannot be clearly matched to a nearby Happening, publish it as its own Happening with a visible "possible link", instead of holding it unpublished in `clarification`. Related: [ADR 0004](../adr/0004-confirm-matches-before-membership.md), [ADR 0005](../adr/0005-separate-extraction-from-matching.md), [ADR 0007](../adr/0007-happening-identity-follows-the-situation.md), [#6](https://github.com/Pcworker996/nebius-hack/issues/6) (clarify ambiguous matching, repair wrong membership), [#20](https://github.com/Pcworker996/nebius-hack/issues/20) (waiting Reports stall), and the earlier [duplicate report handling notes](duplicate-report-handling.md). These notes summarize sources. The Nearhood sections are our recommendation, not implemented behaviour.
+Accessed **2026-10-29**. Supporting research for a draft proposal: when a new Report cannot be clearly matched to a nearby Happening, publish it as its own Happening with a visible "possible link", instead of holding it unpublished in `clarification`. Related: [ADR 0004](../adr/0004-confirm-matches-before-membership.md), [ADR 0005](../adr/0005-separate-extraction-from-matching.md), [ADR 0007](../adr/0007-happening-identity-follows-the-situation.md), [#6](../issues/6.md) (clarify ambiguous matching, repair wrong membership), [#20](../issues/20.md) (waiting Reports stall), and the earlier [duplicate report handling notes](duplicate-report-handling.md). These notes summarize sources. The Nearhood sections are our recommendation, not implemented behaviour.
 
 Several sources are PDFs whose text we extracted locally; quotes from them are marked with the section or rule number where one exists. Claims we could not read in the primary text are marked **unverified**.
 
@@ -78,7 +78,7 @@ So almost every v4 error was an *unknown*, not a confident wrong answer. There w
 - The evidence-ID enum in the schema contains only *candidate* Observation IDs, so a reason cannot structurally cite the new Report.
 - The largest v4 packet was 57,331 of 65,536 bytes, so raising the per-candidate cap is not free.
 
-**Stalling is real.** [#20](https://github.com/Pcworker996/nebius-hack/issues/20) records that `match_review` and `clarification` wait only on the contributor. No endpoint lists a contributor's Reports, and a contributor who loses the URL cannot return. The cost of the current design is a stranded, invisible Report, not just a delay.
+**Stalling is real.** [#20](../issues/20.md) records that `match_review` and `clarification` wait only on the contributor. No endpoint lists a contributor's Reports, and a contributor who loses the URL cannot return. The cost of the current design is a stranded, invisible Report, not just a delay.
 
 ## Implications for the draft proposal
 
@@ -131,7 +131,7 @@ Our recommendations. **Supported** = keep as drafted; **Change** = keep the inte
 - **Flag radius.** *Evidence leans one way.* Let the semantic grade decide whether to show a link, not distance. A01-distance (correct target at 1,400 m) passed 3/3, so a 250 m cut would have hidden it. Use distance only to order and phrase links ("40 m away"). FixMyStreet's 250 m is a deterministic *retrieval* radius for category-only matching, not a semantic flag.
 - **Who resolves links.** *Undecided.* Clerical staff resolve links in Census practice, the system re-evaluates automatically in Senzing, and Waze relies on later observers. Recommendation: the contributor can move only their own Report. A later Report graded `same` to both linked Happenings should prompt *its* contributor and flag the link for review. Merging two Happenings needs a steward role that does not exist yet (#6).
 - **Merge survivor ID.** *Evidence supports:* the older Happening survives, the other becomes a redirect, and IDs are never reused (Wikidata).
-- **Map display of flagged pins.** *Undecided; no primary source found.* Two linked pins at nearly the same coordinates hit the open marker-overlap bug [#17](https://github.com/Pcworker996/nebius-hack/issues/17). Resolve #17 first, or draw the link visibly (shared cluster or connector) so a reader cannot miss it.
+- **Map display of flagged pins.** *Undecided; no primary source found.* Two linked pins at nearly the same coordinates hit the open marker-overlap bug [#17](../issues/17.md). Resolve #17 first, or draw the link visibly (shared cluster or connector) so a reader cannot miss it.
 - **Demo without repair.** *Evidence against shipping auto-publish-new without repair.* Winkler warns that unmaintained registers accumulate duplication, and Chicago shows that unrepaired duplicates persist. Acceptable for the demo: the non-blocking clarification above, the link record, and a "these are different" dismissal. Not acceptable: an automatic split of the demo's partial-reopening Report.
 
 ## Gaps and unverified claims

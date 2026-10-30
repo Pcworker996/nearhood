@@ -9,7 +9,7 @@ date: 2026-10-26
 
 Each stage therefore claims a lease on the Report's `nearhood.report_processing` row: an atomic update that sets `state='processing'`, a random `attempt` token and `lease_until = now() + 60 seconds`. The lease is decided from the stored row only; callers cannot supply a stage.
 
-Sources: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), the [processing contract](../implementation/report-processing-stages.md) and [ADR 0005](0005-separate-extraction-from-matching.md). Recorded retrospectively from the implemented contract.
+Sources: [ticket #4](../issues/4.md), the [processing contract](../implementation/report-processing-stages.md) and [ADR 0005](0005-separate-extraction-from-matching.md). Recorded retrospectively from the implemented contract.
 
 ## Decision and responsibilities
 

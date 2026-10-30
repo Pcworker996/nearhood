@@ -1,6 +1,6 @@
 # Architecture decision records
 
-ADRs explain significant, lasting engineering choices and their consequences. They complement [GitHub issues](https://github.com/Pcworker996/nebius-hack/issues), which own requirements and task status, and [CONTEXT.md](../../CONTEXT.md), which owns domain terminology.
+ADRs explain significant, lasting engineering choices and their consequences. They complement [GitHub issues](../issues/README.md), which own requirements and task status, and [CONTEXT.md](../../CONTEXT.md), which owns domain terminology.
 
 | Record                                            | Decision                                                                                                  | Status                                                                              |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -18,4 +18,4 @@ Records 0001–0003 were captured retrospectively on October 16, 2026 from the a
 
 Create the next numbered ADR when a consequential choice needs an explanation: context, decision, rationale, consequences, source issue, and implementation status. Distinguish accepted direction from shipped behavior. When replacing a decision, retain the old record and link it to its successor.
 
-Daily progress and reflection belong in the [engineering journal](../journal/README.md). An ADR is not a daily task list.
+An ADR is not a daily task list.

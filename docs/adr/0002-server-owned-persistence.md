@@ -7,7 +7,7 @@ date: 2026-10-16
 
 Nearhood needs a deployed, persistent application with spatial queries and evidence relationships. Use Next.js/TypeScript for the web application and HTTP/JSON API, hosted on Vercel, with Supabase PostgreSQL/PostGIS accessed by the application server. Leaflet/MapTiler supplies the interactive street map; the throwaway prototype remains visual prior art.
 
-Sources: [spec #1](https://github.com/Pcworker996/nebius-hack/issues/1), completed [slice #3](https://github.com/Pcworker996/nebius-hack/issues/3), and the [application setup/contracts](../../README.md).
+Sources: [spec #1](../issues/1.md), completed [slice #3](../issues/3.md), and the [application setup/contracts](../../README.md).
 
 ## Consequences and responsibilities
 

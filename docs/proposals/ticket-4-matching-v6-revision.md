@@ -2,7 +2,7 @@
 
 **Status:** Contract agreed 2026-10-29; see [Consolidated v6 contract](#consolidated-v6-contract-2026-10-29). Not implemented.
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-27.
-**Related issues:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4) (matching stage). Evidence: [live matching record](../reviews/2026-10-27-issue-4-live-matching.md) and its [artifacts](../reviews/artifacts/2026-10-27-issue-4-matching/). Companion: [complete matching output](ticket-4-complete-matching-output.md), which owns the exact-count schema fix.
+**Related issues:** [#4](../issues/4.md) (matching stage). Evidence: [live matching record](../reviews/2026-10-27-issue-4-live-matching.md) and its [artifacts](../reviews/artifacts/2026-10-27-issue-4-matching/). Companion: [complete matching output](ticket-4-complete-matching-output.md), which owns the exact-count schema fix.
 **Decision requested:** Answer U1 to U4, and agree to R1 to R5 below, before `report-matching-v6` is implemented and evaluated.
 
 > **Renumbered (2026-10-28):** this revision was drafted as v5. The exact-count schema fix from the companion proposal shipped alone as `report-matching-v5`, so this revision is `report-matching-v6` and its baseline is v5. References to the 2026-10-27 v4 run remain historical.

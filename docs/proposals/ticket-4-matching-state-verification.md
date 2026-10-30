@@ -1,6 +1,6 @@
 # Verify saved Report state after matching
 
-Status: implemented October 27, 2026; focused product-boundary verification passes 18/18 on mobile and desktop. Full browser run reports 112 passed, including two existing expected failures for #17, with zero unexpected failures. See the [verification record](../reviews/2026-10-27-issue-4-matching-states.md). Related: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), [matching-only live evaluation](../reviews/2026-10-27-issue-4-live-matching.md), and [ADR 0003](../adr/0003-test-through-the-product-boundary.md).
+Status: implemented October 27, 2026; focused product-boundary verification passes 18/18 on mobile and desktop. Full browser run reports 112 passed, including two existing expected failures for #17, with zero unexpected failures. See the [verification record](../reviews/2026-10-27-issue-4-matching-states.md). Related: [ticket #4](../issues/4.md), [matching-only live evaluation](../reviews/2026-10-27-issue-4-live-matching.md), and [ADR 0003](../adr/0003-test-through-the-product-boundary.md).
 
 The model-only evaluation did not exercise saved Report processing state or publication. Add a separate product-boundary test that replays recorded matching responses through the real application APIs and PostgreSQL, using controlled external auth and model services.
 

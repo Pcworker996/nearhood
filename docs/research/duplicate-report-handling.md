@@ -1,6 +1,6 @@
 # Duplicate report handling: source notes
 
-Accessed **2026-10-29**. Supporting research for the open question of what Nearhood should do when a Report's candidate Happenings are neither clearly the same nor clearly separate ([ADR 0004](../adr/0004-confirm-matches-before-membership.md), [ADR 0007](../adr/0007-happening-identity-follows-the-situation.md), [#6](https://github.com/Pcworker996/nebius-hack/issues/6), [#20](https://github.com/Pcworker996/nebius-hack/issues/20)). These notes summarize source behaviour. The Nearhood section is our recommendation, not vendor claims or implemented features.
+Accessed **2026-10-29**. Supporting research for the open question of what Nearhood should do when a Report's candidate Happenings are neither clearly the same nor clearly separate ([ADR 0004](../adr/0004-confirm-matches-before-membership.md), [ADR 0007](../adr/0007-happening-identity-follows-the-situation.md), [#6](../issues/6.md), [#20](../issues/20.md)). These notes summarize source behaviour. The Nearhood section is our recommendation, not vendor claims or implemented features.
 
 FixMyStreet source links are pinned to commit [`cd96011`](https://github.com/mysociety/fixmystreet/tree/cd96011f1630272f3aecde3c461873245faac2a8).
 

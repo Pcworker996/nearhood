@@ -1,6 +1,6 @@
 =# Ticket #4 implementation checkpoint
 
-Source: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4). Review comparison: `git diff ee04cd6b23418db8a12511c625ea0f395acb4f94...eb39bd8`. Local implementation commits: `9357db4`, `77afcb6`, `eb39bd8`.
+Source: [ticket #4](../issues/4.md). Review comparison: `git diff ee04cd6b23418db8a12511c625ea0f395acb4f94...eb39bd8`. Local implementation commits: `9357db4`, `77afcb6`, `eb39bd8`.
 
 ## Standards
 

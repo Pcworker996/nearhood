@@ -7,7 +7,7 @@ date: 2026-10-16
 
 Nearhood's most important guarantees cross UI, API, database, and evidence relationships. Use the running browser with real application APIs and persistence as the main automated behavioral testing boundary, as confirmed in the spec. Assert observable outcomes rather than internal function calls or a particular generated sentence.
 
-Sources: the testing decisions in [spec #1](https://github.com/Pcworker996/nebius-hack/issues/1), [slice #3](https://github.com/Pcworker996/nebius-hack/issues/3), and the [test setup](../../README.md#verification).
+Sources: the testing decisions in [spec #1](../issues/1.md), [slice #3](../issues/3.md), and the [test setup](../../README.md#verification).
 
 ## Consequences and responsibilities
 

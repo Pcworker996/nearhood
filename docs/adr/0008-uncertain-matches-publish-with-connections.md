@@ -5,7 +5,7 @@ date: 2026-10-29
 
 # Uncertain matches never block a Report; possible duplicates are shown as attributed connections
 
-When matching couldn't tell which nearby Happening a Report describes, [ADR 0004](0004-confirm-matches-before-membership.md) left the Report unassigned until its contributor answered a question. In practice the Report disappeared: it stayed unpublished, the question could not always be answered (more than five possible matches, or one Happening's evidence cut short), and the contributor often never came back ([#20](https://github.com/Pcworker996/nebius-hack/issues/20)). Publishing every uncertain Report as new was rejected because it would split Reports that belong together, including the V1 demo's partial-reopening step.
+When matching couldn't tell which nearby Happening a Report describes, [ADR 0004](0004-confirm-matches-before-membership.md) left the Report unassigned until its contributor answered a question. In practice the Report disappeared: it stayed unpublished, the question could not always be answered (more than five possible matches, or one Happening's evidence cut short), and the contributor often never came back ([#20](../issues/20.md)). Publishing every uncertain Report as new was rejected because it would split Reports that belong together, including the V1 demo's partial-reopening step.
 
 Source: discussion with the product owner, Maoyuan Wang, on 2026-10-29, recorded in the [possible-duplicate connections proposal](../proposals/possible-duplicate-links.md). Research: [duplicate report handling](../research/duplicate-report-handling.md), [uncertain match handling](../research/uncertain-match-handling.md).
 
@@ -25,7 +25,7 @@ Source: discussion with the product owner, Maoyuan Wang, on 2026-10-29, recorded
 - A connection creates a new Shared Account version for both Happenings. That changes their fingerprints, so a contributor reviewing a nearby Report at the same moment is asked to refresh.
 - Until grading improves ([v6 contract](../proposals/ticket-4-matching-v6-revision.md#consolidated-v6-contract-2026-10-29)), automatic statements would connect many unrelated demo Happenings. Connections ship only after the v6 grading is measured.
 - Duplicate pins will exist, visibly connected. Without a steward role, a Happening joined by several contributors can only be emptied by each moving their own Report.
-- Reports whose contributor never answers are still unpublished; [#20](https://github.com/Pcworker996/nebius-hack/issues/20) owns that.
+- Reports whose contributor never answers are still unpublished; [#20](../issues/20.md) owns that.
 
 ## Alternatives
 

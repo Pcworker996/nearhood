@@ -2,7 +2,7 @@
 
 Status: development suite implemented and run October 27, 2026. The 32 bases and 16 variants were attempted three times each against the live model. See the [results and limitations](../reviews/2026-10-27-issue-4-live-matching.md). The 24 independent held-out cases and independent label review remain outstanding. Qualification policy below is still proposed.
 
-Related: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), [current test plan](ticket-4-test-plan.md), [matching contract](../implementation/report-processing-stages.md), [ADR 0005](../adr/0005-separate-extraction-from-matching.md), and [evaluation guide](../guides/agent-architecture-and-evaluation.md).
+Related: [ticket #4](../issues/4.md), [current test plan](ticket-4-test-plan.md), [matching contract](../implementation/report-processing-stages.md), [ADR 0005](../adr/0005-separate-extraction-from-matching.md), and [evaluation guide](../guides/agent-architecture-and-evaluation.md).
 
 ## Evaluate the matching decision with fixed evidence
 

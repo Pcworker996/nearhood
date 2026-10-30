@@ -1,6 +1,6 @@
 # Acceptance audit — Report intake and matching (#4)
 
-Issue: [#4](https://github.com/Pcworker996/nebius-hack/issues/4), revised acceptance criteria of October 21.
+Issue: [#4](../issues/4.md), revised acceptance criteria of October 21.
 Baseline: local `main` at `2d08682` plus uncommitted edits, including `report-extraction-v6` in `src/lib/report-model.ts`. Not pushed; `origin/main` is `ee04cd6` and does not contain #4.
 Providers: controlled fixtures only. No Nebius, Google, hosted database or Vercel call was made for this record.
 

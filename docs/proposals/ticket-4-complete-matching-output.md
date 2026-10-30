@@ -2,7 +2,7 @@
 
 **Status:** M1 and M2 accepted 2026-10-28 and implemented locally (uncommitted). Live checks not run yet; they need separate approval.
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-27.
-**Related issues:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4) (matching stage). Evidence: the diagnosis below and the [live matching record](../reviews/2026-10-27-issue-4-live-matching.md) (case A02-remove-identity).
+**Related issues:** [#4](../issues/4.md) (matching stage). Evidence: the diagnosis below and the [live matching record](../reviews/2026-10-27-issue-4-live-matching.md) (case A02-remove-identity).
 **Decision requested:** Agree to M1 and M2 below, and answer U1 to U4, before `report-matching-v5` is implemented.
 
 Labels: **Proposed** is a contract to accept or change. **Illustrative** is wording or a value that can change without changing behavior. **Undecided** blocks the work that depends on it.

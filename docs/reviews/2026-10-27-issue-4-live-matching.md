@@ -2,7 +2,7 @@
 
 October 27, 2026. **The model is not qualified.** Automated assessment assertions passed in 122 of 144 trials. Forty of 48 development cases passed all three repeats. There are unsafe same-occurrence assessments, unnecessary uncertainty, one incomplete response, and unresolved label and grounding questions.
 
-Source: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), [matching suite design](../proposals/ticket-4-matching-evaluation.md), and [processing contract](../implementation/report-processing-stages.md). This record does not close any release checkbox.
+Source: [ticket #4](../issues/4.md), [matching suite design](../proposals/ticket-4-matching-evaluation.md), and [processing contract](../implementation/report-processing-stages.md). This record does not close any release checkbox.
 
 Follow-up: [saved Report state after matching](2026-10-27-issue-4-matching-states.md) replays selected recorded outputs through real application APIs and PostgreSQL to verify publication, review, clarification, pending and confirmation. That is separate evidence from the model-quality scores here.
 

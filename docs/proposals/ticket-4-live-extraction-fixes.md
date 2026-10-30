@@ -2,7 +2,7 @@
 
 **Status:** Draft, not accepted or implemented.
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-27.
-**Related issues:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4) (criterion 36, extraction). Evidence: [live extraction record](../reviews/2026-10-27-issue-4-live-extraction.md). Plan: [ticket-4 test plan](ticket-4-test-plan.md).
+**Related issues:** [#4](../issues/4.md) (criterion 36, extraction). Evidence: [live extraction record](../reviews/2026-10-27-issue-4-live-extraction.md). Plan: [ticket-4 test plan](ticket-4-test-plan.md).
 **Decision requested:** Agree to L1 to L3 below, and answer U1 to U3, before `report-extraction-v8` is implemented.
 
 Labels: **Proposed** is a contract to accept or change. **Illustrative** is wording or a value that can change without changing behavior. **Undecided** blocks the work that depends on it.

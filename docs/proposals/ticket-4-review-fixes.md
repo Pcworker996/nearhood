@@ -1,8 +1,8 @@
 # Proposal: Fix evidence integrity, unresolvable coverage, and processing loops found in the #4 review
 
-**Status:** Decisions R1 to R4 agreed 2026-10-25 (all as recommended). Phases A to E implemented and locally verified on `fix/issue-4-processing` (`npm run verify`: 82 browser tests pass), not committed or pushed. Ticket text updated (D3); paged matching filed as [#19](https://github.com/Pcworker996/nebius-hack/issues/19).
+**Status:** Decisions R1 to R4 agreed 2026-10-25 (all as recommended). Phases A to E implemented and locally verified on `fix/issue-4-processing` (`npm run verify`: 82 browser tests pass), not committed or pushed. Ticket text updated (D3); paged matching filed as [#19](../issues/19.md).
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-25.
-**Related issues:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4). It builds on the [#4 fix plan](report-processing-fixes.md) (D1 to D5 agreed). Marker overlap is [#17](https://github.com/Pcworker996/nebius-hack/issues/17) and is out of scope.
+**Related issues:** [#4](../issues/4.md). It builds on the [#4 fix plan](report-processing-fixes.md) (D1 to D5 agreed). Marker overlap is [#17](../issues/17.md) and is out of scope.
 **Decision requested:** None outstanding. R1 to R4 and phases A to E were accepted 2026-10-25.
 
 Labels: **Proposed** means a contract to accept or change. **Illustrative** means wording or a value that can change without changing behavior. **Undecided** means a product call that blocks the work that depends on it.
@@ -202,4 +202,4 @@ Open questions:
 - R3-P3: create-new stays refused under incomplete coverage, with truthful copy. Paged matching (P1) becomes a follow-up issue.
 - R4: the repair migration only touches rows whose `described_state` equals their Report's original text, so it is safe on any database. The hosted count (Q1) was not run.
 - Phases A to E accepted, plus the ticket-text update (D3).
-**Issue / ADR / implementation reference:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4); builds on [report-processing-fixes.md](report-processing-fixes.md).
+**Issue / ADR / implementation reference:** [#4](../issues/4.md); builds on [report-processing-fixes.md](report-processing-fixes.md).

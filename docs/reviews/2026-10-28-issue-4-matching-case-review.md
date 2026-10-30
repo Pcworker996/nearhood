@@ -2,7 +2,7 @@
 
 October 28, 2026. Agent review prepared with Maoyuan Wang. **Not an independent sign-off:** the same agent family authored the labels. Each verdict below is a recommendation for the reviewer to confirm or overturn.
 
-Source run: [live matching record](2026-10-27-issue-4-live-matching.md), `report-matching-v4`, 48 packets × 3 runs. Raw inputs and outputs: [artifacts](artifacts/2026-10-27-issue-4-matching/). Proposed fixes: [v6 revision proposal](../proposals/ticket-4-matching-v6-revision.md). Related: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4).
+Source run: [live matching record](2026-10-27-issue-4-live-matching.md), `report-matching-v4`, 48 packets × 3 runs. Raw inputs and outputs: [artifacts](artifacts/2026-10-27-issue-4-matching/). Proposed fixes: [v6 revision proposal](../proposals/ticket-4-matching-v6-revision.md). Related: [ticket #4](../issues/4.md).
 
 > **Rule change after this review (2026-10-28):** the [Happening identity proposal](../proposals/happening-identity-recurrence.md) redefines `same` as "same problem at the same place unless evidence shows a different situation". Under it, U01–U04, U01-duplicate-source and S03 are expected `same`, so the verdicts below for those cases, and the U04 "unsafe" finding, describe the old rule. The other verdicts and the cross-cutting findings are unaffected.
 

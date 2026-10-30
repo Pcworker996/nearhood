@@ -2,7 +2,7 @@
 
 **Status:** Decisions D1 to D5 agreed 2026-10-23. Phases 0 to 3 implemented and locally verified on branch `fix/issue-4-processing` (`7b2eb7b`, `64d746e`, `462fa41`, `9e9fcfd`), not pushed. Phase 4 pending.
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-23.
-**Related issues:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4). Evidence: [acceptance audit](../reviews/2026-10-23-issue-4-acceptance-audit.md).
+**Related issues:** [#4](../issues/4.md). Evidence: [acceptance audit](../reviews/2026-10-23-issue-4-acceptance-audit.md).
 **Decision requested:** Agree the implementation contract in phases 1 to 3. Decisions D1 to D5 are answered.
 
 Labels used below: **Proposed** means a contract to accept or change. **Illustrative** means a value or wording that can change without changing behavior. **Undecided** means a product call that blocks the phase that depends on it.
@@ -200,4 +200,4 @@ Open questions beyond D1 to D5:
 - D4-A: reproduce marker overlap here and fix it in a new issue.
 - D5-A: defer the request-wide deadline to hosted measurement.
 
-**Issue / ADR / implementation reference:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4). D2-B amends criterion 5's 30-day wording.
+**Issue / ADR / implementation reference:** [#4](../issues/4.md). D2-B amends criterion 5's 30-day wording.

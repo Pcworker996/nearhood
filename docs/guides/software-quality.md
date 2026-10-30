@@ -4,9 +4,9 @@ A practical guide for the Nearhood product owner and developers.
 
 For an actionable process and copyable worksheet, use [Verification within a defined scope](scoped-verification.md).
 
-**Reference snapshot:** the project-status examples near the end reflect October 16, 2026. Use [GitHub issues](https://github.com/Pcworker996/nebius-hack/issues) for current task status and [Report submission](../implementation/report-submission.md) for the contribution contract. The engineering practices below are reusable guidance.
+**Reference snapshot:** the project-status examples near the end reflect October 16, 2026. Use [GitHub issues](../issues/README.md) for current task status and [Report submission](../implementation/report-submission.md) for the contribution contract. The engineering practices below are reusable guidance.
 
-**Status:** This is an educational guide and a suggested working process, not a claim that every practice below is implemented. Examples involving contribution, matching, processing, or account updates describe later workflows. They do not expand the agreed V1 scope. Product requirements remain in [GitHub issues](https://github.com/Pcworker996/nebius-hack/issues), terminology in [CONTEXT.md](../../CONTEXT.md), and standing principles in the [product guardrails](../product-guardrails.md).
+**Status:** This is an educational guide and a suggested working process, not a claim that every practice below is implemented. Examples involving contribution, matching, processing, or account updates describe later workflows. They do not expand the agreed V1 scope. Product requirements remain in [GitHub issues](../issues/README.md), terminology in [CONTEXT.md](../../CONTEXT.md), and standing principles in the [product guardrails](../product-guardrails.md).
 
 ## 1. Quality starts with the goal
 
@@ -210,7 +210,7 @@ A useful request for future tickets:
 
 As of the October 16, 2026 review:
 
-- [Ticket #3](https://github.com/Pcworker996/nebius-hack/issues/3) is complete and closed; production is [nearhood-app.vercel.app](https://nearhood-app.vercel.app).
+- [Ticket #3](../issues/3.md) is complete and closed; production is [nearhood-app.vercel.app](https://nearhood-app.vercel.app).
 - `npm run typecheck`, `npm run build`, and all 12 mobile/desktop browser tests passed in that checkout. Automated browser tests used a real API and isolated PostgreSQL/PostGIS test database.
 - Production homepage and happenings API returned HTTP 200, with six seeded Happenings. The product owner confirmed hosted persistence and live map/attribution checks.
 - These checks establish the browsing/evidence slice. They do not establish later contribution, authentication, model processing, or resolution behavior.

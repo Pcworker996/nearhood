@@ -7,7 +7,7 @@ date: 2026-10-19
 
 Nearhood must avoid duplicate Happenings without treating proximity, category, wording similarity, or a preselected detail as proof that two Reports describe the same occurrence. For the initial Report flow, use deterministic location/time retrieval, model-assisted semantic ranking over a bounded packet of inspectable evidence, and contributor confirmation before adding the Report to an existing Happening.
 
-Source: the product owner's October 19 revision in [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), [product guardrails](../product-guardrails.md), and [domain glossary](../../CONTEXT.md).
+Source: the product owner's October 19 revision in [ticket #4](../issues/4.md), [product guardrails](../product-guardrails.md), and [domain glossary](../../CONTEXT.md).
 
 **October 21 revision:** [ADR 0005](0005-separate-extraction-from-matching.md) partially supersedes this record's five-candidate pre-comparison cutoff and combined-call architecture. It also resolves the hackathon boundary for separate-occurrence Reports: save them unassigned and explain why; guided answers are deferred. Contributor confirmation remains required and now explicitly covers later “Add an update” Reports. The sections below retain the October 19 decision and implementation history, not the new target contract.
 
@@ -37,4 +37,4 @@ The simpler alternative—automatically attach the nearest or preselected Happen
 
 ## Implementation and verification status
 
-The implementation is in [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4), [the implementation spec](../implementation/report-submission.md), and the matching migrations and server/UI paths linked there. Local browser tests use the real application APIs and PostgreSQL with controlled external auth/model HTTP services, following [ADR 0003](0003-test-through-the-product-boundary.md). Live Google configuration, hosted migration state, exact Nebius model selection, and separate-occurrence clarification remain unverified or unresolved and must not be presented as complete.
+The implementation is in [ticket #4](../issues/4.md), [the implementation spec](../implementation/report-submission.md), and the matching migrations and server/UI paths linked there. Local browser tests use the real application APIs and PostgreSQL with controlled external auth/model HTTP services, following [ADR 0003](0003-test-through-the-product-boundary.md). Live Google configuration, hosted migration state, exact Nebius model selection, and separate-occurrence clarification remain unverified or unresolved and must not be presented as complete.

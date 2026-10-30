@@ -1,6 +1,6 @@
 # Verification and review records
 
-These are **historical, revision-specific records**. A passing run establishes evidence for the stated commit and environment; it does not establish current branch health, live-provider success, or deployment status. Use [GitHub issues](https://github.com/Pcworker996/nebius-hack/issues) for current acceptance and blockers.
+These are **historical, revision-specific records**. A passing run establishes evidence for the stated commit and environment; it does not establish current branch health, live-provider success, or deployment status. Use [GitHub issues](../issues/README.md) for current acceptance and blockers.
 
 | Record                                                                      | Scope                                                                                                                   |
 | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |

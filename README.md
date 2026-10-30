@@ -87,7 +87,10 @@ The exact eligible Nemotron model, worker hosting and contribution processing re
 ## Engineering notes
 
 - [Architecture decision records](docs/adr/README.md): lasting choices, rationale, and implementation status.
-- [Engineering journal](docs/journal/README.md): daily progress, learning, small wins, and the next action.
 - [Software quality guide](docs/guides/software-quality.md): how goals, design, testing, and release evidence fit together.
 
-Requirements and task status remain in [GitHub Issues](https://github.com/Pcworker996/nebius-hack/issues); domain terms remain in [CONTEXT.md](CONTEXT.md).
+Requirements and task status live in a private tracker; [exported issues](docs/issues/README.md) are a dated snapshot; domain terms remain in [CONTEXT.md](CONTEXT.md).
+
+## License and credits
+
+Code is released under the [MIT License](LICENSE). Icons and the visual reference in `public/figma` were AI-generated with Figma's AI tools in the project's own Figma file; no third-party design assets are included. DM Sans and Newsreader are self-hosted from Fontsource under the SIL Open Font License. Map tiles and data are © MapTiler and © OpenStreetMap contributors.

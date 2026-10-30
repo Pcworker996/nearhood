@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues and PRDs live in GitHub Issues for Pcworker996/nebius-hack.
+Issues and PRDs live in GitHub Issues for Pcworker996/nebius-hack, a private tracker; `docs/issues/` holds a dated public snapshot.
 See `docs/agents/issue-tracker.md`.
 
 ### Triage labels

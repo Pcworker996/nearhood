@@ -2,7 +2,7 @@
 
 **Reviewed:** October 20, 2026. **Purpose:** a working guide you can use while designing an LLM application, reviewing an agent, or deciding whether a model change is ready.
 
-**Status:** educational guidance and proposed worksheets. This document does not implement an evaluation framework, change Nearhood's accepted architecture, or expand a ticket. Nearhood's requirements remain in [GitHub issues](https://github.com/Pcworker996/nebius-hack/issues), vocabulary in [CONTEXT.md](../../CONTEXT.md), and boundaries in [the product guardrails](../product-guardrails.md) and [ADR 0004](../adr/0004-confirm-matches-before-membership.md).
+**Status:** educational guidance and proposed worksheets. This document does not implement an evaluation framework, change Nearhood's accepted architecture, or expand a ticket. Nearhood's requirements remain in [GitHub issues](../issues/README.md), vocabulary in [CONTEXT.md](../../CONTEXT.md), and boundaries in [the product guardrails](../product-guardrails.md) and [ADR 0004](../adr/0004-confirm-matches-before-membership.md).
 
 ## Start here
 
@@ -40,7 +40,7 @@ Complete this capability card:
 | Uncertainty      | When is an answer unavailable?             | Candidate evidence cannot establish continuity; keep the Report unassigned.                                                                |
 | Failure/recovery | What survives an interrupted operation?    | Saved Report and prior account survive; retry the same Report.                                                                             |
 | Acceptance       | What will a reviewer observe?              | A suggested candidate has inspectable evidence; before confirmation its account is unchanged; confirmation incorporates the Report once.   |
-| Scope            | Where is the behavior agreed?              | [Ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4) and its [implementation spec](../implementation/report-submission.md).    |
+| Scope            | Where is the behavior agreed?              | [Ticket #4](../issues/4.md) and its [implementation spec](../implementation/report-submission.md).    |
 
 Keep **hard contracts** separate from **quality judgments**. A reference to an invented Observation ID is a contract failure. Whether evidence sufficiently supports the same occurrence is a semantic judgment. Both matter, but they need different graders.
 

@@ -1,6 +1,6 @@
 # Verification within a defined scope
 
-Status: proposed reusable workflow, October 22, 2026. This guide adds no product requirements or mandatory repository gates. Requirements and current results belong in the project's issue tracker. In Nearhood, use [GitHub Issues](https://github.com/Pcworker996/nebius-hack/issues), the [product guardrails](../product-guardrails.md), and accepted ADRs. For background, see [Software quality](software-quality.md).
+Status: proposed reusable workflow, October 22, 2026. This guide adds no product requirements or mandatory repository gates. Requirements and current results belong in the project's issue tracker. In Nearhood, use [GitHub Issues](../issues/README.md), the [product guardrails](../product-guardrails.md), and accepted ADRs. For background, see [Software quality](software-quality.md).
 
 Use this workflow for a project milestone, feature, bug fix or release. Choose one unit of work per record. It covers both verification (does the implementation meet its contract?) and validation (does that contract and experience serve the intended outcome?).
 
@@ -153,7 +153,7 @@ What this evidence does and does not establish:
 
 ## Nearhood ticket #4: illustrative application
 
-Source: [ticket #4](https://github.com/Pcworker996/nebius-hack/issues/4). These examples explain the workflow; they are not a fresh assessment or new acceptance criteria. Use the issue for current scope and results.
+Source: [ticket #4](../issues/4.md). These examples explain the workflow; they are not a fresh assessment or new acceptance criteria. Use the issue for current scope and results.
 
 **Outcome:** a contributor can submit a Report, retain its original evidence, and reach a supported first publication or an understandable saved/unassigned state.
 

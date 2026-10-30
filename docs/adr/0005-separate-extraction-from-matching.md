@@ -7,7 +7,7 @@ date: 2026-10-21
 
 Nearhood needs to distinguish what a contributor reports from which evolving occurrence it describes. Use one software-controlled workflow with a dedicated Report-to-JSON LLM call, a validated persistent extraction checkpoint, deterministic nearby retrieval, and a second LLM call comparing the JSON and original evidence with candidate Happenings. Require contributor confirmation before existing-Happening membership for initial Reports and “Add an update” alike. Models cannot choose tools, write membership or run an open-ended loop.
 
-Sources: the product owner's October 21 decisions in [spec #1](https://github.com/Pcworker996/nebius-hack/issues/1), [plan #2](https://github.com/Pcworker996/nebius-hack/issues/2), and [the revised matching contract](../proposals/report-matching-strategy.md). Implementation belongs to [#4](https://github.com/Pcworker996/nebius-hack/issues/4) and [#5](https://github.com/Pcworker996/nebius-hack/issues/5).
+Sources: the product owner's October 21 decisions in [spec #1](../issues/1.md), [plan #2](../issues/2.md), and [the revised matching contract](../proposals/report-matching-strategy.md). Implementation belongs to [#4](../issues/4.md) and [#5](../issues/5.md).
 
 **October 29 revision:** [ADR 0008](0008-uncertain-matches-publish-with-connections.md) narrows the coverage rule below. Reports left out of one Happening's evidence are disclosed and no longer block publication. A truncated pool of Happenings is still not evidence of no match: such a Report is never published as new automatically.
 

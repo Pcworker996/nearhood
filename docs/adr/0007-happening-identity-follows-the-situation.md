@@ -5,7 +5,7 @@ date: 2026-10-28
 
 # Happening identity follows the situation, not the occurrence
 
-Until now, a Happening was one *occurrence* of a condition. [CONTEXT.md](../../CONTEXT.md) separated occurrences "by evidence about continuity of the condition". Spec [#1](https://github.com/Pcworker996/nebius-hack/issues/1) left a Report with "unclear continuity" unassigned and asked the contributor a focused question.
+Until now, a Happening was one *occurrence* of a condition. [CONTEXT.md](../../CONTEXT.md) separated occurrences "by evidence about continuity of the condition". Spec [#1](../issues/1.md) left a Report with "unclear continuity" unassigned and asked the contributor a focused question.
 
 A common case defeats that rule. A lamp is reported dark, then reported resolved without anyone verifying a repair, then reported dark again. Nobody can say whether it was repaired in between, so the contributor is asked a question nobody can answer. In the [2026-10-27 live matching run](../reviews/2026-10-27-issue-4-live-matching.md), this judgement produced the only unsafe model errors (U04), and it drives most of the unknown-history cases ([case review](../reviews/2026-10-28-issue-4-matching-case-review.md)). Readers need the current state and its history, not a decision about where one occurrence ended.
 

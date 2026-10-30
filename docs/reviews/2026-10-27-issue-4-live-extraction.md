@@ -1,6 +1,6 @@
 # Live extraction evaluation (#4), October 27, 2026
 
-**Issue:** [#4](https://github.com/Pcworker996/nebius-hack/issues/4), criterion 36 (extraction). **Plan:** [ticket-4 test plan](../proposals/ticket-4-test-plan.md), section 6.
+**Issue:** [#4](../issues/4.md), criterion 36 (extraction). **Plan:** [ticket-4 test plan](../proposals/ticket-4-test-plan.md), section 6.
 **Baseline:** branch `fix/issue-4-processing` at `31ff413` plus uncommitted work (extraction v7, new tests and fixtures). Not committed, pushed or deployed.
 **Environment:** local machine, **live** Nebius provider, model `nvidia/Nemotron-3-Ultra-550b-a55b`, `report-extraction-v7`, `temperature: 0`, thinking disabled.
 **Command:** `npm run extraction:live`, run three times (99 extraction calls). Artifact: [`artifacts/2026-10-27-issue-4-live-extraction.json`](artifacts/2026-10-27-issue-4-live-extraction.json).

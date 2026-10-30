@@ -2,7 +2,7 @@
 
 **Status:** Direction agreed in discussion with Maoyuan Wang on 2026-10-28. Details are a draft, not accepted or implemented.
 **Author / date:** Agent draft for Maoyuan Wang, 2026-10-28.
-**Related issues:** [#1](https://github.com/Pcworker996/nebius-hack/issues/1) (spec), [#4](https://github.com/Pcworker996/nebius-hack/issues/4) (matching), [#9](https://github.com/Pcworker996/nebius-hack/issues/9) (provisional resolution and reassessment). Evidence: [case review](../reviews/2026-10-28-issue-4-matching-case-review.md), [live matching record](../reviews/2026-10-27-issue-4-live-matching.md). Affects: [v6 revision proposal](ticket-4-matching-v6-revision.md), [ADR 0004](../adr/0004-confirm-matches-before-membership.md), [CONTEXT.md](../../CONTEXT.md).
+**Related issues:** [#1](../issues/1.md) (spec), [#4](../issues/4.md) (matching), [#9](../issues/9.md) (provisional resolution and reassessment). Evidence: [case review](../reviews/2026-10-28-issue-4-matching-case-review.md), [live matching record](../reviews/2026-10-27-issue-4-live-matching.md). Affects: [v6 revision proposal](ticket-4-matching-v6-revision.md), [ADR 0004](../adr/0004-confirm-matches-before-membership.md), [CONTEXT.md](../../CONTEXT.md).
 **Decision requested:** Accept the identity rule in H1 and the activity rule in H2, and answer Q1 to Q4, before the v6 prompt and labels are written.
 
 Labels: **Agreed** was decided in discussion. **Proposed** is a contract to accept or change. **Illustrative** can change without changing behavior. **Undecided** blocks the work that depends on it.
