@@ -11,6 +11,7 @@ import {
   type SavedReport,
 } from "@/lib/happenings";
 import { placeAt, type Geocoder } from "@/lib/geocoding";
+import { FigmaIcon } from "./figma-icon";
 import { ReportCard } from "./report-card";
 
 const ContributionPin = dynamic(() => import("./contribution-pin"), {
@@ -416,10 +417,17 @@ export default function Contribution({
   return (
     <div className="detail-screen">
       <header className="topbar">
-        <button className="text-button" onClick={onBack}>
-          Back to map
+        <button
+          className="round-button"
+          aria-label="Back to map"
+          onClick={onBack}
+        >
+          <FigmaIcon name="back" />
         </button>
-        <span className="brand">Nearhood</span>
+        <div>
+          <p className="eyebrow">Contribute</p>
+          <span className="brand">Nearhood</span>
+        </div>
       </header>
       <main className="detail-content contribution-content">
         <h1>{saved ? "Your saved Report" : "Share what you observed"}</h1>
