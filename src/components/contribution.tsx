@@ -140,8 +140,8 @@ export default function Contribution({
     if (authError)
       setError(
         authError === "unavailable"
-          ? "Google sign-in is not configured yet. Your draft is kept on this device."
-          : "Sign-in did not complete. Your draft is kept; please try again.",
+          ? "Google sign-in is not configured yet."
+          : "Sign-in did not complete. Please try again.",
       );
   }, []);
   useEffect(() => {
@@ -686,6 +686,32 @@ export default function Contribution({
               Start another Report
             </button>
           </>
+        ) : !sessionReady ? (
+          <p role="status">Checking sign-in…</p>
+        ) : !signedIn ? (
+          // Contributors sign in before the form opens. The draft keeps the
+          // pin and any Happening chosen with Add an update through sign-in.
+          <section className="sign-in-gate" aria-label="Sign in to contribute">
+            <h2>Sign in to contribute</h2>
+            <p className="muted">
+              Reports are attributed to a public name you choose. Your Google
+              email stays private.
+            </p>
+            <button
+              className="primary-button"
+              type="button"
+              onClick={() => {
+                try {
+                  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+                } catch {
+                  /* The draft only holds the pin; sign-in continues without it. */
+                }
+                window.location.assign("/auth/start");
+              }}
+            >
+              Continue with Google
+            </button>
+          </section>
         ) : (
           <form onSubmit={submit} className="contribution-form">
             {submissionStarted && (
@@ -830,30 +856,9 @@ export default function Contribution({
                 </p>
               )}
             </fieldset>
-            {!sessionReady ? (
-              <p role="status">Checking sign-in…</p>
-            ) : signedIn ? (
-              <button className="primary-button" type="submit" disabled={busy}>
-                {busy ? "Saving Report…" : "Submit Report"}
-              </button>
-            ) : (
-              <button
-                className="primary-button"
-                type="button"
-                onClick={() => {
-                  try {
-                    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-                    window.location.assign("/auth/start");
-                  } catch {
-                    setError(
-                      "Enable draft storage before continuing with Google.",
-                    );
-                  }
-                }}
-              >
-                Continue with Google
-              </button>
-            )}
+            <button className="primary-button" type="submit" disabled={busy}>
+              {busy ? "Saving Report…" : "Submit Report"}
+            </button>
           </form>
         )}
       </main>

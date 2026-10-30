@@ -283,7 +283,7 @@ test("public readers can browse but cannot submit or process Reports", async ({
   expect(process.status()).toBe(401);
 });
 
-test("a Google contributor keeps a draft and chosen name, then reloads a saved Report after processing failure", async ({
+test("contributors sign in before the form opens, then reload a saved Report after processing failure", async ({
   page,
 }, testInfo) => {
   await page.request.post("http://127.0.0.1:3101/control", {
@@ -291,19 +291,17 @@ test("a Google contributor keeps a draft and chosen name, then reloads a saved R
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Contribute", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Sign in to contribute" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("What did you observe?")).toHaveCount(0);
+  await page.getByRole("button", { name: "Continue with Google" }).click();
   await page
     .getByLabel("What did you observe?")
     .fill("A fallen tree blocks the north path.");
   await page.getByLabel("Public display name").fill("River Neighbor");
   await placePin(page, projectLatitude(testInfo, 8), 130);
   await page.getByLabel("Observation time").selectOption("unknown");
-  await page.getByRole("button", { name: "Continue with Google" }).click();
-  await expect(page.getByLabel("What did you observe?")).toHaveValue(
-    "A fallen tree blocks the north path.",
-  );
-  await expect(page.getByLabel("Public display name")).toHaveValue(
-    "River Neighbor",
-  );
   await page
     .getByRole("button", { name: "Submit Report", exact: true })
     .click();
@@ -468,38 +466,25 @@ test("a long Report can publish multiple scoped Observations without model echoi
   ).toEqual(["north entrance", "south entrance"]);
 });
 
-test("cancelled Google sign-in keeps a chosen-time source-based draft on the same origin", async ({
+test("cancelled Google sign-in returns to the sign-in step without opening the form", async ({
   page,
 }) => {
   await page.request.post("http://127.0.0.1:3101/control", {
     data: { cancelNextSignIn: true },
   });
   await page.goto("/?contribute=1");
-  await page
-    .getByLabel("What did you observe?")
-    .fill("The notice describes a closed entrance.");
-  await page.getByLabel("Public display name").fill("Draft Author");
-  await page.getByLabel("Observation time").selectOption("chosen");
-  await page
-    .getByLabel("Observed at (your local time)")
-    .fill("2026-10-18T09:30");
-  await page.getByLabel("How do you know?").selectOption("source_based");
-  await page
-    .getByLabel("Source link (optional)")
-    .fill("https://example.test/notice");
   await page.getByRole("button", { name: "Continue with Google" }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Sign-in did not complete" }),
   ).toBeVisible();
-  await expect(page.getByLabel("What did you observe?")).toHaveValue(
-    "The notice describes a closed entrance.",
-  );
-  await expect(page.getByLabel("Observed at (your local time)")).toHaveValue(
-    "2026-10-18T09:30",
-  );
-  await expect(page.getByLabel("Source link (optional)")).toHaveValue(
-    "https://example.test/notice",
-  );
+  await expect(page.getByLabel("What did you observe?")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Continue with Google" }),
+  ).toBeVisible();
+  // Retrying signs in and opens the form on the same origin.
+  await page.getByRole("button", { name: "Continue with Google" }).click();
+  await expect(page).toHaveURL(/^http:\/\/127\.0\.0\.1:3100\//);
+  await expect(page.getByLabel("What did you observe?")).toBeVisible();
 });
 
 test("a source-based Report produces distinct claim evidence with unknown observation time and private email", async ({
@@ -729,15 +714,19 @@ test("a selected Happening stays unchanged until the contributor confirms the ma
     await page.request.get("/api/happenings/bridge")
   ).json();
   await page.getByRole("button", { name: "Add an update" }).click();
+  // Signing in keeps the Happening's pin and candidate for the update.
+  await page.getByRole("button", { name: "Continue with Google" }).click();
   await expect(
     page.getByText(`Pin: Near ${roadAt(before.lat)}`),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Location prefilled from a Happening."),
   ).toBeVisible();
   await page
     .getByLabel("What did you observe?")
     .fill("The south entrance looks different.");
   await page.getByLabel("Public display name").fill("Another Neighbor");
   await page.getByLabel("Observation time").selectOption("unknown");
-  await page.getByRole("button", { name: "Continue with Google" }).click();
   await page
     .getByRole("button", { name: "Submit Report", exact: true })
     .click();
