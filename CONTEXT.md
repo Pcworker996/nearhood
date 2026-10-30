@@ -47,6 +47,10 @@ A concise readable presentation of a happening's shared account. Key statements 
 **Shared account**:
 The provisional current interpretation of what a happening's available evidence supports, including its chronology, spatial scope, changes, disagreement, and uncertainty. It may change as new observations arrive and is not itself independent evidence.
 
+**Reported cause**:
+An explanation of why a happening occurred, as stated in a report or an outside source and attributed to it, keeping its qualifications. A cause no source states remains unknown.
+_Avoid_: Root cause, likely cause
+
 **Spatial scope**:
 The part of a place or situation that an observation describes, such as one lane or entrance. Different states in different parts do not by themselves establish contradictory accounts or full resolution.
 
@@ -84,10 +88,14 @@ A person's private choice to receive in-app updates about provisional status cha
 A person's response indicating whether they intend to attend an activity. It is distinct from choosing to receive updates.
 
 **Discovery**:
-Finding relevant happenings already stored in the app in response to a reader's request. Expanding the search area broadens the geographic search of stored happenings.
+Finding relevant happenings already stored in the app in response to a reader's request. Expanding the search area broadens the geographic search of stored happenings. A source check may follow for a discovered happening, but its findings are not discovery results.
+
+**Suggestion**:
+A practical next step for a reader, derived from the observations it cites and fitted to the reader's request. It describes what is reported and unknown; it never establishes that a place or route is safe, passable, or to be avoided.
+_Avoid_: Advice, recommendation
 
 **Source check**:
-An assessment of relevant information outside the app, with dated, linked findings describing agreement, conflicts, and what remains unknown.
+An assessment of relevant information outside the app, with dated, linked findings describing agreement, conflicts, and what remains unknown. It belongs to one happening and is compared against a particular version of its shared account; it is never part of the report stack or the shared account.
 
 **Reports received**:
 A provisional status acknowledging available reports without establishing resolution. It can describe a happening whose current observations conflict.
