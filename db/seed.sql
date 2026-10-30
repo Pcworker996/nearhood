@@ -1,7 +1,7 @@
 -- Fixed, fictional fixtures. These accounts were written for the demo, not by a live model.
 INSERT INTO nearhood.contributors VALUES
  ('mara', 'Mara L.'), ('market', 'Riverside market team'), ('jules', 'Jules R.'), ('organizer', 'Canal Green organizers'),
- ('rhea', 'Rhea M.'), ('omar', 'Omar T.'), ('imani', 'Imani S.'), ('garden-organizer', 'Mina K.')
+ ('rhea', 'Rhea M.'), ('omar', 'Omar T.'), ('imani', 'Imani S.'), ('garden-organizer', 'Mina K.'), ('dana', 'Dana W.')
 ON CONFLICT DO NOTHING;
 INSERT INTO nearhood.reports VALUES
  ('bridge-mara', 'mara', 'Both entrances have orange barriers across the path. I had to turn back.', '2026-10-08T19:12:00Z', '2026-10-08T19:20:00Z', 'firsthand', NULL, extensions.ST_SetSRID(extensions.ST_MakePoint(-83.0457,42.3328),4326)::extensions.geography),
@@ -12,6 +12,7 @@ INSERT INTO nearhood.reports VALUES
  ('path-south-omar', 'omar', 'I used the south entrance around 11:10 am and the pavement there looked dry. I did not check the north ramp.', '2026-10-12T15:10:00Z', '2026-10-12T15:18:00Z', 'firsthand', NULL, extensions.ST_SetSRID(extensions.ST_MakePoint(-83.0498,42.3326),4326)::extensions.geography),
  ('signal-rhea', 'rhea', 'At the east crossing, the walk indication did not come on until the second cycle around 8:10 am.', '2026-10-12T12:10:00Z', '2026-10-12T12:16:00Z', 'firsthand', NULL, extensions.ST_SetSRID(extensions.ST_MakePoint(-83.0540,42.3338),4326)::extensions.geography),
  ('signal-imani', 'imani', 'At noon, I used the same east crossing and the walk indication came on in the next cycle.', '2026-10-12T16:00:00Z', '2026-10-12T16:08:00Z', 'firsthand', NULL, extensions.ST_SetSRID(extensions.ST_MakePoint(-83.0540,42.3338),4326)::extensions.geography),
+ ('bridge-sign-dana', 'dana', 'A sign on the north barrier says the city is repairing the bridge deck. It does not give a reopening date.', '2026-10-08T19:40:00Z', '2026-10-08T19:45:00Z', 'source_based', NULL, extensions.ST_SetSRID(extensions.ST_MakePoint(-83.0457,42.3329),4326)::extensions.geography),
  ('garden-plan', 'garden-organizer', 'I am planning a volunteer garden cleanup at the west beds on Tuesday, October 13, from 5:30 to 7:00 pm. This is a plan; it has not happened yet.', NULL, '2026-10-12T15:00:00Z', 'firsthand', NULL, extensions.ST_SetSRID(extensions.ST_MakePoint(-83.0480,42.3294),4326)::extensions.geography)
 ON CONFLICT DO NOTHING;
 INSERT INTO nearhood.observations VALUES
@@ -24,6 +25,7 @@ INSERT INTO nearhood.observations VALUES
  ('path-south-dry', 'path-south-omar', 'South entrance surface', 'Pavement appeared dry', 'South entrance', '2026-10-12T15:10:00Z'),
  ('signal-delayed', 'signal-rhea', 'Walk signal', 'Walk indication appeared on the second cycle', 'East crossing', '2026-10-12T12:10:00Z'),
  ('signal-normal', 'signal-imani', 'Walk signal', 'Walk indication appeared on the next cycle', 'East crossing', '2026-10-12T16:00:00Z'),
+ ('bridge-sign', 'bridge-sign-dana', 'Posted closure sign', 'Sign says the city is repairing the bridge deck; no reopening date given', 'North entrance', '2026-10-08T19:40:00Z'),
  ('garden-scheduled', 'garden-plan', 'Volunteer garden cleanup', 'Scheduled for October 13, 5:30–7:00 pm Detroit time', 'West beds', NULL)
 ON CONFLICT DO NOTHING;
 INSERT INTO nearhood.happenings VALUES
@@ -35,7 +37,7 @@ INSERT INTO nearhood.happenings VALUES
  ('garden-cleanup', 'Volunteer garden cleanup scheduled', 'activity', 'Northbank garden · west beds', extensions.ST_SetSRID(extensions.ST_MakePoint(-83.0480,42.3294),4326)::extensions.geography, 'Reports received', true, '2026-10-13T21:30:00Z', '2026-10-13T23:00:00Z')
 ON CONFLICT DO NOTHING;
 INSERT INTO nearhood.observation_memberships VALUES
- ('bridge','bridge-both'),('bridge','bridge-south'),('bridge','bridge-no-time'),('lamp','lamp-dark'),('picnic','picnic-plan'),
+ ('bridge','bridge-both'),('bridge','bridge-south'),('bridge','bridge-no-time'),('bridge','bridge-sign'),('lamp','lamp-dark'),('picnic','picnic-plan'),
  ('path-water','path-north-water'),('path-water','path-south-dry'),
  ('crossing-signal','signal-delayed'),('crossing-signal','signal-normal'),
  ('garden-cleanup','garden-scheduled')

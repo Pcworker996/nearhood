@@ -54,8 +54,8 @@ test("an answer keeps only stored, cited evidence and shows how it was found", a
             unknowns: ["Whether either entrance is open now."],
             // Not in any Report's words, so it must not be shown as a cause.
             cause: {
-              summary: "Bridge repairs",
-              quote: "the city is repairing the deck",
+              summary: "A burst water main",
+              quote: "a water main burst under the path",
               reportId: "$report",
               findingUrl: null,
             },
